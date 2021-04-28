@@ -5,6 +5,7 @@ import LinearAlgebra
 import Random
 import Memento
 import MathOptInterface
+import JSON
 
 const MOI = MathOptInterface
 const LA = LinearAlgebra

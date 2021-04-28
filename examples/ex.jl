@@ -9,13 +9,15 @@ include("solver.jl")
 #      User-defined inputs      #
 #-------------------------------#
 params = Dict{String, Any}(
-
+"num_nodes" => 5,
+"instance" => 1,
+"data_type" => "old",
  
 "solution_type" => "exact",
 "optimizer" => "cplex",
 "presolve" => true,
 "optimizer_log" => true, 
-"relax_integrality" => false,
+"relax_integrality" => false
                             
 )
 
@@ -23,7 +25,7 @@ params = Dict{String, Any}(
 #      Optimization model      #
 #------------------------------#
 lom_optimizer = get_solver(params)
-# data = LaplacianOpt.get_data(params)
+data = LaplacianOpt.get_data(params)
 
 
 # model_qc  = LaplacianOpt.build_LOModel(data)
