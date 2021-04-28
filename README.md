@@ -1,4 +1,4 @@
-<!-- # LaplacianOpt.jl -->
+## LaplacianOpt
 **LaplacianOpt.jl** is a Julia package which implements polyhedral relaxation-based algorithms for optimization of weighted graph Laplacians. Given a complete weighted graph, this package provides an optimal (and an approximate) spanning tree with maximum algebraic connectivity (second largest eigenvalue of the graph Laplacian).   
 
 ## Usage
@@ -16,8 +16,8 @@ Please report any issues via the Github **[issue tracker](https://github.com/har
 This work was supported by Los Alamos National Laboratory's LDRD Early Career Research Award, *"20190590ECR: Discrete Optimization Algorithms for Provable Optimal Quantum Circuit Design"*. The primary developer of this package is [Harsha Nagarajan](http://harshanagarajan.com) ([@harshangrjn](https://github.com/harshangrjn)). 
 
 ## Citation
-If you find LaplacianOpt.jl useful in your work, we request you to cite the following paper [link](https://doi.org/10.1109/ECC.2015.7330770): 
-```
+If you find LaplacianOpt.jl useful in your work, we request you to cite the following paper [\[link\]](https://doi.org/10.1109/ECC.2015.7330770): 
+```bibtex
 @inproceedings{NagarajanRathinamDarbha2015,
   title={On maximizing algebraic connectivity of networks for various engineering applications},
   author={Nagarajan, Harsha and Rathinam, Sivakumar and Darbha, Swaroop},
