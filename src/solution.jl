@@ -31,6 +31,7 @@ end
 
 ""
 function get_objective_value(model::JuMP.Model)
+    
     obj_val = NaN
 
     try
@@ -45,6 +46,7 @@ end
 
 ""
 function get_objective_bound(model::JuMP.Model)
+    
     obj_lb = -Inf
 
     try
@@ -56,9 +58,12 @@ function get_objective_bound(model::JuMP.Model)
 end
 
 function build_LOModel_solution(lom::LaplacianOptModel)
+    
     solution = Dict{String,Any}()
+    
     for i in keys(lom.variables)
         solution[String(i)] = JuMP.value.(lom.variables[i])
     end
+
     return solution
 end

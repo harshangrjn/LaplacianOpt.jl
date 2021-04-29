@@ -29,3 +29,11 @@ function variable_algebraic_connectivity(lom::LaplacianOptModel)
 
     return
 end
+
+function variable_multi_commodity_flow(lom::LaplacianOptModel)
+    n = lom.data["num_nodes"]
+
+    lom.variables[:flow_var] = JuMP.@variable(lom.model, 0 <= flow_var[1:n,1:n,1:(n-1)] <= 1)
+
+    return
+end

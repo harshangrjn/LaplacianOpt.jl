@@ -18,9 +18,54 @@ function get_data(params::Dict{String, Any})
 
     edge_weigths_matrix = convert_array_to_matrix(n, edge_weights)
 
+    # Tolerance to verify zero values
+    if "tol_zero" in keys(params)
+        tol_zero = params["tol_zero"]
+
+        if params["tol_zero"] >= 1E-4
+            Memento.warn(_LOGGER, "Zero tolerance value may be too high for numerical accuracy in solutions")
+        end
+
+    else
+        # default value
+        tol_zero = 1E-6
+    end
+
+    # Tolerance to verify PSD-ness of a matrix
+    if "tol_psd" in keys(params)
+        tol_psd = params["tol_psd"]
+
+        if params["tol_psd"] >= 1E-3
+            Memento.warn(_LOGGER, "PSD tolerance value may be too high for PSD feasibility")
+        end
+        
+    else
+        # default value
+        tol_psd = 1E-6
+    end
+
+    if "eigen_cuts_full" in keys(params)
+        eigen_cuts_full = params["eigen_cuts_full"]
+    else
+        #default value
+        Memento.info(_LOGGER, "Turning on full-sized eigen cuts")
+        eigen_cuts_full = true
+    end
+
+    if "eigen_cuts_logging" in keys(params)
+        eigen_cuts_logging = params["eigen_cuts_logging"]
+    else
+        #default value
+        eigen_cuts_logging = false
+    end
+
     data = Dict{String, Any}("num_nodes" => n,
                              "instance" => instance,
                              "edge_weights" => edge_weigths_matrix,
+                             "tol_zero" => tol_zero,
+                             "tol_psd" => tol_psd,
+                             "eigen_cuts_full" => eigen_cuts_full,
+                             "eigen_cuts_logging" => eigen_cuts_logging,
                              "relax_integrality" => params["relax_integrality"])
 
     return data
@@ -35,7 +80,7 @@ function convert_array_to_matrix(n::Int, edge_weights::Any)
         w_ij = edge_weights[k][2]
 
         if w_ij < 0 
-            Memento.error(_LOGGER, "LaplaciaOpt does not support graphs with negative weights")
+            Memento.error(_LOGGER, "LaplacianOpt does not support graphs with negative weights")
         end
 
         instance_matrix[i,j] = w_ij

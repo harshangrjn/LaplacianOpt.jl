@@ -9,16 +9,18 @@ include("solver.jl")
 #      User-defined inputs      #
 #-------------------------------#
 params = Dict{String, Any}(
-"num_nodes" => 5,
+"num_nodes" => 8,
 "instance" => 1,
 "data_type" => "old",
+
+"eigen_cuts_full" => true,
  
 "solution_type" => "exact",
 "optimizer" => "cplex",
 "presolve" => true,
 "optimizer_log" => true, 
 "relax_integrality" => false
-                            
+                        
 )
 
 #------------------------------#

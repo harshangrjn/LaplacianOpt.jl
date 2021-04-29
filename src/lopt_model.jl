@@ -25,6 +25,8 @@ function constraint_LOModel(lom::LaplacianOptModel)
     constraint_topology_no_self_loops(lom)
     constraint_topology_vertex_cutset(lom)
     constraint_topology_total_edges(lom)
+
+    constraint_lazycallback_wrapper(lom)
     
     return
 end
