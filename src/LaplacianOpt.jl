@@ -37,6 +37,7 @@ include("lopt_model.jl")
 include("variables.jl")
 include("constraints.jl")
 include("objective.jl")
+include("solution.jl")
 include("log.jl")
 
 end # module

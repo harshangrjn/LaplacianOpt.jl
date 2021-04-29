@@ -28,6 +28,6 @@ lom_optimizer = get_solver(params)
 data = LaplacianOpt.get_data(params)
 
 
-# model_qc  = LaplacianOpt.build_LOModel(data)
-# result_qc = LaplacianOpt.optimize_LOModel!(model_qc, optimizer = qcm_optimizer)
+model_lo  = LaplacianOpt.build_LOModel(data)
+result_lo = LaplacianOpt.optimize_LOModel!(model_lo, optimizer = lom_optimizer)
 # LaplacianOpt.visualize_LOModel_solution(result_qc, data)

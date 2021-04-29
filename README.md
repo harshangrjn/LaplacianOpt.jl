@@ -1,5 +1,5 @@
 ## LaplacianOpt
-**LaplacianOpt.jl** is a Julia package which implements polyhedral relaxation-based algorithms for optimization of weighted graph Laplacians. Given a complete weighted graph, this package provides an optimal (and an approximate) spanning tree which has the maximum second largest eigenvalue of the graph Laplacian, also known as the algebraic connectivity of the graph.
+**LaplacianOpt.jl** is a Julia package which implements polyhedral relaxation-based algorithms for optimization of weighted graph Laplacians. Given a complete weighted graph, this package provides an optimal (and an approximate) spanning tree which has the maximum second largest eigenvalue of the graph Laplacian, also known as the algebraic connectivity of the graph. This package also implements various types of relaxations to the Laplacian optimization problem. 
 
 ## Usage
 - Clone the repository.

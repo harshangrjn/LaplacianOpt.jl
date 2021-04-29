@@ -16,7 +16,12 @@ function get_data(params::Dict{String, Any})
         edge_weights = data_dict["new_data"]["edge_weights"]
     end
 
-    data = convert_array_to_matrix(n, edge_weights)
+    edge_weigths_matrix = convert_array_to_matrix(n, edge_weights)
+
+    data = Dict{String, Any}("num_nodes" => n,
+                             "instance" => instance,
+                             "edge_weights" => edge_weigths_matrix,
+                             "relax_integrality" => params["relax_integrality"])
 
     return data
 end
@@ -26,8 +31,7 @@ function convert_array_to_matrix(n::Int, edge_weights::Any)
     instance_matrix = Matrix{Float64}(zeros(n,n))
 
     for k = 1:length(edge_weights)
-        i    = edge_weights[k][1][1]
-        j    = edge_weights[k][1][2]
+        i, j = edge_weights[k][1]
         w_ij = edge_weights[k][2]
 
         if w_ij < 0 
