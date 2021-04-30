@@ -6,10 +6,12 @@ import Random
 import Memento
 import MathOptInterface
 import JSON
+import LightGraphs
 
 const MOI = MathOptInterface
 const LA = LinearAlgebra
 const LO = LaplacianOpt
+const LG = LightGraphs
 
 # Create our module level logger (this will get precompiled)
 const _LOGGER = Memento.getlogger(@__MODULE__)

@@ -52,11 +52,22 @@ function get_data(params::Dict{String, Any})
         eigen_cuts_full = true
     end
 
-    if "eigen_cuts_logging" in keys(params)
-        eigen_cuts_logging = params["eigen_cuts_logging"]
+    if "topology_flow_cuts" in keys(params)
+        topology_flow_cuts = params["topology_flow_cuts"]
     else
         #default value
-        eigen_cuts_logging = false
+        topology_flow_cuts = true
+    end
+
+    if eigen_cuts_full || topology_flow_cuts
+        lazy_callback_status = true
+    end
+
+    if "lazycuts_logging" in keys(params)
+        lazycuts_logging = params["lazycuts_logging"]
+    else
+        #default value
+        lazycuts_logging = false
     end
 
     data = Dict{String, Any}("num_nodes" => n,
@@ -65,7 +76,9 @@ function get_data(params::Dict{String, Any})
                              "tol_zero" => tol_zero,
                              "tol_psd" => tol_psd,
                              "eigen_cuts_full" => eigen_cuts_full,
-                             "eigen_cuts_logging" => eigen_cuts_logging,
+                             "lazycuts_logging" => lazycuts_logging,
+                             "topology_flow_cuts" => topology_flow_cuts,
+                             "lazy_callback_status" => lazy_callback_status,
                              "relax_integrality" => params["relax_integrality"])
 
     return data

@@ -1,5 +1,5 @@
-function get_rounded_zeros_and_ones!(v::Vector{Float64}, tol_zero::Float64)
-    
+function get_rounded_zeros_and_ones!(v::Array{Float64}, tol_zero::Float64)
+   
     for i in findall(abs.(v) .<= tol_zero)
         v[i] = 0
     end
@@ -12,4 +12,4 @@ function get_rounded_zeros_and_ones!(v::Vector{Float64}, tol_zero::Float64)
         end
     end
 
-end
+end 

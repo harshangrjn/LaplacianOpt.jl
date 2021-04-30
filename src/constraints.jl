@@ -63,17 +63,20 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel)
                 constraint_eigen_cuts_on_full_matrix(W_val, cb_cuts, lom)
             end
 
+            if lom.data["topology_flow_cuts"]
+                z_val = abs.(JuMP.callback_value.(Ref(cb_cuts), lom.variables[:z_var]))         
+                
+                LO.get_rounded_zeros_and_ones!(z_val, lom.data["tol_zero"])
+                
+                constraint_topology_flow_cuts(z_val, cb_cuts, lom)
+            end
+
         end 
 
     end
 
-    lazy_callback_status = false
-
-    if lom.data["eigen_cuts_full"]
-
-        lazy_callback_status = true
+    if lom.data["lazy_callback_status"]
         MOI.set(lom.model, MOI.LazyConstraintCallback(), constraint_lazycallback_cuts)
-
     end
 
 end
@@ -90,13 +93,13 @@ function constraint_eigen_cuts_on_full_matrix(W_val::Matrix{Float64}, cb_cuts, l
             
             violated_eigen_vec = LA.eigvecs(W_val)[:,1]
             
-            get_rounded_zeros_and_ones!(violated_eigen_vec, lom.data["tol_zero"])
+            LO.get_rounded_zeros_and_ones!(violated_eigen_vec, lom.data["tol_zero"])
 
             con = JuMP.@build_constraint(violated_eigen_vec' * lom.variables[:W_var] * violated_eigen_vec >= 0)
             
             MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con) 
         
-            if lom.data["eigen_cuts_logging"]
+            if lom.data["lazycuts_logging"]
                 Memento.info(_LOGGER, "Polyhedral relaxation cuts: full-sized eigen")
             end    
 
@@ -108,6 +111,41 @@ function constraint_eigen_cuts_on_full_matrix(W_val::Matrix{Float64}, cb_cuts, l
     end
 
     return
+end
+
+function constraint_topology_flow_cuts(z_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptModel)
+
+    cc_lazy = LG.connected_components(LG.SimpleGraph(abs.(z_val)))
+
+    if length(cc_lazy) == 2 
+
+        con = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[1], j in cc_lazy[2]) >= 1)  
+
+        MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)      
+        
+        if lom.data["lazycuts_logging"]
+            Memento.info(_LOGGER, "Polyhedral relaxation cuts: graph connectivity (#cc = $(length(cc_lazy)))")
+        end    
+
+    elseif length(cc_lazy) == 3
+
+        con1 = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[1], j in cc_lazy[2]) >= 1)  
+        con2 = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[2], j in cc_lazy[3]) >= 1)  
+
+        MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con1)       
+        MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con2)
+
+        if lom.data["lazycuts_logging"]
+            Memento.info(_LOGGER, "Polyhedral relaxation cuts: graph connectivity (#cc = $(length(cc_lazy)))")
+        end    
+
+    elseif length(cc_lazy) >= 4
+
+        Memento.info(_LOGGER, "Polyhedral relaxation cuts: flow cuts not added for integer solutions with $(length(cc_lazy)) connected components")
+        
+    end
+
+    return 
 end
 
 function constraint_topology_multi_commodity_flow(lom::LaplacianOptModel)
