@@ -7,6 +7,8 @@ import Memento
 import MathOptInterface
 import JSON
 import LightGraphs
+import TikzGraphs
+import TikzPictures
 
 const MOI = MathOptInterface
 const LA = LinearAlgebra

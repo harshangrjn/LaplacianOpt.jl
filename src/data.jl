@@ -56,6 +56,7 @@ function get_data(params::Dict{String, Any})
         topology_flow_cuts = params["topology_flow_cuts"]
     else
         #default value
+        Memento.info(_LOGGER, "Turning on topology flow cuts")
         topology_flow_cuts = true
     end
 

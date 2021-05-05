@@ -28,7 +28,6 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
     return result
 end
 
-
 ""
 function get_objective_value(model::JuMP.Model)
     
