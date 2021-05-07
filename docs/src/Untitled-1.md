@@ -1,1 +1,0 @@
-![10 nodes optimal graph](assets/10_nodes_opt.png)
