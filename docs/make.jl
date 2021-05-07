@@ -26,6 +26,6 @@ makedocs(
 )
 
 deploydocs(
-    repo = "http://github.com/harshangrjn/LaplacianOpt.jl.git",
+    repo = "github.com/harshangrjn/LaplacianOpt.jl.git",
     push_preview = true
 )
