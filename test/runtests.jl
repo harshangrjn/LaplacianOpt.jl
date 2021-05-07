@@ -1,12 +1,15 @@
 using LaplacianOpt
-using Memento
-using JuMP
-using LinearAlgebra
 using Test
-using GLPK
+
+import Memento
+import JuMP
+import LinearAlgebra
+import GLPK
+import MathOptInterface
 
 const LO = LaplacianOpt
 const LA = LinearAlgebra
+const MOI = MathOptInterface
 
 # Suppress warnings during testing
 LO.logger_config!("error")

@@ -6,9 +6,6 @@ version = "0.1.0"
 [deps]
 CPLEX = "a076750e-1247-5638-91d2-ce28b192dca0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-DocumenterTools = "35a29f4d-8980-5a13-9543-d66fff28ecb8"
-GLPK = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
@@ -18,11 +15,18 @@ Memento = "f28f55f0-a522-5efc-85c2-fe41dfb9b2d9"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TikzGraphs = "b4f28e30-c73f-5eaf-a395-8a9db949a742"
 TikzPictures = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
 
 [compat]
 DataStructures = "~0.17, ~0.18"
+JuMP = "^0.21.0"
 Memento = "~1.0, ~1.1"
 julia = "1"
+
+[extras]
+GLPK = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test", "GLPK"]

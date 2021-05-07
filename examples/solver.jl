@@ -48,7 +48,7 @@ function get_solver(params::Dict{String,Any})
     
     # Global NLP/MINLP optimizer
     elseif params["optimizer"] == "alpine"   # open-source 
-         alpine = optimizer_with_attributes(Alpine.Optimizer, 
+         alpine = JuMP.optimizer_with_attributes(Alpine.Optimizer, 
                                             "nlp_solver" => get_ipopt(presolve, optimizer_log),
                                             "minlp_solver" => get_juniper(presolve, optimizer_log),  
                                             "mip_solver" => get_cplex(presolve, optimizer_log),
@@ -61,14 +61,14 @@ function get_solver(params::Dict{String,Any})
 end
 
 function get_cplex(presolve::Bool, optimizer_log::Bool)
-     cplex = optimizer_with_attributes(CPLEX.Optimizer, 
+     cplex = JuMP.optimizer_with_attributes(CPLEX.Optimizer, 
                                        MOI.Silent() => !optimizer_log, 
                                        "CPX_PARAM_PREIND" => presolve) 
     return cplex 
 end
 
 function get_ipopt(presolve::Bool, optimizer_log::Bool)
-     ipopt = optimizer_with_attributes(Ipopt.Optimizer, 
+     ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, 
                                        MOI.Silent() => !optimizer_log, 
                                        "sb" => "yes", 
                                        "max_iter" => 1E4)
@@ -76,13 +76,13 @@ function get_ipopt(presolve::Bool, optimizer_log::Bool)
 end
 
 function get_cbc(presolve::Bool, optimizer_log::Bool)
-     cbc = optimizer_with_attributes(Cbc.Optimizer, 
+     cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, 
                                      MOI.Silent() => !optimizer_log)
     return cbc 
 end
 
 function get_juniper(presolve::Bool, optimizer_log::Bool)
-     juniper = optimizer_with_attributes(Juniper.Optimizer, 
+     juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, 
                                          MOI.Silent() => !optimizer_log, 
                                          "mip_solver" => get_cplex(presolve, optimizer_log), 
                                          "nl_solver" => get_ipopt(presolve, optimizer_log))
@@ -90,7 +90,7 @@ function get_juniper(presolve::Bool, optimizer_log::Bool)
 end
 
 function get_glpk(presolve::Bool, optimizer_log::Bool)
-    glpk = optimizer_with_attributes(GLPK.Optimizer, 
+    glpk = JuMP.optimizer_with_attributes(GLPK.Optimizer, 
                                      MOI.Silent() => !optimizer_log)
    return glpk
 end

@@ -14,15 +14,25 @@ function get_rounded_zeros_and_ones!(v::Array{Float64}, tol_zero::Float64)
 
 end 
 
-function get_optimal_graph(num_nodes::Int, z_val::Array{Float64})
+function get_optimal_graph_edges(num_nodes::Int, z_val::Array{Float64})
 
-    edges = []
+    edges = Vector{Tuple{Int64, Int64}}()
 
-    for i=1:num_nodes-1
+    if !LA.issymmetric(z_val)
+        Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
+    end
+
+    for i=1:num_nodes
+        if !isapprox(z_val[i,i], 0)
+            Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
+        end
+    end
+
+    for i=1:(num_nodes-1)
         for j=(i+1):num_nodes
-           if isapprox(z_val[i,j], 1.0)
-            push!(edges, (i,j))
-           end
+            if isapprox(z_val[i,j], 1.0)
+                push!(edges, (i,j))
+            end
         end
     end
 

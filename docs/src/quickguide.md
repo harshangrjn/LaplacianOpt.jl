@@ -37,7 +37,7 @@ The `"solution"` field contains detailed information about the solution produced
 For example, the one can obtain the optimal solution toplogy from the symmetric adjacency matrix with,
 
 ```Julia
-optimal_graph = LaplacianOpt.get_optimal_graph(params["num_nodes"], results["solution"]["z_var"])
+optimal_graph = LaplacianOpt.get_optimal_graph_edges(params["num_nodes"], results["solution"]["z_var"])
 ```
 
 # Visualizing results
