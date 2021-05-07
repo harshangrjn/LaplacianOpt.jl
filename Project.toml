@@ -22,6 +22,7 @@ TikzPictures = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
 DataStructures = "~0.17, ~0.18"
 JuMP = "^0.21.0"
 Memento = "~1.0, ~1.1"
+TikzPictures = "3.3"
 julia = "1"
 
 [extras]
