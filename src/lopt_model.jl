@@ -3,7 +3,11 @@ function build_LOModel(data::Dict{String, Any})
     m_lo = LaplacianOptModel(data, JuMP.Model(), Dict{Symbol,Any}(), Dict{String,Any}())
 
     variable_LOModel(m_lo)
-    constraint_LOModel(m_lo)
+    
+    if m_lo.data["solution_type"] == "exact"
+        constraint_LOModel(m_lo)
+    end
+
     objective_LOModel(m_lo)
 
     return m_lo
@@ -69,4 +73,19 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer=nothing)
     lom.result = build_LOModel_result(lom, solve_time) 
 
     return lom.result
+end
+
+function run_LOpt_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz")
+
+    data = LO.get_data(params)
+
+    model_lopt  = LO.build_LOModel(data)
+
+    result_lopt = LO.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
+
+    if visualize_solution
+        LaplacianOpt.visualize_LOModel_solution(result_lopt, data, visualizing_tool = visualizing_tool)
+    end
+
+    return result_lopt
 end

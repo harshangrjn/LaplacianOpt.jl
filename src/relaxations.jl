@@ -17,7 +17,7 @@ function variable_domain(var::JuMP.VariableRef)
 end
 
 """
-general relaxation of binlinear term (McCormick), which can be used to obtain specific variants in partiuclar cases of variables (like binary)
+General relaxation of binlinear term (McCormick), which can be used to obtain specific variants in partiuclar cases of variables (like binary)
 ```
 z >= JuMP.lower_bound(x)*y + JuMP.lower_bound(y)*x - JuMP.lower_bound(x)*JuMP.lower_bound(y)
 z >= JuMP.upper_bound(x)*y + JuMP.upper_bound(y)*x - JuMP.upper_bound(x)*JuMP.upper_bound(y)

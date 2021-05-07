@@ -10,13 +10,41 @@ function get_data(params::Dict{String, Any})
         Memento.error(_LOGGER, "Mismatch in number of input nodes")
     end
 
-    if params["data_type"] == "old"
+    # Input data 
+    if "data_type" in keys(params)
+        if params["data_type"] == "old"
+            edge_weights = data_dict["old_data"]["edge_weights"]
+        elseif params["data_type"] == "new"
+            edge_weights = data_dict["new_data"]["edge_weights"]
+        end
+    else
+        # default value
         edge_weights = data_dict["old_data"]["edge_weights"]
-    elseif params["data_type"] == "new"
-        edge_weights = data_dict["new_data"]["edge_weights"]
     end
 
     edge_weigths_matrix = convert_array_to_matrix(n, edge_weights)
+
+    # Solution type 
+    if "solution_type" in keys(params)
+        solution_type = params["solution_type"]
+    else
+        solution_type = "exact"
+    end
+
+    # Optimizer
+    if "optimizer" in keys(params)
+        optimizer = params["optimizer"]
+    else
+        Memento.error(_LOGGER, "Input a valid MILP optimizer")
+    end
+
+    # Relax Integrality 
+    if "relax_integrality" in keys(params)
+        relax_integrality = params["relax_integrality"]
+    else
+        # default value
+        relax_integrality = false
+    end
 
     # Tolerance to verify zero values
     if "tol_zero" in keys(params)
@@ -74,13 +102,15 @@ function get_data(params::Dict{String, Any})
     data = Dict{String, Any}("num_nodes" => n,
                              "instance" => instance,
                              "edge_weights" => edge_weigths_matrix,
+                             "solution_type" => solution_type,
                              "tol_zero" => tol_zero,
                              "tol_psd" => tol_psd,
                              "eigen_cuts_full" => eigen_cuts_full,
                              "lazycuts_logging" => lazycuts_logging,
                              "topology_flow_cuts" => topology_flow_cuts,
                              "lazy_callback_status" => lazy_callback_status,
-                             "relax_integrality" => params["relax_integrality"])
+                             "optimizer" => optimizer,
+                             "relax_integrality" => relax_integrality)
 
     return data
 end

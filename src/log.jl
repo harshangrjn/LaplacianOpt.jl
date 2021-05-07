@@ -1,4 +1,4 @@
-function visualize_LOModel_solution(results::Dict{String, Any}, data::Dict{String, Any}; plotting_tool = "tikz", plot_file_format = "pdf")
+function visualize_LOModel_solution(results::Dict{String, Any}, data::Dict{String, Any}; visualizing_tool = "tikz", plot_file_format = "pdf")
     
     if results["primal_status"] != MOI.FEASIBLE_POINT
         Memento.error(_LOGGER, "Non-feasible primal status. Graph solution may not be exact")
@@ -7,9 +7,9 @@ function visualize_LOModel_solution(results::Dict{String, Any}, data::Dict{Strin
     if !data["relax_integrality"]
         Memento.info(_LOGGER, "Plotting the graph of integral solution")
         
-        if plotting_tool == "tikz"
+        if visualizing_tool == "tikz"
             LO.plot_tikzgraph(results["solution"]["z_var"], data["num_nodes"], data["instance"], data["edge_weights"], data["tol_zero"], plot_file_format)
-        elseif plotting_tool == "graphviz"
+        elseif visualizing_tool == "graphviz"
             LO.plot_graphviz(results["solution"]["z_var"], data["num_nodes"], data["instance"], data["edge_weights"], data["tol_zero"], plot_file_format)
         end
 
@@ -82,4 +82,3 @@ function plot_graphviz(z_var::Matrix{Float64}, num_nodes::Int64, instance::Int64
     # execute the dot_to_pdf.sh script file in the examples/plots folder
 
 end
-
