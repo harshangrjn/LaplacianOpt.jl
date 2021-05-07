@@ -27,17 +27,6 @@ git-tree-sha1 = "c3598e525718abcc440f69cc6d5f60dda0a1b61e"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.6+5"
 
-[[CEnum]]
-git-tree-sha1 = "215a9aa4a1f23fbd05b92769fdd62559488d70e9"
-uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
-version = "0.4.1"
-
-[[CPLEX]]
-deps = ["CEnum", "Libdl", "MathOptInterface", "SparseArrays"]
-git-tree-sha1 = "fad0484e0e5864cde54b26e7f3868e857b95f31c"
-uuid = "a076750e-1247-5638-91d2-ce28b192dca0"
-version = "0.7.7"
-
 [[Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "e2f47f6d8337369411569fd45ae5753ca10394c6"
