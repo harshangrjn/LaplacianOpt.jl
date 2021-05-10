@@ -153,6 +153,8 @@ end
 
 function constraint_topology_multi_commodity_flow(lom::LaplacianOptModel)
 
+    n = lom.data["num_nodes"]
+    
     # Flow balance on source node 
     JuMP.@constraint(lom.model, [k=1:(n-1)], sum(lom.variables[:flow_var][1,2:n,k]) - sum(lom.variables[:flow_var][2:n,1,k]) == 1)
 

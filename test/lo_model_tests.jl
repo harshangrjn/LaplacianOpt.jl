@@ -1,4 +1,4 @@
-@testset "optimal solution tests" begin
+@testset "Algebraic Connectivity: Optimal solution tests" begin
     
     file_path = joinpath(@__DIR__,"..", "examples/solver.jl")
     include(file_path)
@@ -49,3 +49,30 @@
     @test isapprox(LA.eigvals(L_val)[2], result_lo["solution"]["γ_var"])
 end
 
+@testset "Max Span Tree: Optimal solution tests" begin
+    
+    file_path = joinpath(@__DIR__,"..", "examples/solver.jl")
+    include(file_path)
+
+    params = Dict{String, Any}(
+        "num_nodes" => 5,
+        "instance" => 1,
+        "optimizer" => "glpk"
+        )
+
+    lom_optimizer = get_solver(params)
+    result_mst = LaplacianOpt.run_MaxSpanTree_model(params, lom_optimizer)
+
+    @test result_mst["termination_status"] == MOI.OPTIMAL
+    @test result_mst["primal_status"] == MOI.FEASIBLE_POINT
+    @test isapprox(result_mst["objective"], 113.7588, atol=1E-4)
+    @test isapprox(result_mst["solution"]["z_var"][1,2], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][2,1], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][2,5], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][5,2], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][3,4], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][4,3], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][3,5], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][5,3], 1.0)
+
+end

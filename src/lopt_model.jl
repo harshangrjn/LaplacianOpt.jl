@@ -89,3 +89,54 @@ function run_LOpt_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerW
 
     return result_lopt
 end
+
+function run_MaxSpanTree_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz")
+    data = LO.get_data(params)
+
+    model_mst = LO.build_MaxSpanTree_model(data)
+
+    result_mst = LO.optimize_LOModel!(model_mst, optimizer = lom_optimizer)
+
+    if visualize_solution
+        LaplacianOpt.visualize_LOModel_solution(result_mst, data, visualizing_tool = visualizing_tool)
+    end
+
+    return result_mst
+
+end
+
+function build_MaxSpanTree_model(data::Dict{String, Any})
+
+    m_mst = LaplacianOptModel(data, JuMP.Model(), Dict{Symbol,Any}(), Dict{String,Any}())
+
+    variable_MaxSpanTree_model(m_mst)
+    
+    constraint_MaxSpanTree_model(m_mst)
+
+    objective_MaxSpanTree_model(m_mst)
+
+    return m_mst
+end
+
+function objective_MaxSpanTree_model(lom::LaplacianOptModel)
+    objective_maximize_spanning_tree_cost(lom)
+
+    return
+end
+
+function variable_MaxSpanTree_model(lom::LaplacianOptModel)
+    variable_edge_onoff(lom)
+    variable_multi_commodity_flow(lom)
+
+    return
+end
+
+function constraint_MaxSpanTree_model(lom::LaplacianOptModel)
+
+    constraint_topology_no_self_loops(lom)
+    constraint_topology_vertex_cutset(lom)
+    constraint_topology_total_edges(lom)
+    constraint_topology_multi_commodity_flow(lom)
+    
+    return
+end
