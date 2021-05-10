@@ -2,7 +2,6 @@ module LaplacianOpt
 
 import JuMP
 import LinearAlgebra
-import Random
 import Memento
 import MathOptInterface
 import JSON

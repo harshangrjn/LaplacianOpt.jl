@@ -3,6 +3,7 @@ CPLEX = "a076750e-1247-5638-91d2-ce28b192dca0"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 LaplacianOpt = "bb20392f-64fb-4001-92e8-14b3aedd5a9e"
 Memento = "f28f55f0-a522-5efc-85c2-fe41dfb9b2d9"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 
 [compat]
 JuMP = "^0.21.0"
