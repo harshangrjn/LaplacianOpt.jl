@@ -119,12 +119,14 @@ function build_MaxSpanTree_model(data::Dict{String, Any})
 end
 
 function objective_MaxSpanTree_model(lom::LaplacianOptModel)
+    
     objective_maximize_spanning_tree_cost(lom)
 
     return
 end
 
 function variable_MaxSpanTree_model(lom::LaplacianOptModel)
+
     variable_edge_onoff(lom)
     variable_multi_commodity_flow(lom)
 

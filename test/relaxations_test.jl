@@ -1,4 +1,6 @@
 @testset "relaxation_bilinear tests" begin
+    LO.silence()
+    
     m = JuMP.Model(glpk_optimizer)
 
     LB = [-1, -2.5, 0, -3, 0]

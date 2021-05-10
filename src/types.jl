@@ -13,8 +13,8 @@ mutable struct LaplacianOptModel
 end
 
 "Contructor for struct `LaplacianOptModel`"
-function LaplacianOptModel(data)
-    lom = new(data)
+function LaplacianOptModel(data::Dict{Symbol,Any};)
+    lom = new(data, JuMP.Model(), Dict{Symbol,Any}(), Dict{Symbol,Any}())
     lom.data = data
     lom.model = JuMP.Model() 
     lom.variables = Dict{Symbol,Any}()
