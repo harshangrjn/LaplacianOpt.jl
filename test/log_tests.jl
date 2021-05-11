@@ -14,7 +14,7 @@
     model_lopt  = LO.build_LOModel(data)
     result_lopt = LO.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
 
-    LO.visualize_LOModel_solution(result_lopt, data, visualizing_tool = "tikz")
+    LO.visualize_LOModel_solution(result_lopt, data, visualizing_tool = "tikz", plot_file_format = "tex")
     LO.visualize_LOModel_solution(result_lopt, data, visualizing_tool = "graphviz")
 
     @test result_lopt["termination_status"] == MOI.OPTIMAL
