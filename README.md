@@ -1,6 +1,6 @@
 Status: 
 [![CI](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/ci.yml)
-[![Documentation](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/documentation.yml/badge.svg)](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/documentation.yml)
+[![Documentation](https://github.com/harshangrjn/LaplacianOpt.jl/workflows/documentation.yml/badge.svg)](https://github.com/harshangrjn/LaplacianOpt.jl/workflows/documentation.yml)
 [![codecov](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl/branch/main/graph/badge.svg?token=7EKATOHLYL)](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl)
 ## LaplacianOpt
 **LaplacianOpt.jl** is a Julia package which implements polyhedral relaxation-based algorithms for optimization of weighted graph Laplacians. Given a complete weighted graph, this package provides an optimal (and an approximate) spanning tree which has the maximum second largest eigenvalue of the graph Laplacian, also known as the algebraic connectivity of the graph. This package also implements various types of relaxations to the Laplacian optimization problem. 
