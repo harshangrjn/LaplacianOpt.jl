@@ -6,6 +6,3 @@ status:
         threshold: 5%        # allowed to drop X% and still result in a "success" PR status
       branches:
         threshold: 5%        # allowed to drop X% and still result in a "success" commit status
-
-ignore:
-  - "**/src/log.jl"             # No need of unit tests for graph visualizations as this depends on exterior applications
