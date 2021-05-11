@@ -43,12 +43,6 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel)
     
     function constraint_lazycallback_cuts(cb_cuts)
 
-        W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
-
-        if typeof(W_val) != Matrix{Float64}
-            Memento.error(_LOGGER, "PSD matrix (W) cannot have non-float entries")
-        end
-
         status = JuMP.callback_node_status(cb_cuts, lom.model)
 
         if status == MOI.CALLBACK_NODE_STATUS_FRACTIONAL
@@ -63,10 +57,18 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel)
         else status == MOI.CALLBACK_NODE_STATUS_INTEGER
 
             if lom.data["eigen_cuts_full"]
+
+                W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
+
+                if typeof(W_val) != Matrix{Float64}
+                    Memento.error(_LOGGER, "PSD matrix (W) cannot have non-float entries")
+                end
+
                 constraint_eigen_cuts_on_full_matrix(W_val, cb_cuts, lom)
             end
 
             if lom.data["topology_flow_cuts"]
+
                 z_val = abs.(JuMP.callback_value.(Ref(cb_cuts), lom.variables[:z_var]))         
                 
                 LO.get_rounded_zeros_and_ones!(z_val, lom.data["tol_zero"])
@@ -121,7 +123,7 @@ function constraint_topology_flow_cuts(z_val::Matrix{Float64}, cb_cuts, lom::Lap
     cc_lazy = LG.connected_components(LG.SimpleGraph(abs.(z_val)))
 
     if length(cc_lazy) == 2 
-
+        
         con = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[1], j in cc_lazy[2]) >= 1)  
 
         MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)      
@@ -137,7 +139,7 @@ function constraint_topology_flow_cuts(z_val::Matrix{Float64}, cb_cuts, lom::Lap
 
         MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con1)       
         MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con2)
-
+        
         if lom.data["lazycuts_logging"]
             Memento.info(_LOGGER, "Polyhedral relaxation cuts: graph connectivity (#cc = $(length(cc_lazy)))")
         end    

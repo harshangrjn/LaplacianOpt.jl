@@ -90,10 +90,10 @@ function run_LOpt_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerW
     return result_lopt
 end
 
-function run_MaxSpanTree_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz")
+function run_MaxSpanTree_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz", lazy_callback = false)
     data = LO.get_data(params)
 
-    model_mst = LO.build_MaxSpanTree_model(data)
+    model_mst = LO.build_MaxSpanTree_model(data, lazy_callback)
 
     result_mst = LO.optimize_LOModel!(model_mst, optimizer = lom_optimizer)
 
@@ -105,13 +105,13 @@ function run_MaxSpanTree_model(params::Dict{String, Any}, lom_optimizer::MOI.Opt
 
 end
 
-function build_MaxSpanTree_model(data::Dict{String, Any})
+function build_MaxSpanTree_model(data::Dict{String, Any}, lazy_callback::Bool)
 
     m_mst = LaplacianOptModel(data, JuMP.Model(), Dict{Symbol,Any}(), Dict{String,Any}())
 
-    variable_MaxSpanTree_model(m_mst)
+    variable_MaxSpanTree_model(m_mst, lazy_callback)
     
-    constraint_MaxSpanTree_model(m_mst)
+    constraint_MaxSpanTree_model(m_mst, lazy_callback)
 
     objective_MaxSpanTree_model(m_mst)
 
@@ -125,20 +125,28 @@ function objective_MaxSpanTree_model(lom::LaplacianOptModel)
     return
 end
 
-function variable_MaxSpanTree_model(lom::LaplacianOptModel)
+function variable_MaxSpanTree_model(lom::LaplacianOptModel, lazy_callback::Bool)
 
     variable_edge_onoff(lom)
-    variable_multi_commodity_flow(lom)
+    
+    if !lazy_callback
+        variable_multi_commodity_flow(lom)
+    end
 
     return
 end
 
-function constraint_MaxSpanTree_model(lom::LaplacianOptModel)
+function constraint_MaxSpanTree_model(lom::LaplacianOptModel, lazy_callback::Bool)
 
     constraint_topology_no_self_loops(lom)
     constraint_topology_vertex_cutset(lom)
     constraint_topology_total_edges(lom)
-    constraint_topology_multi_commodity_flow(lom)
+    
+    if lazy_callback 
+        constraint_lazycallback_wrapper(lom)
+    else
+        constraint_topology_multi_commodity_flow(lom)
+    end
     
     return
 end

@@ -60,8 +60,7 @@ end
         "optimizer" => "glpk"
         )
 
-    lom_optimizer = get_solver(params)
-    result_mst = LaplacianOpt.run_MaxSpanTree_model(params, lom_optimizer)
+    result_mst = LaplacianOpt.run_MaxSpanTree_model(params, glpk_optimizer)
 
     @test result_mst["termination_status"] == MOI.OPTIMAL
     @test result_mst["primal_status"] == MOI.FEASIBLE_POINT
@@ -75,4 +74,31 @@ end
     @test isapprox(result_mst["solution"]["z_var"][3,5], 1.0)
     @test isapprox(result_mst["solution"]["z_var"][5,3], 1.0)
 
+end
+
+@testset "Max Span Tree: Lazy callback tests" begin
+
+    file_path = joinpath(@__DIR__,"..", "examples/solver.jl")
+    include(file_path)
+
+    params = Dict{String, Any}(
+        "num_nodes" => 15,
+        "instance" => 5,
+        "data_type" => "old",
+        "eigen_cuts_full" => false,
+        "topology_flow_cuts" => true,
+        "optimizer" => "glpk"
+        )
+
+    result_mst = LaplacianOpt.run_MaxSpanTree_model(params, glpk_optimizer, lazy_callback=true)
+    
+    @test result_mst["termination_status"] == MOI.OPTIMAL
+    @test result_mst["primal_status"] == MOI.FEASIBLE_POINT
+    @test isapprox(result_mst["objective"], 3576.56202331, atol=1E-6)
+    @test isapprox(result_mst["solution"]["z_var"][1,4], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][2,4], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][3,4], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][4,15], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][7,15], 1.0)
+    @test isapprox(result_mst["solution"]["z_var"][8,15], 1.0)
 end
