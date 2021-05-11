@@ -6,7 +6,12 @@
     params = Dict{String, Any}(
         "num_nodes" => 5,
         "instance" => 1,
-        "optimizer" => "glpk"
+        "optimizer" => "glpk",
+        "tol_zero" => 1E-4,
+        "tol_psd" => 1E-3,
+        "eigen_cuts_full" => true,
+        "topology_flow_cuts" => true,
+        "lazycuts_logging" => true
     )
 
     lom_optimizer = get_solver(params)

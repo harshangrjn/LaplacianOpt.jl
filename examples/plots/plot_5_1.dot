@@ -1,0 +1,9 @@
+graph G { 
+layout=neato; 
+size="10,5"; 
+node [fontname="Helvetica", fontsize=20, shape = circle, width=0.4, fixedsize=true, style="filled", fillcolor="0.650 0.200 1.000"]; 
+1 -- 4 [label = "11.269", fontsize=9, fontname="Helvetica"]; 
+2 -- 4 [label = "13.662", fontsize=9, fontname="Helvetica"]; 
+3 -- 4 [label = "29.117", fontsize=9, fontname="Helvetica"]; 
+3 -- 5 [label = "27.744", fontsize=9, fontname="Helvetica"]; 
+}
