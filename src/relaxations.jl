@@ -29,14 +29,14 @@ function relaxation_bilinear(m::JuMP.Model, xy::JuMP.VariableRef, x::JuMP.Variab
     lb_x, ub_x = variable_domain(x)
     lb_y, ub_y = variable_domain(y)
     
-    if (lb_x == 0) && (ub_x == 1)
+    if (lb_x == 0) && (ub_x == 1) && ((lb_y != 0) || (ub_y != 1))
       
       JuMP.@constraint(m, xy >= lb_y*x)
       JuMP.@constraint(m, xy >= y + ub_y*x - ub_y)
       JuMP.@constraint(m, xy <= ub_y*x)
       JuMP.@constraint(m, xy <= y + lb_y*x - lb_y)
 
-    elseif (lb_y == 0) && (ub_y == 1)
+    elseif (lb_y == 0) && (ub_y == 1) && ((lb_x != 0) || (ub_x != 1))
       
       JuMP.@constraint(m, xy >= lb_x*y)
       JuMP.@constraint(m, xy >= ub_x*y + x - ub_x)
