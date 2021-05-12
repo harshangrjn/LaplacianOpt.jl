@@ -34,10 +34,16 @@ results["objective"]
 ```
 
 The `"solution"` field contains detailed information about the solution produced by the optimization model.
-For example, the one can obtain the optimal solution toplogy from the symmetric adjacency matrix with,
+For example, one can obtain the edges of the optimal graph toplogy from the symmetric adjacency matrix with,
 
 ```Julia
-optimal_graph = LaplacianOpt.get_optimal_graph_edges(params["num_nodes"], results["solution"]["z_var"])
+optimal_graph = LaplacianOpt.optimal_graph_edges(results["solution"]["z_var"])
+```
+and the Fiedler vector of the optimal graph topology from the edge weights and the adjacency matrix with,
+```Julia
+data = LaplacianOpt.get_data(params)
+optimal_adjacency_matrix = results["solution"]["z_var"] .* data["edge_weights"] 
+optimal_fiedler_vector = LaplacianOpt.fiedler_vector(optimal_adjacency_matrix)
 ```
 
 # Visualizing results
