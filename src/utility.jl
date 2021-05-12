@@ -59,11 +59,11 @@ function laplacian_matrix(adjacency_matrix::Array{Float64})
         for j = i:num_nodes
             
             if i == j    
-                if !isapprox(adjacency_matrix[i,i], 0)
+                if !isapprox(adjacency_matrix[i,j], 0)
                     Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
                 end
 
-                laplacian_matrix[i,i] = sum(adjacency_matrix[i,:])
+                laplacian_matrix[i,j] = sum(adjacency_matrix[i,:])
             else 
                 if adjacency_matrix[i,j] <= -1E-6
                     Memento.error(_LOGGER, "Input adjacency matrix cannot have negative weights")
@@ -89,7 +89,7 @@ function fiedler_vector(adjacency_matrix::Array{Float64})
     
     L_mat = LO.laplacian_matrix(adjacency_matrix)
     
-    if !isapprox(abs.(LA.nullspace(L_mat)), abs.(LA.eigvecs(L_mat)[:,1]))
+    if !isapprox(abs.(LA.nullspace(L_mat)[:,1]), abs.(LA.eigvecs(L_mat)[:,1]))
         Memento.error(_LOGGER, "Ordering of eigenvectors may be not be sorted based on the eigenvalues for the Laplacian matrix")
     end
 

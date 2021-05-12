@@ -41,4 +41,12 @@ end
     v = [ -0.2113248654051879, 0.7886751345948118, -0.5773502691896268]
     @test isapprox(v, fiedler, atol=1E-6)
 
+    # Disconnected graph
+    adj_mat_3 = [0 1 1 0; 1 0 0 0; 1 0 0 0; 0 0 0 0.0]
+    ac = LO.algebraic_connectivity(adj_mat_3)
+    @test isapprox(ac, 0, atol=1E-6)
+    fiedler = LO.fiedler_vector(adj_mat_3)
+    v = [ 0.5773502691896258, 0.5773502691896273, 0.5773502691896241, 0.0]
+    @test isapprox(v, fiedler, atol=1E-6)
+
 end
