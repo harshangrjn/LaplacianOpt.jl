@@ -5,10 +5,10 @@ node [fontname="Helvetica", fontsize=20, shape = circle, width=0.4, fixedsize=tr
 1 -- 4 [label = "67.877", fontsize=9, fontname="Helvetica"]; 
 2 -- 7 [label = "57.218", fontsize=9, fontname="Helvetica"]; 
 3 -- 7 [label = "125.676", fontsize=9, fontname="Helvetica"]; 
-3 -- 10 [label = "67.004", fontsize=9, fontname="Helvetica"]; 
 4 -- 7 [label = "92.04", fontsize=9, fontname="Helvetica"]; 
 5 -- 7 [label = "136.931", fontsize=9, fontname="Helvetica"]; 
 5 -- 8 [label = "104.61", fontsize=9, fontname="Helvetica"]; 
 6 -- 7 [label = "49.676", fontsize=9, fontname="Helvetica"]; 
 7 -- 9 [label = "40.613", fontsize=9, fontname="Helvetica"]; 
+7 -- 10 [label = "47.414", fontsize=9, fontname="Helvetica"]; 
 }

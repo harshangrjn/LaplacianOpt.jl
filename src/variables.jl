@@ -8,7 +8,6 @@ function variable_lifted_W_matrix(lom::LaplacianOptModel)
     lom.variables[:W_var] = JuMP.@variable(lom.model, W_var[1:n, 1:n], Symmetric)
 
     for i = 1:n
-        # These bounds can be tightened if there is a good upper bound on γ_var
         JuMP.set_lower_bound(W_var[i,i], 0)
     end
 

@@ -80,6 +80,14 @@ function get_data(params::Dict{String, Any})
         eigen_cuts_full = true
     end
 
+    if "soc_linearized_cuts" in keys(params)
+        soc_linearized_cuts = params["soc_linearized_cuts"]
+    else
+        #default value
+        Memento.info(_LOGGER, "Turning off linearized SOC cuts")
+        soc_linearized_cuts = false
+    end
+
     if "topology_flow_cuts" in keys(params)
         topology_flow_cuts = params["topology_flow_cuts"]
     else
@@ -88,7 +96,7 @@ function get_data(params::Dict{String, Any})
         topology_flow_cuts = true
     end
 
-    if eigen_cuts_full || topology_flow_cuts
+    if eigen_cuts_full || topology_flow_cuts || soc_linearized_cuts
         lazy_callback_status = true
     end
 
@@ -106,6 +114,7 @@ function get_data(params::Dict{String, Any})
                              "tol_zero" => tol_zero,
                              "tol_psd" => tol_psd,
                              "eigen_cuts_full" => eigen_cuts_full,
+                             "soc_linearized_cuts" => soc_linearized_cuts,
                              "lazycuts_logging" => lazycuts_logging,
                              "topology_flow_cuts" => topology_flow_cuts,
                              "lazy_callback_status" => lazy_callback_status,

@@ -57,18 +57,18 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel)
         else status == MOI.CALLBACK_NODE_STATUS_INTEGER
 
             if lom.data["eigen_cuts_full"]
-
                 W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
-
-                if typeof(W_val) != Matrix{Float64}
-                    Memento.error(_LOGGER, "PSD matrix (W) cannot have non-float entries")
-                end
 
                 constraint_eigen_cuts_on_full_matrix(W_val, cb_cuts, lom)
             end
 
-            if lom.data["topology_flow_cuts"]
+            if lom.data["soc_linearized_cuts"]
+                W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
 
+                constraint_soc_linearized_cuts_on_2minors(W_val, cb_cuts, lom)
+            end
+
+            if lom.data["topology_flow_cuts"]
                 z_val = abs.(JuMP.callback_value.(Ref(cb_cuts), lom.variables[:z_var]))         
                 
                 LO.get_rounded_zeros_and_ones!(z_val, lom.data["tol_zero"])
@@ -111,6 +111,42 @@ function constraint_eigen_cuts_on_full_matrix(W_val::Matrix{Float64}, cb_cuts, l
         else
 
             Memento.warn(_LOGGER, "Eigen cut corresponding to the negative eigenvalue could not be added")
+
+        end
+    end
+
+    return
+end
+
+function constraint_soc_linearized_cuts_on_2minors(W_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptModel)
+    
+    num_nodes = lom.data["num_nodes"]
+
+    for i = 1:(num_nodes-1)
+        for j = (i+1):num_nodes
+
+            W_val_minor = W_val[i,j]^2 - W_val[i,i] * W_val[j,j]
+
+            if  W_val_minor >= lom.data["tol_zero"]
+                
+                coefficient_vec = [-(W_val[i,j])^2
+                                   2 * W_val[i,j] * W_val[i,i]]
+                
+                variable_vec = [lom.variables[:W_var][i,i], lom.variables[:W_var][i,j]]
+                
+                # Taylor's approximation of rotated SOC constraint (x^2 <= y*z)
+                if !isapprox(W_val[i,i], 0, atol=1E-6)
+                    con = JuMP.@build_constraint(coefficient_vec[1]*variable_vec[1] + coefficient_vec[2]*variable_vec[2] 
+                                                    <= W_val[i,i]^2 * lom.variables[:W_var][j,j])
+                    
+                    MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)   
+                end
+
+                if lom.data["lazycuts_logging"]
+                    Memento.info(_LOGGER, "Polyhedral relaxation cuts: 2x2 minor linearized SOC")
+                end    
+
+            end
 
         end
     end
