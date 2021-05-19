@@ -1,6 +1,11 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.1.2
+- Clean up of plot functions in log.jl
+- Clean up of docs 
+- Bug fix in tests for plots
+
 ### v0.1.1
 - Added utility functions for evaluation of algebraic connectivity 
 - Added utility functions for evaluation of fieder vector

@@ -84,7 +84,7 @@ function run_LOpt_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerW
     result_lopt = LO.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
 
     if visualize_solution
-        LaplacianOpt.visualize_LOModel_solution(result_lopt, data, visualizing_tool = visualizing_tool)
+        LaplacianOpt.visualize_solution(result_lopt, data, visualizing_tool = visualizing_tool)
     end
 
     return result_lopt
@@ -98,7 +98,7 @@ function run_MaxSpanTree_model(params::Dict{String, Any}, lom_optimizer::MOI.Opt
     result_mst = LO.optimize_LOModel!(model_mst, optimizer = lom_optimizer)
 
     if visualize_solution
-        LaplacianOpt.visualize_LOModel_solution(result_mst, data, visualizing_tool = visualizing_tool)
+        LaplacianOpt.visualize_solution(result_mst, data, visualizing_tool = visualizing_tool)
     end
 
     return result_mst

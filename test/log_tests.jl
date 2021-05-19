@@ -1,4 +1,4 @@
-@testset "visualize_LOModel_solution tests" begin
+@testset "visualize_solution tests" begin
     
     file_path = joinpath(@__DIR__,"..", "examples/solver.jl")
     include(file_path)
@@ -19,8 +19,10 @@
     model_lopt  = LO.build_LOModel(data)
     result_lopt = LO.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
 
-    LO.visualize_LOModel_solution(result_lopt, data, visualizing_tool = "tikz", plot_file_format = "tex")
-    LO.visualize_LOModel_solution(result_lopt, data, visualizing_tool = "graphviz")
+    LO.visualize_solution(result_lopt, data, visualizing_tool = "tikz", plot_file_format = "tex")
+    LO.visualize_solution(result_lopt, data, visualizing_tool = "tikz", plot_file_format = "tex", display_edge_weights=true)
+    LO.visualize_solution(result_lopt, data, visualizing_tool = "graphviz")
+    LO.visualize_solution(result_lopt, data, visualizing_tool = "graphviz", display_edge_weights=false)
 
     @test result_lopt["termination_status"] == MOI.OPTIMAL
     @test result_lopt["primal_status"] == MOI.FEASIBLE_POINT

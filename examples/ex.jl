@@ -1,7 +1,7 @@
 using LaplacianOpt
 using JuMP
-# using CPLEX
-using GLPK
+using CPLEX
+#using GLPK
 using Memento
 
 include("solver.jl")

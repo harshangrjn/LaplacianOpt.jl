@@ -52,17 +52,19 @@ LaplacianOpt also currently supports the visualization of optimal graphs layouts
 
 ```julia
 data = LaplacianOpt.get_data(params)
-LaplacianOpt.visualize_LOModel_solution(results, data, visualizing_tool = "tikz")
+LaplacianOpt.visualize_solution(results, data, visualizing_tool = "tikz")
 ```
 
 + [Graphviz](https://graphviz.org) package for better visualization of weighted graphs. To this end, LaplacianOpt generates the raw `.dot` file, which can be further visualized using the Graphviz software either via the direct [installation](https://graphviz.org/download/) on the computer or using an online front-end visualization GUI (for example, see [Edotor](https://edotor.net)). Dot files can be generated in LaplacianOpt with 
 
 ```julia
 data = LaplacianOpt.get_data(params)
-LaplacianOpt.visualize_LOModel_solution(results, data, visualizing_tool = "graphviz")
+LaplacianOpt.visualize_solution(results, data, visualizing_tool = "graphviz")
 ```
 For example, on a complete graph with 10 nodes in [instance #1](https://github.com/harshangrjn/LaplacianOpt.jl/blob/main/examples/instances/10_nodes/10_1.json), the optimal spanning tree, out of ``10^8`` feasible solutions, obtained by LaplacianOpt using Graphviz visualization is shown below 
 
-```@raw html
+![Optimal solution](assets/10_nodes_opt_1.png)
+<!-- ```@raw html
 <img src="assets/10_nodes_opt.png" width="730"/>
-```
+``` -->
+

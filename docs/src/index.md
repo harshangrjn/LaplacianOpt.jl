@@ -31,7 +31,7 @@ import Pkg
 Pkg.test("LaplacianOpt")
 ```
 
-## Citation
+## Citing LaplacianOpt
 If you find LaplacianOpt useful in your work, we request you to cite the following paper [\[link\]](https://doi.org/10.1109/ECC.2015.7330770): 
 ```bibtex
 @inproceedings{NagarajanRathinamDarbha2015,
