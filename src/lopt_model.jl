@@ -1,6 +1,7 @@
 function build_LOModel(data::Dict{String, Any})
 
-    m_lo = LaplacianOptModel(data, JuMP.Model(), Dict{Symbol,Any}(), Dict{String,Any}())
+    # m_lo = LaplacianOptModel(data, JuMP.Model(), Dict{Symbol,Any}(), Dict{String,Any}())
+    m_lo = LaplacianOptModel(data)
 
     variable_LOModel(m_lo)
     
@@ -107,7 +108,7 @@ end
 
 function build_MaxSpanTree_model(data::Dict{String, Any}, lazy_callback::Bool)
 
-    m_mst = LaplacianOptModel(data, JuMP.Model(), Dict{Symbol,Any}(), Dict{String,Any}())
+    m_mst = LaplacianOptModel(data)
 
     variable_MaxSpanTree_model(m_mst, lazy_callback)
     

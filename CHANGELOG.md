@@ -1,6 +1,11 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.1.3
+- Types bug fix for constructor in `LaplacianOptModel`
+- Updated tests in max span tree model 
+- Updated cleaned-up docs
+
 ### v0.1.2
 - Clean up of plot functions in log.jl
 - Clean up of docs 

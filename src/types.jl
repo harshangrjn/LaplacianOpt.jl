@@ -8,17 +8,19 @@ mutable struct LaplacianOptModel
     data::Dict{String,Any}
     model::JuMP.Model
     variables::Dict{Symbol,Any}
-    #constraints::Dict{Symbol,Any}
     result::Dict{String,Any}
-end
 
-"Contructor for struct `LaplacianOptModel`"
-function LaplacianOptModel(data::Dict{Symbol,Any};)
-    lom = new(data, JuMP.Model(), Dict{Symbol,Any}(), Dict{Symbol,Any}())
-    lom.data = data
-    lom.model = JuMP.Model() 
-    lom.variables = Dict{Symbol,Any}()
-    lom.result = Dict{String,Any}()
-    return lom
+    "Contructor for struct `LaplacianOptModel`"
+    function LaplacianOptModel(data::Dict{String,Any})
+        
+        data = data
+        model = JuMP.Model() 
+        variables = Dict{Symbol,Any}()
+        result = Dict{String,Any}()
+        lom = new(data, model, variables, result)
+
+        return lom
+    end
+
 end
 

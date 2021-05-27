@@ -13,7 +13,7 @@ params = Dict{String, Any}(
     "num_nodes" => 8,
     "instance" => 1,
     "eigen_cuts_full" => true,
-    "soc_linearized_cuts" => true,
+    "soc_linearized_cuts" => false,
     "optimizer" => "cplex"
 )
 

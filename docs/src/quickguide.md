@@ -15,18 +15,12 @@ params = Dict{String, Any}(
 "optimizer" => "cplex"
 )
 
-lopt_optimizer = JuMP.optimizer_with_attributes(CPLEX.Optimizer) 
-results = LaplacianOpt.run_LOpt_model(params, lopt_optimizer)
+lom_optimizer = JuMP.optimizer_with_attributes(CPLEX.Optimizer) 
+results = LaplacianOpt.run_LOpt_model(params, lom_optimizer)
 ```
 
 # Extracting results
-The run commands (for example, `run_LOpt_model`) in LaplacianOpt return detailed results in the form of a dictionary. This dictionary can be saved for further processing as follows,
-
-```julia
-results = LaplacianOpt.run_LOpt_model(params, lopt_optimizer)
-```
-
-For example, for the given instance of a complete graph, the algorithm's runtime and the optimal objective value (maximum algebraic connectivity) can be accessed with,
+The run commands (for example, `run_LOpt_model`) in LaplacianOpt return detailed results in the form of a dictionary. This dictionary can be used for further processing of the results. For example, for the given instance of a complete graph, the algorithm's runtime and the optimal objective value (maximum algebraic connectivity) can be accessed with,
 
 ```julia
 results["solve_time"]
@@ -61,10 +55,7 @@ LaplacianOpt.visualize_solution(results, data, visualizing_tool = "tikz")
 data = LaplacianOpt.get_data(params)
 LaplacianOpt.visualize_solution(results, data, visualizing_tool = "graphviz")
 ```
-For example, on a complete graph with 10 nodes in [instance #1](https://github.com/harshangrjn/LaplacianOpt.jl/blob/main/examples/instances/10_nodes/10_1.json), the optimal spanning tree, out of ``10^8`` feasible solutions, obtained by LaplacianOpt using Graphviz visualization is shown below 
+For example, on a weighted complete graph with 10 nodes in [instance #1](https://github.com/harshangrjn/LaplacianOpt.jl/blob/main/examples/instances/10_nodes/10_1.json), the optimal spanning tree with maximum algebraic connectivity, out of ``10^8`` feasible solutions, obtained by LaplacianOpt (using Graphviz visualization) is shown below 
 
 ![Optimal solution](assets/10_nodes_opt_1.png)
-<!-- ```@raw html
-<img src="assets/10_nodes_opt.png" width="730"/>
-``` -->
 
