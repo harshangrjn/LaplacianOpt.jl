@@ -33,11 +33,12 @@ For example, one can obtain the edges of the optimal graph toplogy from the symm
 ```Julia
 optimal_graph = LaplacianOpt.optimal_graph_edges(results["solution"]["z_var"])
 ```
-and the Fiedler vector of the optimal graph topology from the edge weights and the adjacency matrix with,
+Further, algebraic connectivity and the Fiedler vector of the optimal graph topology (though can be applied on any graph topology) can be obtained from the adjacency matrix with,
 ```Julia
-data = LaplacianOpt.get_data(params)
-optimal_adjacency_matrix = results["solution"]["z_var"] .* data["edge_weights"] 
-optimal_fiedler_vector = LaplacianOpt.fiedler_vector(optimal_adjacency_matrix)
+optimal_adjacency = results["solution"]["z_var"] .* LaplacianOpt.get_data(params)["edge_weights"] 
+graph_data = LaplacianOpt.GraphData(optimal_adjacency)
+println("Algebraic connectivity: ", graph_data.ac)
+println("Fiedler vector: ", graph_data.fiedler)
 ```
 
 # Visualizing results

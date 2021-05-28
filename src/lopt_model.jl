@@ -1,17 +1,16 @@
 function build_LOModel(data::Dict{String, Any})
 
-    # m_lo = LaplacianOptModel(data, JuMP.Model(), Dict{Symbol,Any}(), Dict{String,Any}())
-    m_lo = LaplacianOptModel(data)
+    lom = LaplacianOptModel(data)
 
-    variable_LOModel(m_lo)
+    variable_LOModel(lom)
     
-    if m_lo.data["solution_type"] == "exact"
-        constraint_LOModel(m_lo)
+    if lom.data["solution_type"] == "exact"
+        constraint_LOModel(lom)
     end
 
-    objective_LOModel(m_lo)
+    objective_LOModel(lom)
 
-    return m_lo
+    return lom
 end
 
 function variable_LOModel(lom::LaplacianOptModel)

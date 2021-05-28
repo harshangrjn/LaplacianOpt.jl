@@ -15,7 +15,9 @@ function get_rounded_zeros_and_ones!(v::Array{Float64}, tol_zero::Float64)
 end 
 
 """
-LaplacianOpt.optimal_graph_edges() returns a vector of tuples of edges corresponding 
+    optimal_graph_edges(adjacency_matrix::Array{Float64}) 
+
+Returns a vector of tuples of edges corresponding 
 to an input adjacency matrix of the graph. 
 """
 function optimal_graph_edges(adjacency_matrix::Array{Float64})
@@ -46,8 +48,9 @@ function optimal_graph_edges(adjacency_matrix::Array{Float64})
 end
 
 """
-LaplacianOpt.laplacian_matrix() returns the weighted Laplacian matrix 
-for an input weighted adjacency matrix of the graph. 
+    laplacian_matrix(adjacency_matrix::Array{Float64}) 
+
+Returns the weighted Laplacian matrix for an input weighted adjacency matrix of the graph. 
 """
 function laplacian_matrix(adjacency_matrix::Array{Float64})
 
@@ -86,7 +89,9 @@ function laplacian_matrix(adjacency_matrix::Array{Float64})
 end
 
 """
-LaplacianOpt.fiedler_vector() returns the Fiedler vector or the eigenvector corresponding to the 
+    fiedler_vector(adjacency_matrix::Array{Float64})
+
+Returns the Fiedler vector or the eigenvector corresponding to the 
 second smallest eigenvalue of the Laplacian matrix for an input weighted adjacency matrix of the graph. 
 """
 function fiedler_vector(adjacency_matrix::Array{Float64})
@@ -105,7 +110,9 @@ function fiedler_vector(adjacency_matrix::Array{Float64})
 end
 
 """
-LaplacianOpt.algebraic_connectivity() returns the algebraic connectivity or the  
+    algebraic_connectivity(adjacency_matrix::Array{Float64}) 
+    
+Returns the algebraic connectivity or the  
 second smallest eigenvalue of the Laplacian matrix, for an input weighted adjacency matrix of the graph. 
 """
 function algebraic_connectivity(adjacency_matrix::Array{Float64})

@@ -1,6 +1,11 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.1.4 
+- Updated types to handle graph structs, `GraphData`
+- Updated docs for utility functions
+- Updated units tests to cover `GraphData`
+
 ### v0.1.3
 - Types bug fix for constructor in `LaplacianOptModel`
 - Updated tests in max span tree model 

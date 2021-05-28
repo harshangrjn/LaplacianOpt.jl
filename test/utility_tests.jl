@@ -28,25 +28,22 @@ end
 @testset "utility tests: algebraic_connectivity and fiedler_vector" begin
     
     adj_mat_1 = [0 1 2; 1 0 3; 2 3 0.0]
-    ac = LO.algebraic_connectivity(adj_mat_1)
-    @test isapprox(ac, 4.267949192, atol=1E-6)
-    fiedler = LO.fiedler_vector(adj_mat_1)    
+    graph_data = LO.GraphData(adj_mat_1)
+    @test isapprox(graph_data.ac, 4.267949192, atol=1E-6)    
     v = [0.7886751345948128, -0.5773502691896261, -0.21132486540518727]
-    @test isapprox(v, fiedler, atol=1E-6)
+    @test isapprox(v, graph_data.fiedler, atol=1E-6)
 
     adj_mat_2 = [0 1 2; 1 0 0; 2 0 0.0]
-    ac = LO.algebraic_connectivity(adj_mat_2)
-    @test isapprox(ac, 1.26794919243, atol=1E-6)
-    fiedler = LO.fiedler_vector(adj_mat_2)
+    graph_data = LO.GraphData(adj_mat_2)
+    @test isapprox(graph_data.ac, 1.26794919243, atol=1E-6)
     v = [ -0.2113248654051879, 0.7886751345948118, -0.5773502691896268]
-    @test isapprox(v, fiedler, atol=1E-6)
+    @test isapprox(v, graph_data.fiedler, atol=1E-6)
 
     # Disconnected graph
     adj_mat_3 = [0 1 1 0; 1 0 0 0; 1 0 0 0; 0 0 0 0.0]
-    ac = LO.algebraic_connectivity(adj_mat_3)
-    @test isapprox(ac, 0, atol=1E-6)
-    fiedler = LO.fiedler_vector(adj_mat_3)
+    graph_data = LO.GraphData(adj_mat_3)
+    @test isapprox(graph_data.ac, 0, atol=1E-6)
     v = [ 0.5773502691896258, 0.5773502691896273, 0.5773502691896241, 0.0]
-    @test isapprox(v, fiedler, atol=1E-6)
+    @test isapprox(v, graph_data.fiedler, atol=1E-6)
 
 end

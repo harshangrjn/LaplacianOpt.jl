@@ -27,5 +27,5 @@
     @test result_lopt["termination_status"] == MOI.OPTIMAL
     @test result_lopt["primal_status"] == MOI.FEASIBLE_POINT
 
-    # Nothing more to test for coverage since the visualizaiton depends on exterior packages. So, we believe the dot files generated are accurate. 
+    # Nothing more to test for coverage since the visualizaiton depends on exterior packages. So, I believe the dot files generated are accurate. 
 end

@@ -1,5 +1,7 @@
 """
-Computes the valid domain of a given JuMP variable taking into account bounds
+  variable_domain(var::JuMP.VariableRef)
+
+  Computes the valid domain of a given JuMP variable taking into account bounds
 and the varaible's implicit bounds (e.g. binary).
 """
 function variable_domain(var::JuMP.VariableRef)
@@ -17,6 +19,8 @@ function variable_domain(var::JuMP.VariableRef)
 end
 
 """
+  relaxation_bilinear(m::JuMP.Model, xy::JuMP.VariableRef, x::JuMP.VariableRef, y::JuMP.VariableRef)
+
 General relaxation of binlinear term (McCormick), which can be used to obtain specific variants in partiuclar cases of variables (like binary)
 ```
 z >= JuMP.lower_bound(x)*y + JuMP.lower_bound(y)*x - JuMP.lower_bound(x)*JuMP.lower_bound(y)
