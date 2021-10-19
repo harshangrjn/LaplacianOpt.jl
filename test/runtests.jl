@@ -7,12 +7,12 @@ import LinearAlgebra
 import GLPK
 import MathOptInterface
 
-const LO = LaplacianOpt
-const LA = LinearAlgebra
-const MOI = MathOptInterface
+const LOpt = LaplacianOpt
+const LA   = LinearAlgebra
+const MOI  = MathOptInterface
 
 # Suppress warnings during testing
-LO.logger_config!("error")
+LOpt.logger_config!("error")
 
 glpk_optimizer = JuMP.optimizer_with_attributes(GLPK.Optimizer, MOI.Silent() => true)
 

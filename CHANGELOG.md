@@ -1,6 +1,12 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.1.5
+- Added CITATION.bib
+- Added support for Gurobi MIP solver in `examples/solver.jl` 
+- Updated `LO` to `LOpt`
+- Minor docs cleanups
+
 ### v0.1.4 
 - Updated types to handle graph structs, `GraphData`
 - Updated docs for utility functions

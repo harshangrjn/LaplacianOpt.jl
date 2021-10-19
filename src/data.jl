@@ -22,7 +22,7 @@ function get_data(params::Dict{String, Any})
         edge_weights = data_dict["old_data"]["edge_weights"]
     end
 
-    edge_weigths_matrix = convert_array_to_matrix(n, edge_weights)
+    edge_weigths_matrix = LOpt.convert_array_to_matrix(n, edge_weights)
 
     # Solution type 
     if "solution_type" in keys(params)
@@ -35,7 +35,7 @@ function get_data(params::Dict{String, Any})
     if "optimizer" in keys(params)
         optimizer = params["optimizer"]
     else
-        Memento.error(_LOGGER, "Input a valid MILP optimizer")
+        Memento.error(_LOGGER, "Input a valid MIP optimizer")
     end
 
     # Relax Integrality 

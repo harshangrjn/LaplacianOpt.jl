@@ -4,7 +4,7 @@
 CurrentModule = LaplacianOpt
 ```
 ## Overview
-**LaplacianOpt** is a Julia package which implements polyhedral relaxation-based algorithms for optimization of weighted graph Laplacians. Given a complete weighted, undirected graph, this package provides an optimal (and if preferable, an approximate) spanning tree which has the maximum second smallest eigenvalue of the graph Laplacian, also known as the [Algebraic Connectivity](https://dml.cz/bitstream/handle/10338.dmlcz/101168/CzechMathJ_23-1973-2_11.pdf) of the graph. This package also implements various types of convex relaxations to the Laplacian optimization problem. 
+**[LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl)** is a Julia package which implements polyhedral relaxation-based algorithms for optimization of weighted graph Laplacians. Given a complete weighted, undirected graph, this package provides an optimal (and if preferable, an approximate) spanning tree which has the maximum second smallest eigenvalue of the graph Laplacian, also known as the [Algebraic Connectivity](https://dml.cz/bitstream/handle/10338.dmlcz/101168/CzechMathJ_23-1973-2_11.pdf) of the graph. This package also implements various types of convex relaxations to the Laplacian optimization problem. 
 
 ## Installation 
 To use LaplacianOpt, first [download and install](https://julialang.org/downloads/) Julia. Note that the current version of LaplacianOpt is compatible with Julia 1.0 and later. 
@@ -34,7 +34,7 @@ Pkg.test("LaplacianOpt")
 ## Citing LaplacianOpt
 If you find LaplacianOpt useful in your work, we request you to cite the following paper [\[link\]](https://doi.org/10.1109/ECC.2015.7330770): 
 ```bibtex
-@inproceedings{NagarajanRathinamDarbha2015,
+@inproceedings{LOpt_ECC2015,
   title={On maximizing algebraic connectivity of networks for various engineering applications},
   author={Nagarajan, Harsha and Rathinam, Sivakumar and Darbha, Swaroop},
   booktitle={European Control Conference (ECC)},

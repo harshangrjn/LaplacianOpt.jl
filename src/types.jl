@@ -40,9 +40,9 @@ mutable struct GraphData
     
     function GraphData(adjacency::Array{Float64})
         adj_matrix = adjacency
-        laplacian = LO.laplacian_matrix(adjacency)
-        fiedler = LO.fiedler_vector(adjacency)
-        ac = LO.algebraic_connectivity(adjacency)
+        laplacian = LOpt.laplacian_matrix(adjacency)
+        fiedler = LOpt.fiedler_vector(adjacency)
+        ac = LOpt.algebraic_connectivity(adjacency)
 
         graph_data = new(adj_matrix, laplacian, fiedler, ac)
 

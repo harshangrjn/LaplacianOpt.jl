@@ -11,9 +11,9 @@ import TikzPictures
 
 const MOI = MathOptInterface
 const LA = LinearAlgebra
-const LO = LaplacianOpt
+const LOpt = LaplacianOpt
 const LG = LightGraphs
-
+ 
 # Create our module level logger (this will get precompiled)
 const _LOGGER = Memento.getlogger(@__MODULE__)
 

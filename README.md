@@ -3,7 +3,7 @@ Status:
 [![codecov](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl/branch/main/graph/badge.svg?token=7EKATOHLYL)](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl)
 [![Documentation](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/documentation.yml/badge.svg)](https://harshangrjn.github.io/LaplacianOpt.jl/stable/)
 ## LaplacianOpt
-**LaplacianOpt.jl** is a Julia package which implements polyhedral relaxation-based algorithms for optimization of weighted graph Laplacians. Given a complete weighted, undirected graph, this package provides an optimal (and if preferable, an approximate) spanning tree which has the maximum second smallest eigenvalue of the graph Laplacian, also known as the [Algebraic Connectivity](https://dml.cz/bitstream/handle/10338.dmlcz/101168/CzechMathJ_23-1973-2_11.pdf) of the graph. This package also implements various types of convex relaxations to the Laplacian optimization problem. 
+**LaplacianOpt** is a Julia package which implements polyhedral relaxation-based algorithms for optimization of weighted graph Laplacians. Given a complete weighted, undirected graph, this package provides an optimal (and if preferable, an approximate) spanning tree which has the maximum second smallest eigenvalue of the graph Laplacian, also known as the [Algebraic Connectivity](https://dml.cz/bitstream/handle/10338.dmlcz/101168/CzechMathJ_23-1973-2_11.pdf) of the graph. This package also implements various types of convex relaxations to the Laplacian optimization problem. 
 
 ## Usage
 - Clone the repository.
@@ -22,7 +22,7 @@ This work was supported by Los Alamos National Laboratory's LDRD Early Career Re
 ## Citation
 If you find LaplacianOpt.jl useful in your work, we request you to cite the following paper [\[link\]](https://doi.org/10.1109/ECC.2015.7330770): 
 ```bibtex
-@inproceedings{NagarajanRathinamDarbha2015,
+@inproceedings{LOpt_ECC2015,
   title={On maximizing algebraic connectivity of networks for various engineering applications},
   author={Nagarajan, Harsha and Rathinam, Sivakumar and Darbha, Swaroop},
   booktitle={European Control Conference (ECC)},

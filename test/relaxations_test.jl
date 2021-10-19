@@ -1,5 +1,5 @@
 @testset "relaxation_bilinear tests" begin
-    LO.silence()
+    LOpt.silence()
     
     m = JuMP.Model(glpk_optimizer)
 
@@ -8,12 +8,12 @@
     JuMP.@variable(m, LB[i] <= x[i=1:5] <= UB[i])
     JuMP.@variable(m, z[1:6])
 
-    LO.relaxation_bilinear(m, z[1], x[1], x[2])
-    LO.relaxation_bilinear(m, z[2], x[1], x[4])
-    LO.relaxation_bilinear(m, z[3], x[2], x[3])
-    LO.relaxation_bilinear(m, z[4], x[3], x[4])
-    LO.relaxation_bilinear(m, z[5], x[3], x[5])
-    LO.relaxation_bilinear(m, z[6], x[4], x[5])
+    LOpt.relaxation_bilinear(m, z[1], x[1], x[2])
+    LOpt.relaxation_bilinear(m, z[2], x[1], x[4])
+    LOpt.relaxation_bilinear(m, z[3], x[2], x[3])
+    LOpt.relaxation_bilinear(m, z[4], x[3], x[4])
+    LOpt.relaxation_bilinear(m, z[5], x[3], x[5])
+    LOpt.relaxation_bilinear(m, z[6], x[4], x[5])
 
     JuMP.@constraint(m, sum(x) >= 3.3)
     JuMP.@constraint(m, sum(x) <= 3.8)

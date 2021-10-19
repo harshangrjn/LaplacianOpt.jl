@@ -96,8 +96,8 @@ second smallest eigenvalue of the Laplacian matrix for an input weighted adjacen
 """
 function fiedler_vector(adjacency_matrix::Array{Float64})
     
-    L_mat = LO.laplacian_matrix(adjacency_matrix)
-    ac = LO.algebraic_connectivity(adjacency_matrix)
+    L_mat = LOpt.laplacian_matrix(adjacency_matrix)
+    ac    = LOpt.algebraic_connectivity(adjacency_matrix)
 
     fiedler = LA.eigvecs(L_mat)[:,2] 
 
@@ -117,7 +117,7 @@ second smallest eigenvalue of the Laplacian matrix, for an input weighted adjace
 """
 function algebraic_connectivity(adjacency_matrix::Array{Float64})
     
-    L_mat = LO.laplacian_matrix(adjacency_matrix)
+    L_mat = LOpt.laplacian_matrix(adjacency_matrix)
 
     ac = sort(LA.eigvals(L_mat))[2] 
     

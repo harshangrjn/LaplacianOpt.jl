@@ -8,9 +8,9 @@ function visualize_solution(results::Dict{String, Any}, data::Dict{String, Any};
         Memento.info(_LOGGER, "Plotting the graph of integral solution")
         
         if visualizing_tool == "tikz"
-            LO.plot_tikzgraph(results["solution"]["z_var"] .* data["edge_weights"], data["instance"], plot_file_format = plot_file_format, display_edge_weights = display_edge_weights)
+            LOpt.plot_tikzgraph(results["solution"]["z_var"] .* data["edge_weights"], data["instance"], plot_file_format = plot_file_format, display_edge_weights = display_edge_weights)
         elseif visualizing_tool == "graphviz"
-            LO.plot_graphviz(results["solution"]["z_var"] .* data["edge_weights"], data["instance"], display_edge_weights = display_edge_weights)
+            LOpt.plot_graphviz(results["solution"]["z_var"] .* data["edge_weights"], data["instance"], display_edge_weights = display_edge_weights)
         end
 
     else 

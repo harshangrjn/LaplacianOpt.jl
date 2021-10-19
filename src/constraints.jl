@@ -59,21 +59,21 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel)
             if lom.data["eigen_cuts_full"]
                 W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
 
-                constraint_eigen_cuts_on_full_matrix(W_val, cb_cuts, lom)
+                LOpt.constraint_eigen_cuts_on_full_matrix(W_val, cb_cuts, lom)
             end
 
             if lom.data["soc_linearized_cuts"]
                 W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
 
-                constraint_soc_linearized_cuts_on_2minors(W_val, cb_cuts, lom)
+                LOpt.constraint_soc_linearized_cuts_on_2minors(W_val, cb_cuts, lom)
             end
 
             if lom.data["topology_flow_cuts"]
                 z_val = abs.(JuMP.callback_value.(Ref(cb_cuts), lom.variables[:z_var]))         
                 
-                LO.get_rounded_zeros_and_ones!(z_val, lom.data["tol_zero"])
+                LOpt.get_rounded_zeros_and_ones!(z_val, lom.data["tol_zero"])
                 
-                constraint_topology_flow_cuts(z_val, cb_cuts, lom)
+                LOpt.constraint_topology_flow_cuts(z_val, cb_cuts, lom)
             end
 
         end 
@@ -98,7 +98,7 @@ function constraint_eigen_cuts_on_full_matrix(W_val::Matrix{Float64}, cb_cuts, l
             
             violated_eigen_vec = LA.eigvecs(W_val)[:,1]
             
-            LO.get_rounded_zeros_and_ones!(violated_eigen_vec, lom.data["tol_zero"])
+            LOpt.get_rounded_zeros_and_ones!(violated_eigen_vec, lom.data["tol_zero"])
 
             con = JuMP.@build_constraint(violated_eigen_vec' * lom.variables[:W_var] * violated_eigen_vec >= 0)
             

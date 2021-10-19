@@ -4,15 +4,15 @@
         user-defined inputs in `params` dictionary.  
 """
 function get_solver(params::Dict{String,Any})
-    optimizers_list = ["cplex", "cbc", "ipopt", "juniper", "alpine", "glpk"]
+    optimizers_list = ["cplex", "cbc", "ipopt", "juniper", "alpine", "glpk", "gurobi"]
 
     # Optimizer
     if !("optimizer" in keys(params))
-        Memento.error(Memento.getlogger(@__MODULE__), "Input a valid MILP optimizer")
+        error("Input a valid MIP optimizer")
     end
 
     if !(params["optimizer"] in optimizers_list)
-        Memento.error(Memento.getlogger(@__MODULE__), "Specified optimizer does not belong in the pre-defined list. Add your optimizer separately with it's attributes")
+        error("Specified optimizer does not belong in the pre-defined list. Add your optimizer separately with it's attributes")
     end
 
     if "presolve" in keys(params)
@@ -32,6 +32,9 @@ function get_solver(params::Dict{String,Any})
     # Mixed-integer programming optimizers
     if params["optimizer"] == "cplex"    # commercial 
        return get_cplex(presolve, optimizer_log) 
+       
+    elseif params["optimizer"] == "gurobi"    # commercial 
+        return get_gurobi(presolve, optimizer_log) 
 
     elseif params["optimizer"] == "cbc"  # open-source
        return get_cbc(presolve, optimizer_log)
@@ -65,6 +68,13 @@ function get_cplex(presolve::Bool, optimizer_log::Bool)
                                        MOI.Silent() => !optimizer_log, 
                                        "CPX_PARAM_PREIND" => presolve) 
     return cplex 
+end
+
+function get_gurobi(presolve::Bool, optimizer_log::Bool)
+    gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, 
+                                      MOI.Silent() => !optimizer_log, 
+                                      "Presolve" => presolve) 
+   return gurobi
 end
 
 function get_ipopt(presolve::Bool, optimizer_log::Bool)
