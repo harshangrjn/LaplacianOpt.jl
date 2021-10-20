@@ -516,21 +516,27 @@ uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 
+[[Tectonic]]
+deps = ["Pkg"]
+git-tree-sha1 = "acf12eccb390a78653ee805cd527898f01f78a85"
+uuid = "9ac5f52a-99c6-489f-af81-462ef484790f"
+version = "0.6.1"
+
 [[Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[TikzGraphs]]
 deps = ["LaTeXStrings", "LightGraphs", "TikzPictures"]
-git-tree-sha1 = "e64460dce33354e2247bfae60da7474e4470cdc2"
+git-tree-sha1 = "48932ba660bc8cefc0aa9519ba79d63082aea892"
 uuid = "b4f28e30-c73f-5eaf-a395-8a9db949a742"
-version = "1.1.0"
+version = "1.2.0"
 
 [[TikzPictures]]
-deps = ["LaTeXStrings", "Poppler_jll", "Requires"]
-git-tree-sha1 = "06b36e2baa9b97814ef1993207b71e2e23e9efb5"
+deps = ["LaTeXStrings", "Poppler_jll", "Requires", "Tectonic"]
+git-tree-sha1 = "a08671c0979063a437378f6410bb75a465f3cd1c"
 uuid = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
-version = "3.3.3"
+version = "3.4.1"
 
 [[TimeZones]]
 deps = ["Dates", "Downloads", "InlineStrings", "LazyArtifacts", "Mocking", "Pkg", "Printf", "RecipesBase", "Serialization", "Unicode"]
