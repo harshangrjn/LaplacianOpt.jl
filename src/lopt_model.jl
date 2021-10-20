@@ -2,41 +2,41 @@ function build_LOModel(data::Dict{String, Any})
 
     lom = LaplacianOptModel(data)
 
-    variable_LOModel(lom)
+    LOpt.variable_LOModel(lom)
     
     if lom.data["solution_type"] == "exact"
-        constraint_LOModel(lom)
+        LOpt.constraint_LOModel(lom)
     end
 
-    objective_LOModel(lom)
+    LOpt.objective_LOModel(lom)
 
     return lom
 end
 
 function variable_LOModel(lom::LaplacianOptModel)
 
-    variable_lifted_W_matrix(lom)
-    variable_edge_onoff(lom)
-    variable_algebraic_connectivity(lom)
+    LOpt.variable_lifted_W_matrix(lom)
+    LOpt.variable_edge_onoff(lom)
+    LOpt.variable_algebraic_connectivity(lom)
 
     return
 end
 
 function constraint_LOModel(lom::LaplacianOptModel)
     
-    constraint_build_W_var_matrix(lom)
+    LOpt.constraint_build_W_var_matrix(lom)
 
-    constraint_topology_no_self_loops(lom)
-    constraint_topology_vertex_cutset(lom)
-    constraint_topology_total_edges(lom)
+    LOpt.constraint_topology_no_self_loops(lom)
+    LOpt.constraint_topology_vertex_cutset(lom)
+    LOpt.constraint_topology_total_edges(lom)
 
-    constraint_lazycallback_wrapper(lom)
+    LOpt.constraint_lazycallback_wrapper(lom)
     
     return
 end
 
 function objective_LOModel(lom::LaplacianOptModel)
-    objective_maximize_algebraic_connectivity(lom)
+    LOpt.objective_maximize_algebraic_connectivity(lom)
 
     return
 end
@@ -70,7 +70,7 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer=nothing)
     
     Memento.debug(_LOGGER, "JuMP model optimize time: $(time() - start_time)")
     
-    lom.result = build_LOModel_result(lom, solve_time) 
+    lom.result = LOpt.build_LOModel_result(lom, solve_time) 
 
     return lom.result
 end
@@ -84,7 +84,7 @@ function run_LOpt_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerW
     result_lopt = LOpt.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
 
     if visualize_solution
-        LaplacianOpt.visualize_solution(result_lopt, data, visualizing_tool = visualizing_tool)
+        LOpt.visualize_solution(result_lopt, data, visualizing_tool = visualizing_tool)
     end
 
     return result_lopt
@@ -98,7 +98,7 @@ function run_MaxSpanTree_model(params::Dict{String, Any}, lom_optimizer::MOI.Opt
     result_mst = LOpt.optimize_LOModel!(model_mst, optimizer = lom_optimizer)
 
     if visualize_solution
-        LaplacianOpt.visualize_solution(result_mst, data, visualizing_tool = visualizing_tool)
+        LOpt.visualize_solution(result_mst, data, visualizing_tool = visualizing_tool)
     end
 
     return result_mst
@@ -109,28 +109,28 @@ function build_MaxSpanTree_model(data::Dict{String, Any}, lazy_callback::Bool)
 
     m_mst = LaplacianOptModel(data)
 
-    variable_MaxSpanTree_model(m_mst, lazy_callback)
+    LOpt.variable_MaxSpanTree_model(m_mst, lazy_callback)
     
-    constraint_MaxSpanTree_model(m_mst, lazy_callback)
+    LOpt.constraint_MaxSpanTree_model(m_mst, lazy_callback)
 
-    objective_MaxSpanTree_model(m_mst)
+    LOpt.objective_MaxSpanTree_model(m_mst)
 
     return m_mst
 end
 
 function objective_MaxSpanTree_model(lom::LaplacianOptModel)
     
-    objective_maximize_spanning_tree_cost(lom)
+    LOpt.objective_maximize_spanning_tree_cost(lom)
 
     return
 end
 
 function variable_MaxSpanTree_model(lom::LaplacianOptModel, lazy_callback::Bool)
 
-    variable_edge_onoff(lom)
+    LOpt.variable_edge_onoff(lom)
     
     if !lazy_callback
-        variable_multi_commodity_flow(lom)
+        LOpt.variable_multi_commodity_flow(lom)
     end
 
     return
@@ -138,14 +138,14 @@ end
 
 function constraint_MaxSpanTree_model(lom::LaplacianOptModel, lazy_callback::Bool)
 
-    constraint_topology_no_self_loops(lom)
-    constraint_topology_vertex_cutset(lom)
-    constraint_topology_total_edges(lom)
+    LOpt.constraint_topology_no_self_loops(lom)
+    LOpt.constraint_topology_vertex_cutset(lom)
+    LOpt.constraint_topology_total_edges(lom)
     
     if lazy_callback 
-        constraint_lazycallback_wrapper(lom)
+        LOpt.constraint_lazycallback_wrapper(lom)
     else
-        constraint_topology_multi_commodity_flow(lom)
+        LOpt.constraint_topology_multi_commodity_flow(lom)
     end
     
     return

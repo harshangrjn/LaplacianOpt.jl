@@ -5,6 +5,7 @@ LaplacianOpt.jl Change Log
 - Added CITATION.bib
 - Added support for Gurobi MIP solver in `examples/solver.jl` 
 - Updated `LO` to `LOpt`
+- `lopt_model.jl` function calls updated with `LOpt`
 - Minor docs cleanups
 
 ### v0.1.4 

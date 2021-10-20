@@ -10,7 +10,7 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
     solution = Dict{String,Any}()
 
     if result_count > 0
-        solution = build_LOModel_solution(lom)
+        solution = LOpt.build_LOModel_solution(lom)
     else
         Memento.warn(_LOGGER, "LaplacianOpt model has no results - solution cannot be built")
     end

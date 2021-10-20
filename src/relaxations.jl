@@ -31,8 +31,8 @@ z <= JuMP.upper_bound(x)*y + JuMP.lower_bound(y)*x - JuMP.upper_bound(x)*JuMP.lo
 ```
 """
 function relaxation_bilinear(m::JuMP.Model, xy::JuMP.VariableRef, x::JuMP.VariableRef, y::JuMP.VariableRef)
-    lb_x, ub_x = variable_domain(x)
-    lb_y, ub_y = variable_domain(y)
+    lb_x, ub_x = LOpt.variable_domain(x)
+    lb_y, ub_y = LOpt.variable_domain(y)
     
     if (lb_x == 0) && (ub_x == 1) && ((lb_y != 0) || (ub_y != 1))
       

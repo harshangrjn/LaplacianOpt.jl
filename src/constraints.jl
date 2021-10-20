@@ -111,7 +111,6 @@ function constraint_eigen_cuts_on_full_matrix(W_val::Matrix{Float64}, cb_cuts, l
         else
 
             Memento.warn(_LOGGER, "Eigen cut corresponding to the negative eigenvalue could not be added")
-
         end
     end
 
