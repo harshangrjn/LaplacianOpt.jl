@@ -74,17 +74,22 @@ function get_data(params::Dict{String, Any})
 
     if "eigen_cuts_full" in keys(params)
         eigen_cuts_full = params["eigen_cuts_full"]
+        if eigen_cuts_full
+            Memento.info(_LOGGER, "Applying full-sized eigen cuts")
+        end
     else
         #default value
-        Memento.info(_LOGGER, "Turning on full-sized eigen cuts")
+        Memento.info(_LOGGER, "Applying full-sized eigen cuts")
         eigen_cuts_full = true
     end
 
     if "soc_linearized_cuts" in keys(params)
         soc_linearized_cuts = params["soc_linearized_cuts"]
+        if soc_linearized_cuts
+            Memento.info(_LOGGER, "Applying linearized SOC cuts (2x2 minors)")
+        end
     else
         #default value
-        Memento.info(_LOGGER, "Turning off linearized SOC cuts")
         soc_linearized_cuts = false
     end
 
@@ -92,7 +97,7 @@ function get_data(params::Dict{String, Any})
         topology_flow_cuts = params["topology_flow_cuts"]
     else
         #default value
-        Memento.info(_LOGGER, "Turning on topology flow cuts")
+        Memento.info(_LOGGER, "Applying topology flow cuts")
         topology_flow_cuts = true
     end
 
