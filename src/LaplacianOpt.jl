@@ -5,14 +5,13 @@ import LinearAlgebra
 import Memento
 import MathOptInterface
 import JSON
-import LightGraphs
+import Graphs
 import TikzGraphs
 import TikzPictures
 
 const MOI = MathOptInterface
 const LA = LinearAlgebra
 const LOpt = LaplacianOpt
-const LG = LightGraphs
  
 # Create our module level logger (this will get precompiled)
 const _LOGGER = Memento.getlogger(@__MODULE__)

@@ -155,7 +155,7 @@ end
 
 function constraint_topology_flow_cuts(z_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptModel)
 
-    cc_lazy = LG.connected_components(LG.SimpleGraph(abs.(z_val)))
+    cc_lazy = Graphs.connected_components(Graphs.SimpleGraph(abs.(z_val)))
 
     if length(cc_lazy) == 2 
         

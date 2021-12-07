@@ -1,6 +1,12 @@
 LaplacianOpt.jl Change Log
 =========================
 
+
+### v0.1.6
+- Fixed Tikzgraph issue for tests 
+- Transitioned from LightGraphs to Graphs
+- Minor docs update
+
 ### v0.1.5
 - Added CITATION.bib
 - Added support for Gurobi MIP solver in `examples/solver.jl` 

@@ -24,7 +24,7 @@ function plot_tikzgraph(adjacency_matrix::Matrix{Float64}, instance::Int64; plot
 
     num_nodes = size(adjacency_matrix)[1]
 
-    solution_graph = LG.SimpleGraph(num_nodes)
+    solution_graph = Graphs.SimpleGraph(num_nodes)
 
     edge_labels = Dict{Tuple{Int64, Int64}, String}()
     
@@ -32,7 +32,7 @@ function plot_tikzgraph(adjacency_matrix::Matrix{Float64}, instance::Int64; plot
         for j=(i+1):num_nodes
 
             if !isapprox(adjacency_matrix[i,j], 0, atol=1E-6)
-                LG.add_edge!(solution_graph, i, j)
+                Graphs.add_edge!(solution_graph, i, j)
                 edge_labels[(i,j)] = string(ceil(adjacency_matrix[i,j], digits=2))
             end
 
