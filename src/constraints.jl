@@ -45,13 +45,13 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel)
 
         status = JuMP.callback_node_status(cb_cuts, lom.model)
 
-        if status == MOI.CALLBACK_NODE_STATUS_FRACTIONAL
+        # if status == MOI.CALLBACK_NODE_STATUS_FRACTIONAL
             
-            if lom.data["optimizer"] != "glpk"
-                Memento.info(_LOGGER, "Callback status: solution is fractional")
-            end
+        #     if lom.data["optimizer"] != "glpk"
+        #         Memento.info(_LOGGER, "Callback status: solution is fractional")
+        #     end
 
-        elseif status == MOI.CALLBACK_NODE_STATUS_UNKNOWN
+        if status == MOI.CALLBACK_NODE_STATUS_UNKNOWN
             Memento.error(_LOGGER, "Callback status: unknown - solution may not be integer feasible")
 
         else status == MOI.CALLBACK_NODE_STATUS_INTEGER

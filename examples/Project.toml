@@ -7,5 +7,4 @@ LaplacianOpt = "bb20392f-64fb-4001-92e8-14b3aedd5a9e"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 
 [compat]
-JuMP = "^0.21.0"
 julia = "1"

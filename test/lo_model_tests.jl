@@ -9,7 +9,6 @@
         "data_type" => "old",
          
         "solution_type" => "exact",
-        "optimizer" => "glpk",
         "presolve" => true,
         "optimizer_log" => true, 
         "relax_integrality" => false                      
@@ -55,8 +54,7 @@ end
 
     params = Dict{String, Any}(
         "num_nodes" => 5,
-        "instance" => 1,
-        "optimizer" => "glpk"
+        "instance" => 1
         )
 
     result_mst = LaplacianOpt.run_MaxSpanTree_model(params, glpk_optimizer)
@@ -85,8 +83,7 @@ end
         "instance" => 5,
         "data_type" => "old",
         "eigen_cuts_full" => false,
-        "topology_flow_cuts" => true,
-        "optimizer" => "glpk"
+        "topology_flow_cuts" => true
         )
 
     result_mst = LaplacianOpt.run_MaxSpanTree_model(params, glpk_optimizer, lazy_callback=true)
@@ -112,8 +109,7 @@ end
         "instance" => 5,
         "eigen_cuts_full" => false,
         "soc_linearized_cuts" => true,
-        "topology_flow_cuts" => true,
-        "optimizer" => "glpk"
+        "topology_flow_cuts" => true
     )
 
     result_1 = LaplacianOpt.run_LOpt_model(params_1, glpk_optimizer)
@@ -131,8 +127,7 @@ end
         "num_nodes" => 5,
         "instance" => 5,
         "eigen_cuts_full" => true,
-        "soc_linearized_cuts" => true,
-        "optimizer" => "glpk"
+        "soc_linearized_cuts" => true
     )
 
     result_2 = LaplacianOpt.run_LOpt_model(params_2, glpk_optimizer)

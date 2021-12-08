@@ -7,7 +7,9 @@ using Gurobi
 include("solver.jl")
 
 result_all = zeros(10,3)
-for i=1:10
+lopt_optimizer = get_gurobi()
+
+for i=1:1
     #-------------------------------#
     #      User-defined inputs      #
     #-------------------------------#
@@ -15,15 +17,13 @@ for i=1:10
         "num_nodes" => 8,
         "instance" => i,
         "eigen_cuts_full" => true,
-        "soc_linearized_cuts" => true,
-        "optimizer" => "gurobi"
+        "soc_linearized_cuts" => true
         )
 
     #-------------------------------------------#
     #      Optimization model and solution      #
     #-------------------------------------------#
-    lom_optimizer = get_solver(params)
-    result = LOpt.run_LOpt_model(params, lom_optimizer)
+    result = LOpt.run_LOpt_model(params, lopt_optimizer)
     
     result_all[i,1] = i 
     result_all[i,2] = result["objective"]

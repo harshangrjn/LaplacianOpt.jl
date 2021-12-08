@@ -7,17 +7,19 @@ After the installation of LaplacianOpt and CPLEX (use GLPK if open-source is pre
 ```julia
 import LaplacianOpt as LOpt
 using JuMP
-using CPLEX
+using Gurobi
 
 params = Dict{String, Any}(
 "num_nodes" => 5,
-"instance" => 1,
-"optimizer" => "cplex"
+"instance" => 1
 )
 
-lom_optimizer = JuMP.optimizer_with_attributes(CPLEX.Optimizer) 
-results = LOpt.run_LOpt_model(params, lom_optimizer)
+lopt_optimizer = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "presolve" => 1) 
+results = LOpt.run_LOpt_model(params, lopt_optimizer)
 ```
+
+!!! tip
+    Run times of [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl)'s mathematical optimization models are significantly faster using [Gurobi](https://www.gurobi.com) as the underlying mixed-integer programming (MIP) solver. Note that this solver's individual-usage license is available [free](https://www.gurobi.com/academia/academic-program-and-licenses/) for academic purposes. 
 
 # Extracting results
 The run commands (for example, `run_LOpt_model`) in LaplacianOpt return detailed results in the form of a dictionary. This dictionary can be used for further processing of the results. For example, for the given instance of a complete graph, the algorithm's runtime and the optimal objective value (maximum algebraic connectivity) can be accessed with,

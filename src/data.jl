@@ -31,13 +31,6 @@ function get_data(params::Dict{String, Any})
         solution_type = "exact"
     end
 
-    # Optimizer
-    if "optimizer" in keys(params)
-        optimizer = params["optimizer"]
-    else
-        Memento.error(_LOGGER, "Input a valid MIP optimizer")
-    end
-
     # Relax Integrality 
     if "relax_integrality" in keys(params)
         relax_integrality = params["relax_integrality"]
@@ -123,8 +116,12 @@ function get_data(params::Dict{String, Any})
                              "lazycuts_logging" => lazycuts_logging,
                              "topology_flow_cuts" => topology_flow_cuts,
                              "lazy_callback_status" => lazy_callback_status,
-                             "optimizer" => optimizer,
                              "relax_integrality" => relax_integrality)
+
+    # Optimizer
+    if "optimizer" in keys(params)
+        data["optimizer"] = params["optimizer"]
+    end
 
     return data
 end

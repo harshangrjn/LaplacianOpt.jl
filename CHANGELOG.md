@@ -5,6 +5,8 @@ LaplacianOpt.jl Change Log
 ### v0.1.6
 - Fixed Tikzgraph issue for tests 
 - Transitioned from LightGraphs to Graphs
+- Updated and cleaned up `examples/solver.jl`
+- `src/data.jl` cleanup for handling `"optimizer"`
 - Minor docs update
 
 ### v0.1.5

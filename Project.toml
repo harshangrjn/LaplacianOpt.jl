@@ -16,9 +16,9 @@ TikzPictures = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
 
 [compat]
 DataStructures = "~0.17, ~0.18"
-JSON = "~0.21"
-JuMP = "^0.21.0"
 Graphs = "~1.4"
+JSON = "~0.21"
+JuMP = "^0.21"
 MathOptInterface = "~0.9, 0.10"
 Memento = "~1.0, ~1.1, 1"
 TikzGraphs = "~1.1, 1"
