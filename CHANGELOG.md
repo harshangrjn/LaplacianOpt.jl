@@ -7,7 +7,7 @@ LaplacianOpt.jl Change Log
 - Transitioned from LightGraphs to Graphs
 - Updated and cleaned up `examples/solver.jl`
 - `src/data.jl` cleanup for handling `"optimizer"`
-- Minor docs update
+- Minor docs update 
 
 ### v0.1.5
 - Added CITATION.bib
