@@ -53,3 +53,4 @@ If you find LaplacianOpt.jl useful in your work, we request you to cite the foll
   year={2015},
   publisher={American Society of Mechanical Engineers}
 }
+```
