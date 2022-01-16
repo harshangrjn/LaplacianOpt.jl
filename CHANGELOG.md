@@ -1,6 +1,8 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### Staged
+- Supper for Graphs v1.5+
 
 ### v0.1.6
 - Fixed Tikzgraph issue for tests 
