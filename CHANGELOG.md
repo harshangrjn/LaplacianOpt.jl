@@ -1,6 +1,9 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### Staged 
+- Added support for MOI v1.2
+
 ### v0.1.7
 - Added support for Graphs v1.5+, 1.6+
 - Added support for JuMP v1.0+
@@ -9,13 +12,13 @@ LaplacianOpt.jl Change Log
 ### v0.1.6
 - Fixed Tikzgraph issue for tests 
 - Transitioned from LightGraphs to Graphs
-- Updated and cleaned up `examples/solver.jl`
+- Updated and cleaned up `examples/optimizer.jl`
 - `src/data.jl` cleanup for handling `"optimizer"`
 - Minor docs update 
 
 ### v0.1.5
 - Added CITATION.bib
-- Added support for Gurobi MIP solver in `examples/solver.jl` 
+- Added support for Gurobi MIP solver in `examples/optimizer.jl` 
 - Updated `LO` to `LOpt`
 - `lopt_model.jl` function calls updated with `LOpt`
 - Minor docs cleanups

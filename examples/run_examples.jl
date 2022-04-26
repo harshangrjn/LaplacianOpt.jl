@@ -4,7 +4,7 @@ using CPLEX
 using Gurobi
 #using GLPK
 
-include("solver.jl")
+include("optimizer.jl")
 
 result_all = zeros(10,3)
 lopt_optimizer = get_gurobi()

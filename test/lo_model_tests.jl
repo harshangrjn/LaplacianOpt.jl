@@ -1,6 +1,6 @@
 @testset "Algebraic Connectivity: Optimal solution tests" begin
     
-    file_path = joinpath(@__DIR__,"..", "examples/solver.jl")
+    file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
     include(file_path)
 
     params = Dict{String, Any}(
@@ -49,7 +49,7 @@ end
 
 @testset "Max Span Tree: Optimal solution tests" begin
     
-    file_path = joinpath(@__DIR__,"..", "examples/solver.jl")
+    file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
     include(file_path)
 
     params = Dict{String, Any}(
@@ -75,7 +75,7 @@ end
 
 @testset "Max Span Tree: Lazy callback tests" begin
 
-    file_path = joinpath(@__DIR__,"..", "examples/solver.jl")
+    file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
     include(file_path)
 
     params = Dict{String, Any}(
@@ -101,7 +101,7 @@ end
 
 @testset "SOC relaxations - 1: constraint_soc_linearized_cuts_on_2minors" begin
 
-    file_path = joinpath(@__DIR__,"..", "examples/solver.jl")
+    file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
     include(file_path)
 
     params_1 = Dict{String, Any}(

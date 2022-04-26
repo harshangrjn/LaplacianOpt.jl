@@ -1,6 +1,6 @@
 @testset "visualize_solution tests" begin
     
-    file_path = joinpath(@__DIR__,"..", "examples/solver.jl")
+    file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
     include(file_path)
 
     params = Dict{String, Any}(
