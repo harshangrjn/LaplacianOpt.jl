@@ -1,8 +1,10 @@
 LaplacianOpt.jl Change Log
 =========================
 
-### Staged 
-- Added support for MOI v1.2
+### v0.1.8
+- Added support for MOI v1.0+ 
+- Added support for Graphs v1.0+
+- Added support for JuMP v1.0+
 
 ### v0.1.7
 - Added support for Graphs v1.5+, 1.6+
@@ -10,7 +12,7 @@ LaplacianOpt.jl Change Log
 - Added support for MOI v1.1+
 
 ### v0.1.6
-- Fixed Tikzgraph issue for tests 
+- Fixed Tikzgraph issue in tests 
 - Transitioned from LightGraphs to Graphs
 - Updated and cleaned up `examples/optimizer.jl`
 - `src/data.jl` cleanup for handling `"optimizer"`
