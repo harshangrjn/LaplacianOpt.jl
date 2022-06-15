@@ -144,3 +144,7 @@ function convert_array_to_matrix(n::Int, edge_weights::Any)
 
     return instance_matrix
 end
+
+function parse_file(file_path::String)
+    
+end

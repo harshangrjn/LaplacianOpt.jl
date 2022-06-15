@@ -1,3 +1,7 @@
+<p align="center">
+<img width="790px" src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/logo.png" alt="https://github.com/harshangrjn/LaplacianOpt.jl/tree/master/docs/src/assets/docs_header_dark.png"/>
+</p>
+
 Status: 
 [![CI](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl/branch/main/graph/badge.svg?token=7EKATOHLYL)](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl)

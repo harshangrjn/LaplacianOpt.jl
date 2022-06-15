@@ -1,6 +1,11 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.2.0
+- Generalization for max algebraic connectivity edge augmentation problem 
+- data.jl updates to support new, generic data format 
+- Added logo to the package
+
 ### v0.1.8
 - Added support for MOI v1.0+ 
 - Added support for Graphs v1.0+
