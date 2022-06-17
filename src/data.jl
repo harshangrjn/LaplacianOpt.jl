@@ -1,28 +1,25 @@
 function get_data(params::Dict{String, Any})
-    n = params["num_nodes"] 
-    instance = params["instance"]
-
-    file_path = joinpath(dirname(pathof(LaplacianOpt)),"..", "examples/instances/$(n)_nodes/$(n)_$(instance).json")
     
-    data_dict = JSON.parsefile(file_path)
-
-    if data_dict["num_nodes"] != n 
-        Memento.error(_LOGGER, "Mismatch in number of input nodes")
+    if "data_dict" in keys(params)
+        data_dict = params["data_dict"]
+    else 
+        Memento.error(_LOGGER, "Data dictionary has to be specified in input params")
     end
 
-    # Input data 
-    if "data_type" in keys(params)
-        if params["data_type"] == "old"
-            edge_weights = data_dict["old_data"]["edge_weights"]
-        elseif params["data_type"] == "new"
-            edge_weights = data_dict["new_data"]["edge_weights"]
+    num_nodes = data_dict["num_nodes"] 
+    instance  = params["instance"]
+
+    if "augment_budget" in keys(params)
+        if params["augment_budget"] <= data_dict["num_edges_to_augment"]
+            augment_budget = params["augment_budget"]
+        else 
+            augment_budget = data_dict["num_edges_to_augment"]
+            Memento.info(_LOGGER, "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])")
         end
     else
-        # default value
-        edge_weights = data_dict["old_data"]["edge_weights"]
+        augment_budget = data_dict["num_edges_to_augment"]
+        Memento.info(_LOGGER, "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])")
     end
-
-    edge_weigths_matrix = LOpt.convert_array_to_matrix(n, edge_weights)
 
     # Solution type 
     if "solution_type" in keys(params)
@@ -42,11 +39,6 @@ function get_data(params::Dict{String, Any})
     # Tolerance to verify zero values
     if "tol_zero" in keys(params)
         tol_zero = params["tol_zero"]
-
-        if params["tol_zero"] >= 1E-4
-            Memento.warn(_LOGGER, "Zero tolerance value may be too high for numerical accuracy in solutions")
-        end
-
     else
         # default value
         tol_zero = 1E-6
@@ -55,11 +47,6 @@ function get_data(params::Dict{String, Any})
     # Tolerance to verify PSD-ness of a matrix
     if "tol_psd" in keys(params)
         tol_psd = params["tol_psd"]
-
-        if params["tol_psd"] >= 1E-3
-            Memento.warn(_LOGGER, "PSD tolerance value may be too high for PSD feasibility")
-        end
-        
     else
         # default value
         tol_psd = 1E-6
@@ -105,18 +92,22 @@ function get_data(params::Dict{String, Any})
         lazycuts_logging = false
     end
 
-    data = Dict{String, Any}("num_nodes" => n,
-                             "instance" => instance,
-                             "edge_weights" => edge_weigths_matrix,
-                             "solution_type" => solution_type,
-                             "tol_zero" => tol_zero,
-                             "tol_psd" => tol_psd,
-                             "eigen_cuts_full" => eigen_cuts_full,
-                             "soc_linearized_cuts" => soc_linearized_cuts,
-                             "lazycuts_logging" => lazycuts_logging,
-                             "topology_flow_cuts" => topology_flow_cuts,
-                             "lazy_callback_status" => lazy_callback_status,
-                             "relax_integrality" => relax_integrality)
+    data = Dict{String, Any}("num_nodes"               => num_nodes,
+                             "instance"                => instance,
+                             "num_edges_existing"      => data_dict["num_edges_existing"],
+                             "num_edges_to_augment"    => data_dict["num_edges_to_augment"],
+                             "augment_budget"          => augment_budget,
+                             "adjacency_base_graph"    => data_dict["adjacency_base_graph"],
+                             "adjacency_augment_graph" => data_dict["adjacency_augment_graph"],
+                             "solution_type"           => solution_type,
+                             "tol_zero"                => tol_zero,
+                             "tol_psd"                 => tol_psd,
+                             "eigen_cuts_full"         => eigen_cuts_full,
+                             "soc_linearized_cuts"     => soc_linearized_cuts,
+                             "lazycuts_logging"        => lazycuts_logging,
+                             "topology_flow_cuts"      => topology_flow_cuts,
+                             "lazy_callback_status"    => lazy_callback_status,
+                             "relax_integrality"       => relax_integrality)
 
     # Optimizer
     if "optimizer" in keys(params)
@@ -126,25 +117,65 @@ function get_data(params::Dict{String, Any})
     return data
 end
 
-function convert_array_to_matrix(n::Int, edge_weights::Any)
+function parse_file(file_path::String)
+    data_dict = JSON.parsefile(file_path)
     
-    instance_matrix = Matrix{Float64}(zeros(n,n))
-
-    for k = 1:length(edge_weights)
-        i, j = edge_weights[k][1]
-        w_ij = edge_weights[k][2]
-
-        if w_ij < 0 
-            Memento.error(_LOGGER, "LaplacianOpt does not support graphs with negative weights")
-        end
-
-        instance_matrix[i,j] = w_ij
-        instance_matrix[j,i] = w_ij
+    if "num_nodes" in keys(data_dict)
+        num_nodes = data_dict["num_nodes"]
+    else
+        Memento.error(_LOGGER, "Number of nodes is missing in the input data file")
     end
 
-    return instance_matrix
+    adjacency_base_graph    = Matrix{Float64}(zeros(num_nodes, num_nodes))
+    adjacency_augment_graph = Matrix{Float64}(zeros(num_nodes, num_nodes))
+    
+    num_edges_existing   = 0 
+    num_edges_to_augment = 0 
+
+    for k=1:length(data_dict["edges_existing"])
+        i, j = data_dict["edges_existing"][k][1]
+        w_ij = data_dict["edges_existing"][k][2]
+
+        LOpt._catch_data_input_error(num_nodes, i, j, w_ij)
+        
+        adjacency_base_graph[i,j] = w_ij
+        adjacency_base_graph[j,i] = w_ij
+        num_edges_existing += 1
+    end
+
+    for k=1:length(data_dict["edges_to_augment"])
+        i, j = data_dict["edges_to_augment"][k][1]
+        w_ij = data_dict["edges_to_augment"][k][2]
+
+        LOpt._catch_data_input_error(num_nodes, i, j, w_ij)
+        
+        adjacency_augment_graph[i,j] = w_ij
+        adjacency_augment_graph[j,i] = w_ij
+        num_edges_to_augment += 1
+    end
+
+    if num_edges_to_augment == 0
+        Memento.error(_LOGGER, "LaplacianOpt needs at least one edge to be able to augment to the base graph")
+    # Assuming undirected graph
+    elseif num_edges_existing == num_nodes*(num_nodes-1)/2 
+        Memento.error(_LOGGER, "Input graph is already a complete graph; augmentation is unnecessary")
+    end
+
+    data_dict_new = Dict{String, Any}("num_nodes"               => num_nodes,
+                                      "num_edges_existing"      => num_edges_existing,
+                                      "num_edges_to_augment"    => num_edges_to_augment,
+                                      "adjacency_base_graph"    => adjacency_base_graph,
+                                      "adjacency_augment_graph" => adjacency_augment_graph)
+    
+    return data_dict_new
 end
 
-function parse_file(file_path::String)
-    
+function _catch_data_input_error(num_nodes::Int64, i::Int64, j::Int64, w_ij::Number)
+    if (i > num_nodes) || (j > num_nodes)
+        Memento.error(_LOGGER, "Node pair ($i,$j) does not match with total number of nodes, $num_nodes")
+    end
+
+    if w_ij < 0
+        Memento.error(_LOGGER, "LaplacianOpt does not support graphs with negative weights")
+    end
 end

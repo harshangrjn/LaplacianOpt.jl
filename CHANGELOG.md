@@ -2,7 +2,9 @@ LaplacianOpt.jl Change Log
 =========================
 
 ### v0.2.0
-- Generalization for max algebraic connectivity edge augmentation problem 
+- Breaking changes: Major restructuring of data format and generalization for max. algebraic connectivity edge augmentation problem 
+- Data now takes a base graph with existing edges and the edges which can be augmented
+- User input on the budget of edges to be augmented 
 - data.jl updates to support new, generic data format 
 - Added logo to the package
 

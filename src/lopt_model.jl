@@ -26,7 +26,6 @@ function constraint_LOModel(lom::LaplacianOptModel)
     
     LOpt.constraint_build_W_var_matrix(lom)
 
-    LOpt.constraint_topology_no_self_loops(lom)
     LOpt.constraint_topology_vertex_cutset(lom)
     LOpt.constraint_topology_total_edges(lom)
 
@@ -75,7 +74,7 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer=nothing)
     return lom.result
 end
 
-function run_LOpt_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz")
+function run_LOpt(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz")
 
     data = LOpt.get_data(params)
 
@@ -138,7 +137,6 @@ end
 
 function constraint_MaxSpanTree_model(lom::LaplacianOptModel, lazy_callback::Bool)
 
-    LOpt.constraint_topology_no_self_loops(lom)
     LOpt.constraint_topology_vertex_cutset(lom)
     LOpt.constraint_topology_total_edges(lom)
     

@@ -14,7 +14,7 @@
         "relax_integrality" => false                      
     )
 
-    result_lo = LaplacianOpt.run_LOpt_model(params, glpk_optimizer)
+    result_lo = LaplacianOpt.run_LOpt(params, glpk_optimizer)
 
     @test result_lo["termination_status"] == MOI.OPTIMAL
     @test result_lo["primal_status"] == MOI.FEASIBLE_POINT
@@ -112,7 +112,7 @@ end
         "topology_flow_cuts" => true
     )
 
-    result_1 = LaplacianOpt.run_LOpt_model(params_1, glpk_optimizer)
+    result_1 = LaplacianOpt.run_LOpt(params_1, glpk_optimizer)
     
     @test result_1["termination_status"] == MOI.OPTIMAL
     @test result_1["primal_status"] == MOI.FEASIBLE_POINT
@@ -130,7 +130,7 @@ end
         "soc_linearized_cuts" => true
     )
 
-    result_2 = LaplacianOpt.run_LOpt_model(params_2, glpk_optimizer)
+    result_2 = LaplacianOpt.run_LOpt(params_2, glpk_optimizer)
     
     @test result_2["termination_status"] == MOI.OPTIMAL
     @test result_2["primal_status"] == MOI.FEASIBLE_POINT

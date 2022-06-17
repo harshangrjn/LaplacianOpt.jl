@@ -3,38 +3,30 @@
 #------------------------------------------------------#
 
 function constraint_build_W_var_matrix(lom::LaplacianOptModel)
-    n = lom.data["num_nodes"]
+    num_nodes = lom.data["num_nodes"]
     ew_matrix = lom.data["edge_weights"]
 
     # Diagonal entries
-    JuMP.@constraint(lom.model, [i=1:n], lom.variables[:W_var][i,i] == sum(ew_matrix[i,:] .* lom.variables[:z_var][i,:]) - lom.variables[:γ_var]*(n-1)/n)
+    JuMP.@constraint(lom.model, [i=1:num_nodes], lom.variables[:W_var][i,i] == sum(ew_matrix[i,:] .* lom.variables[:z_var][i,:]) - lom.variables[:γ_var]*(num_nodes-1)/num_nodes)
 
     # Off-diagonal entries
-    JuMP.@constraint(lom.model, [i=1:(n-1), j=(i+1):n], lom.variables[:W_var][i,j] == -ew_matrix[i,j] * lom.variables[:z_var][i,j] + lom.variables[:γ_var]/n)
+    JuMP.@constraint(lom.model, [i=1:(num_nodes-1), j=(i+1):num_nodes], lom.variables[:W_var][i,j] == -ew_matrix[i,j] * lom.variables[:z_var][i,j] + lom.variables[:γ_var]/num_nodes)
 
-    return
-end
-
-function constraint_topology_no_self_loops(lom::LaplacianOptModel)
-    n = lom.data["num_nodes"]
-    
-    JuMP.@constraint(lom.model, [i=1:n], lom.variables[:z_var][i,i] == 0)
-    
     return
 end
 
 function constraint_topology_vertex_cutset(lom::LaplacianOptModel)
-    n = lom.data["num_nodes"]
+    num_nodes = lom.data["num_nodes"]
     
-    JuMP.@constraint(lom.model, [i=1:n], sum(lom.variables[:z_var][i,j] for j in setdiff((1:n), i)) >= 1)
+    JuMP.@constraint(lom.model, [i=1:num_nodes], sum(lom.variables[:z_var][i,j] for j in setdiff((1:num_nodes), i)) >= 1)
     
     return
 end
 
 function constraint_topology_total_edges(lom::LaplacianOptModel)
-    n = lom.data["num_nodes"]
+    num_nodes = lom.data["num_nodes"]
 
-    JuMP.@constraint(lom.model, sum(lom.variables[:z_var][i,j] for i=1:(n-1), j=(i+1):n) == (n-1))
+    JuMP.@constraint(lom.model, sum(lom.variables[:z_var][i,j] for i=1:(num_nodes-1), j=(i+1):num_nodes) == (num_nodes-1))
     
     return
 end
@@ -190,19 +182,19 @@ end
 
 function constraint_topology_multi_commodity_flow(lom::LaplacianOptModel)
 
-    n = lom.data["num_nodes"]
+    num_nodes = lom.data["num_nodes"]
     
     # Flow balance on source node 
-    JuMP.@constraint(lom.model, [k=1:(n-1)], sum(lom.variables[:flow_var][1,2:n,k]) - sum(lom.variables[:flow_var][2:n,1,k]) == 1)
+    JuMP.@constraint(lom.model, [k=1:(num_nodes-1)], sum(lom.variables[:flow_var][1,2:num_nodes,k]) - sum(lom.variables[:flow_var][2:num_nodes,1,k]) == 1)
 
     # Flow balance on target node 
-    JuMP.@constraint(lom.model, [k=1:(n-1)], sum(lom.variables[:flow_var][:,k+1,k]) - sum(lom.variables[:flow_var][k+1,:,k]) == 1) #(k-th commodity corresponds to k+1th node)
+    JuMP.@constraint(lom.model, [k=1:(num_nodes-1)], sum(lom.variables[:flow_var][:,k+1,k]) - sum(lom.variables[:flow_var][k+1,:,k]) == 1) #(k-th commodity corresponds to k+1th node)
     
     # Flow balance on remaining nodes 
-    JuMP.@constraint(lom.model, [k=1:(n-1), v=(2:n); k!=v-1], sum(lom.variables[:flow_var][:,v,k]) - sum(lom.variables[:flow_var][v,:,k]) == 0)
+    JuMP.@constraint(lom.model, [k=1:(num_nodes-1), v=(2:num_nodes); k!=v-1], sum(lom.variables[:flow_var][:,v,k]) - sum(lom.variables[:flow_var][v,:,k]) == 0)
     
     # Flow <= capacity 
-    JuMP.@constraint(lom.model, [k=1:(n-1), i=1:n, j=1:n, kdash=1:(n-1)], lom.variables[:flow_var][i,j,k] + lom.variables[:flow_var][j,i,kdash]' <= lom.variables[:z_var][i,j])
+    JuMP.@constraint(lom.model, [k=1:(num_nodes-1), i=1:num_nodes, j=1:num_nodes, kdash=1:(num_nodes-1)], lom.variables[:flow_var][i,j,k] + lom.variables[:flow_var][j,i,kdash]' <= lom.variables[:z_var][i,j])
     
     return
 end
