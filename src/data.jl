@@ -12,13 +12,18 @@ function get_data(params::Dict{String, Any})
     if "augment_budget" in keys(params)
         if params["augment_budget"] <= data_dict["num_edges_to_augment"]
             augment_budget = params["augment_budget"]
-        else 
+        else
             augment_budget = data_dict["num_edges_to_augment"]
             Memento.info(_LOGGER, "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])")
         end
     else
-        augment_budget = data_dict["num_edges_to_augment"]
-        Memento.info(_LOGGER, "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])")
+        if data_dict["num_edges_to_augment"] == (num_nodes*(num_nodes-1))/2
+            augment_budget = num_nodes-1
+            Memento.info(_LOGGER, "Setting edge augmentation budget to a spanning tree")
+        else
+            augment_budget = data_dict["num_edges_to_augment"]
+            Memento.info(_LOGGER, "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])")
+        end
     end
 
     # Solution type 
@@ -136,16 +141,25 @@ function parse_file(file_path::String)
         i, j = data_dict["edges_existing"][k][1]
         w_ij = data_dict["edges_existing"][k][2]
 
+        if isapprox(abs(w_ij), 0, atol = 1E-6)
+            w_ij = 0
+        end
+
         LOpt._catch_data_input_error(num_nodes, i, j, w_ij)
         
         adjacency_base_graph[i,j] = w_ij
         adjacency_base_graph[j,i] = w_ij
+        
         num_edges_existing += 1
     end
 
     for k=1:length(data_dict["edges_to_augment"])
         i, j = data_dict["edges_to_augment"][k][1]
         w_ij = data_dict["edges_to_augment"][k][2]
+
+        if isapprox(abs(w_ij), 0, atol = 1E-6)
+            w_ij = 0
+        end
 
         LOpt._catch_data_input_error(num_nodes, i, j, w_ij)
         
@@ -159,6 +173,11 @@ function parse_file(file_path::String)
     # Assuming undirected graph
     elseif num_edges_existing == num_nodes*(num_nodes-1)/2 
         Memento.error(_LOGGER, "Input graph is already a complete graph; augmentation is unnecessary")
+    end
+
+    # Check for mutually exclusive sets of edges between base and augment graph
+    if maximum((adjacency_augment_graph .> 0) + (adjacency_base_graph .> 0)) > 1
+        Memento.error(_LOGGER, "Edge sets of base and augment graphs have to be mutually exclusive")
     end
 
     data_dict_new = Dict{String, Any}("num_nodes"               => num_nodes,
@@ -175,7 +194,7 @@ function _catch_data_input_error(num_nodes::Int64, i::Int64, j::Int64, w_ij::Num
         Memento.error(_LOGGER, "Node pair ($i,$j) does not match with total number of nodes, $num_nodes")
     end
 
-    if w_ij < 0
+    if !(isapprox(abs(w_ij), 0, atol=1E-6)) & (w_ij < 0)
         Memento.error(_LOGGER, "LaplacianOpt does not support graphs with negative weights")
     end
 end

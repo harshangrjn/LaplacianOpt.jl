@@ -9,8 +9,8 @@ include("optimizer.jl")
 result_all = zeros(10,3)
 lopt_optimizer = get_gurobi()
 
-num_nodes = 5
-instance = 1
+num_nodes = 8
+instance = 6
 
 # for i=1:1
     
@@ -24,9 +24,9 @@ instance = 1
     params = Dict{String, Any}(
         "instance"            => instance,
         "data_dict"           => data_dict,
-        "augment_budget"      => num_nodes-1,
+        "augment_budget"      => (num_nodes - 1),
         "eigen_cuts_full"     => true,
-        "soc_linearized_cuts" => true
+        "soc_linearized_cuts" => false
         )
 
     #-------------------------------------------#

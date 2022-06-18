@@ -9,7 +9,7 @@ function variable_lifted_W_matrix(lom::LaplacianOptModel)
     lom.variables[:W_var] = JuMP.@variable(lom.model, W_var[1:num_nodes, 1:num_nodes], Symmetric)
 
     for i = 1:num_nodes
-        JuMP.set_lower_bound(W_var[i,i], sum(adjacency_base_graph[i,:]))
+        JuMP.set_lower_bound(W_var[i,i], 0)
     end
 
     return
@@ -17,6 +17,7 @@ end
 
 function variable_edge_onoff(lom::LaplacianOptModel)
     num_nodes = lom.data["num_nodes"]
+    adjacency_base_graph = lom.data["adjacency_base_graph"]
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
 
     lom.variables[:z_var] = JuMP.@variable(lom.model, z_var[1:num_nodes, 1:num_nodes], Bin, Symmetric)
@@ -30,8 +31,15 @@ function variable_edge_onoff(lom::LaplacianOptModel)
             end
 
             if isapprox(adjacency_augment_graph[i,j], 0, atol = 1E-6)
-                JuMP.fix(z_var[i,j], 0)
-                JuMP.fix(z_var[j,i], 0)
+                # (i,j) in base graph
+                if !isapprox(adjacency_base_graph[i,j], 0, atol = 1E-6)
+                    JuMP.fix(z_var[i,j], 1)
+                    JuMP.fix(z_var[j,i], 1)
+                else
+                # (i,j) neither in base not augment graph
+                    JuMP.fix(z_var[i,j], 0)
+                    JuMP.fix(z_var[j,i], 0)
+                end
             end
         end
     end
