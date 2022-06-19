@@ -26,7 +26,7 @@ function constraint_LOModel(lom::LaplacianOptModel)
     
     LOpt.constraint_build_W_var_matrix(lom)
 
-    LOpt.constraint_topology_vertex_cutset(lom)
+    LOpt.constraint_single_vertex_cutset(lom)
     LOpt.constraint_augment_edges_budget(lom)
 
     LOpt.constraint_lazycallback_wrapper(lom)
@@ -137,7 +137,7 @@ end
 
 function constraint_MaxSpanTree_model(lom::LaplacianOptModel, lazy_callback::Bool)
 
-    LOpt.constraint_topology_vertex_cutset(lom)
+    LOpt.constraint_single_vertex_cutset(lom)
     LOpt.constraint_augment_edges_budget(lom)
     
     if lazy_callback 

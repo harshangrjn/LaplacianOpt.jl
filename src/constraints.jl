@@ -20,7 +20,7 @@ function constraint_build_W_var_matrix(lom::LaplacianOptModel)
     return
 end
 
-function constraint_topology_vertex_cutset(lom::LaplacianOptModel)
+function constraint_single_vertex_cutset(lom::LaplacianOptModel)
     num_nodes               = lom.data["num_nodes"]
     num_edges_existing      = lom.data["num_edges_existing"]
     adjacency_base_graph    = lom.data["adjacency_base_graph"]
@@ -78,16 +78,14 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel)
                 LOpt.constraint_soc_linearized_cuts_on_2minors(W_val, cb_cuts, lom)
             end
 
-            if lom.data["topology_flow_cuts"]
+            if !(lom.data["is_base_graph_connected"]) && (lom.data["topology_flow_cuts"])
                 z_val = abs.(JuMP.callback_value.(Ref(cb_cuts), lom.variables[:z_var]))         
                 
                 LOpt.get_rounded_zeros_and_ones!(z_val, lom.data["tol_zero"])
                 
                 LOpt.constraint_topology_flow_cuts(z_val, cb_cuts, lom)
             end
-
         end 
-
     end
 
     if lom.data["lazy_callback_status"]
@@ -154,9 +152,7 @@ function constraint_soc_linearized_cuts_on_2minors(W_val::Matrix{Float64}, cb_cu
                 if lom.data["lazycuts_logging"]
                     Memento.info(_LOGGER, "Polyhedral relaxation cuts: 2x2 minor linearized SOC")
                 end    
-
             end
-
         end
     end
 
@@ -168,55 +164,29 @@ function constraint_topology_flow_cuts(z_val::Matrix{Float64}, cb_cuts, lom::Lap
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
 
     cc_lazy = Graphs.connected_components(Graphs.SimpleGraph(abs.(z_val)))
+    max_cc  = 5
+    if length(cc_lazy) > 5
+        Memento.info(_LOGGER, "Polyhedral relaxation cuts: flow cuts not added for integer solutions with $(length(cc_lazy)) connected components")
+    end
 
-    if length(cc_lazy) == 2 
-        
-        con = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[1], j in cc_lazy[2] 
-                                         if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) >= 1)  
+    if length(cc_lazy) in 2:max_cc
+       
+        for k = 1:(length(cc_lazy)-1)
+            # From cutset  
+            cutset_f = cc_lazy[k]        
+            # To cutset
+            ii = setdiff(1:length(cc_lazy), k)
+            cutset_t = reduce(vcat, cc_lazy[ii])
+            
+            con = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cutset_f, j in cutset_t 
+                                         if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) >= 1)
 
-        MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)      
-        
-        if lom.data["lazycuts_logging"]
-            Memento.info(_LOGGER, "Polyhedral relaxation cuts: graph connectivity (#cc = $(length(cc_lazy)))")
+            MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
         end
 
-    elseif length(cc_lazy) == 3
-
-        con1 = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[1], j in union(cc_lazy[2], cc_lazy[3])
-                                      if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) >= 1)  
-                                              
-        con2 = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[2], j in union(cc_lazy[3], cc_lazy[1]) 
-                                      if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) >= 1)  
-
-        MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con1)       
-        MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con2)
-        
         if lom.data["lazycuts_logging"]
             Memento.info(_LOGGER, "Polyhedral relaxation cuts: graph connectivity (#cc = $(length(cc_lazy)))")
-        end    
-
-    elseif length(cc_lazy) == 4
-
-        con1 = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[1], j in union(cc_lazy[2], cc_lazy[3], cc_lazy[4])
-                                      if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) >= 1)  
-                
-        con2 = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[2], j in union(cc_lazy[1], cc_lazy[3], cc_lazy[4]) 
-                                      if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) >= 1)  
-
-        con3 = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cc_lazy[3], j in union(cc_lazy[1], cc_lazy[2], cc_lazy[4]) 
-                                      if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) >= 1)  
-                                        
-        MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con1)       
-        MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con2)
-        MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con3)
-        
-        if lom.data["lazycuts_logging"]
-            Memento.info(_LOGGER, "Polyhedral relaxation cuts: graph connectivity (#cc = $(length(cc_lazy)))")
-        end   
-         
-    elseif length(cc_lazy) >= 5
-        Memento.info(_LOGGER, "Polyhedral relaxation cuts: flow cuts not added for integer solutions with $(length(cc_lazy)) connected components")
-        
+        end 
     end
 
     return 

@@ -17,13 +17,8 @@ function get_data(params::Dict{String, Any})
             Memento.info(_LOGGER, "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])")
         end
     else
-        if data_dict["num_edges_to_augment"] == (num_nodes*(num_nodes-1))/2
-            augment_budget = num_nodes-1
-            Memento.info(_LOGGER, "Setting edge augmentation budget to a spanning tree")
-        else
-            augment_budget = data_dict["num_edges_to_augment"]
-            Memento.info(_LOGGER, "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])")
-        end
+        augment_budget = data_dict["num_edges_to_augment"]
+        Memento.info(_LOGGER, "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])")
     end
 
     # Solution type 
@@ -104,6 +99,7 @@ function get_data(params::Dict{String, Any})
                              "augment_budget"          => augment_budget,
                              "adjacency_base_graph"    => data_dict["adjacency_base_graph"],
                              "adjacency_augment_graph" => data_dict["adjacency_augment_graph"],
+                             "is_base_graph_connected" => data_dict["is_base_graph_connected"],
                              "solution_type"           => solution_type,
                              "tol_zero"                => tol_zero,
                              "tol_psd"                 => tol_psd,
@@ -118,6 +114,8 @@ function get_data(params::Dict{String, Any})
     if "optimizer" in keys(params)
         data["optimizer"] = params["optimizer"]
     end
+
+    LOpt._detect_infeasbility_in_data(data)
 
     return data
 end
@@ -168,23 +166,18 @@ function parse_file(file_path::String)
         num_edges_to_augment += 1
     end
 
-    if num_edges_to_augment == 0
-        Memento.error(_LOGGER, "LaplacianOpt needs at least one edge to be able to augment to the base graph")
-    # Assuming undirected graph
-    elseif num_edges_existing == num_nodes*(num_nodes-1)/2 
-        Memento.error(_LOGGER, "Input graph is already a complete graph; augmentation is unnecessary")
-    end
-
-    # Check for mutually exclusive sets of edges between base and augment graph
-    if maximum((adjacency_augment_graph .> 0) + (adjacency_base_graph .> 0)) > 1
-        Memento.error(_LOGGER, "Edge sets of base and augment graphs have to be mutually exclusive")
+    # Base graph connectivity
+    is_base_graph_connected = false
+    if num_edges_existing > 0
+        !(isapprox(abs(LOpt.algebraic_connectivity(adjacency_base_graph)), 0, atol=1E-6)) && (is_base_graph_connected = true) 
     end
 
     data_dict_new = Dict{String, Any}("num_nodes"               => num_nodes,
                                       "num_edges_existing"      => num_edges_existing,
                                       "num_edges_to_augment"    => num_edges_to_augment,
                                       "adjacency_base_graph"    => adjacency_base_graph,
-                                      "adjacency_augment_graph" => adjacency_augment_graph)
+                                      "adjacency_augment_graph" => adjacency_augment_graph,
+                                      "is_base_graph_connected" => is_base_graph_connected)
     
     return data_dict_new
 end
@@ -195,6 +188,27 @@ function _catch_data_input_error(num_nodes::Int64, i::Int64, j::Int64, w_ij::Num
     end
 
     if !(isapprox(abs(w_ij), 0, atol=1E-6)) & (w_ij < 0)
-        Memento.error(_LOGGER, "LaplacianOpt does not support graphs with negative weights")
+        Memento.error(_LOGGER, "Graphs with negative weights are not supported")
     end
+end
+
+function _detect_infeasbility_in_data(data::Dict{String, Any})
+   
+    num_nodes = data["num_nodes"]
+
+    if data["num_edges_to_augment"] == 0
+        Memento.error(_LOGGER, "At least one edge has to be specified to be able to augment to the base graph")
+    # Assuming undirected graph
+    elseif data["num_edges_existing"] == num_nodes*(num_nodes-1)/2 
+        Memento.error(_LOGGER, "Input graph is already a complete graph; augmentation is unnecessary")
+    elseif (data["num_edges_existing"] == 0) && (data["augment_budget"] < (num_nodes-1))
+        Memento.error(_LOGGER, "Detected feasible solutions with disconnected graphs. `augment_budget` may be insufficient.")
+    elseif !isinteger(data["augment_budget"])
+        Memento.error(_LOGGER, "Edge augmentation budget has to be an integer-valued number")
+    end 
+
+    # Check for mutually exclusive sets of edges between base and augment graph
+    if maximum((data["adjacency_augment_graph"] .> 0) + (data["adjacency_base_graph"] .> 0)) > 1
+        Memento.error(_LOGGER, "Edge sets of base and augment graphs have to be mutually exclusive")
+    end 
 end

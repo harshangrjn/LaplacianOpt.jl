@@ -1,5 +1,11 @@
 function visualize_solution(results::Dict{String, Any}, data::Dict{String, Any}; visualizing_tool = "tikz", plot_file_format = "pdf", display_edge_weights = true)
     
+    num_edges_existing      = data["num_edges_existing"]
+    adjacency_base_graph    = data["adjacency_base_graph"]
+    adjacency_augment_graph = data["adjacency_augment_graph"]
+    adjacency_full_graph    = adjacency_augment_graph
+    (num_edges_existing > 0) && (adjacency_full_graph += adjacency_base_graph)
+
     if results["primal_status"] != MOI.FEASIBLE_POINT
         Memento.error(_LOGGER, "Non-feasible primal status. Graph solution may not be exact")
     end
@@ -8,9 +14,9 @@ function visualize_solution(results::Dict{String, Any}, data::Dict{String, Any};
         Memento.info(_LOGGER, "Plotting the graph of integral solution")
         
         if visualizing_tool == "tikz"
-            LOpt.plot_tikzgraph(results["solution"]["z_var"] .* data["edge_weights"], data["instance"], plot_file_format = plot_file_format, display_edge_weights = display_edge_weights)
+            LOpt.plot_tikzgraph(results["solution"]["z_var"] .* adjacency_full_graph, data["instance"], plot_file_format = plot_file_format, display_edge_weights = display_edge_weights)
         elseif visualizing_tool == "graphviz"
-            LOpt.plot_graphviz(results["solution"]["z_var"] .* data["edge_weights"], data["instance"], display_edge_weights = display_edge_weights)
+            LOpt.plot_graphviz(results["solution"]["z_var"] .* adjacency_full_graph, data["instance"], display_edge_weights = display_edge_weights)
         end
 
     else 
