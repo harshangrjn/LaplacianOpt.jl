@@ -14,25 +14,22 @@ function visualize_solution(results::Dict{String, Any}, data::Dict{String, Any};
         Memento.info(_LOGGER, "Plotting the graph of integral solution")
         
         if visualizing_tool == "tikz"
-            LOpt.plot_tikzgraph(results["solution"]["z_var"] .* adjacency_full_graph, data["instance"], plot_file_format = plot_file_format, display_edge_weights = display_edge_weights)
+            LOpt.plot_tikzgraph(results["solution"]["z_var"] .* adjacency_full_graph, plot_file_format = plot_file_format, display_edge_weights = display_edge_weights)
         elseif visualizing_tool == "graphviz"
-            LOpt.plot_graphviz(results["solution"]["z_var"] .* adjacency_full_graph, data["instance"], display_edge_weights = display_edge_weights)
+            LOpt.plot_graphviz(results["solution"]["z_var"] .* adjacency_full_graph, display_edge_weights = display_edge_weights)
         end
 
     else 
         Memento.info(_LOGGER, "Cannot plot as the obtained solutions are non-integral; fractional values can be found in the results dictionary")
         return
     end
-    
 end
 
-function plot_tikzgraph(adjacency_matrix::Matrix{Float64}, instance::Int64; plot_file_format = "pdf", display_edge_weights = false)
+function plot_tikzgraph(adjacency_matrix::Matrix{Float64}; plot_file_format = "pdf", display_edge_weights = false)
 
-    num_nodes = size(adjacency_matrix)[1]
-
+    num_nodes      = size(adjacency_matrix)[1]
     solution_graph = Graphs.SimpleGraph(num_nodes)
-
-    edge_labels = Dict{Tuple{Int64, Int64}, String}()
+    edge_labels    = Dict{Tuple{Int64, Int64}, String}()
     
     for i=1:(num_nodes-1)
         for j=(i+1):num_nodes
@@ -52,7 +49,7 @@ function plot_tikzgraph(adjacency_matrix::Matrix{Float64}, instance::Int64; plot
         t = TikzGraphs.plot(solution_graph, node_style="draw, rounded corners, fill=blue!10", TikzGraphs.Layouts.SpringElectrical())
     end
 
-    file_path = joinpath(dirname(pathof(LaplacianOpt)),"..", "examples/plots/plot_$(num_nodes)_$(instance)")
+    file_path = joinpath(dirname(pathof(LaplacianOpt)),"..", "examples/plots/plot_$(num_nodes)")
 
     if plot_file_format == "pdf"
         TikzPictures.save(TikzPictures.PDF(file_path), t)
@@ -62,11 +59,10 @@ function plot_tikzgraph(adjacency_matrix::Matrix{Float64}, instance::Int64; plot
     
 end
 
-function plot_graphviz(adjacency_matrix::Matrix{Float64}, instance::Int64; display_edge_weights = true)
+function plot_graphviz(adjacency_matrix::Matrix{Float64}; display_edge_weights = true)
     
     num_nodes = size(adjacency_matrix)[1]
-
-    file_path = joinpath(dirname(pathof(LaplacianOpt)),"..", "examples/plots/plot_$(num_nodes)_$(instance).dot")
+    file_path = joinpath(dirname(pathof(LaplacianOpt)),"..", "examples/plots/plot_$(num_nodes).dot")
 
     open(file_path, "w") do file
 
@@ -78,18 +74,14 @@ function plot_graphviz(adjacency_matrix::Matrix{Float64}, instance::Int64; displ
 
         for i=1:(num_nodes-1)
             for j=(i+1):num_nodes
-    
-                if !isapprox(adjacency_matrix[i,j], 0, atol=1E-6)
-                    
+                if !isapprox(adjacency_matrix[i,j], 0, atol=1E-6)  
                     if display_edge_weights 
                         w_ij = string(ceil(adjacency_matrix[i,j], digits=3))
                         write(file, "$i -- $j [label = \"$w_ij\", fontsize=9, fontname=\"Helvetica\"]; \n")
                     else 
                         write(file, "$i -- $j [fontsize=9, fontname=\"Helvetica\"]; \n")
                     end
-
                 end
-    
             end
         end
 

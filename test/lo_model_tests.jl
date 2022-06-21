@@ -57,7 +57,7 @@ end
         "instance" => 1
         )
 
-    result_mst = LaplacianOpt.run_MaxSpanTree_model(params, glpk_optimizer)
+    result_mst = LaplacianOpt.run_MaxSpanTree(params, glpk_optimizer)
 
     @test result_mst["termination_status"] == MOI.OPTIMAL
     @test result_mst["primal_status"] == MOI.FEASIBLE_POINT
@@ -86,7 +86,7 @@ end
         "topology_flow_cuts" => true
         )
 
-    result_mst = LaplacianOpt.run_MaxSpanTree_model(params, glpk_optimizer, lazy_callback=true)
+    result_mst = LaplacianOpt.run_MaxSpanTree(params, glpk_optimizer, lazy_callback=true)
     
     @test result_mst["termination_status"] == MOI.OPTIMAL
     @test result_mst["primal_status"] == MOI.FEASIBLE_POINT
@@ -99,7 +99,7 @@ end
     @test isapprox(result_mst["solution"]["z_var"][8,15], 1.0)
 end
 
-@testset "SOC relaxations - 1: constraint_soc_linearized_cuts_on_2minors" begin
+@testset "SOC relaxations - 1: constraint_soc_cuts_on_2minors" begin
 
     file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
     include(file_path)

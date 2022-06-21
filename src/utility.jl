@@ -11,7 +11,6 @@ function get_rounded_zeros_and_ones!(v::Array{Float64}, tol_zero::Float64)
             v[i] = -1
         end
     end
-
 end 
 
 """
@@ -122,4 +121,43 @@ function algebraic_connectivity(adjacency_matrix::Array{Float64})
     ac = sort(LA.eigvals(L_mat))[2] 
     
     return ac
+end
+
+function _is_flow_cut_valid(cutset_f::Vector{Int64}, cutset_t::Vector{Int64}, adjacency::Array{Float64})
+    for i in cutset_f
+        for j in cutset_t
+            if !(isapprox(adjacency[i,j], 0, atol = 1E-6))
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+"""
+    _violated_eigen_vector(W::Array{Float64}; tol = 1E-6)
+    
+Given a square symmetric matrix, this function returns an eigen vector corresponding to it's most 
+violated eigen value w.r.t positive semi-definiteness of the input matrix.  
+"""
+function _violated_eigen_vector(W::Array{Float64}; tol = 1E-6)
+    W_eigvals = LA.eigvals(W)
+
+    if typeof(W_eigvals) != Vector{Float64}
+        Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
+    end
+
+    if LA.eigmin(W) <= -tol
+        
+        if W_eigvals[1] == LA.eigmin(W)
+            violated_eigen_vec = LA.eigvecs(W)[:,1]
+            LOpt.get_rounded_zeros_and_ones!(violated_eigen_vec, 1E-6)
+            return violated_eigen_vec
+        else
+            Memento.warn(_LOGGER, "Eigen cut corresponding to the negative eigenvalue could not be evaluated")
+        end
+    else
+        return
+    end
 end

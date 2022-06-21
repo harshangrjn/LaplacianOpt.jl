@@ -6,8 +6,7 @@ function get_data(params::Dict{String, Any})
         Memento.error(_LOGGER, "Data dictionary has to be specified in input params")
     end
 
-    num_nodes = data_dict["num_nodes"] 
-    instance  = params["instance"]
+    num_nodes = data_dict["num_nodes"]
 
     if "augment_budget" in keys(params)
         if params["augment_budget"] <= data_dict["num_edges_to_augment"]
@@ -20,6 +19,9 @@ function get_data(params::Dict{String, Any})
         augment_budget = data_dict["num_edges_to_augment"]
         Memento.info(_LOGGER, "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])")
     end
+
+    Memento.info(_LOGGER, "Number of edges in the base graph: $(data_dict["num_edges_existing"])")
+    Memento.info(_LOGGER, "Number of edges available to augment: $(data_dict["num_edges_to_augment"])")
 
     # Solution type 
     if "solution_type" in keys(params)
@@ -73,8 +75,31 @@ function get_data(params::Dict{String, Any})
         soc_linearized_cuts = false
     end
 
+    if "eigen_cuts_2minors" in keys(params)
+        eigen_cuts_2minors = params["eigen_cuts_2minors"]
+        if eigen_cuts_2minors
+            Memento.info(_LOGGER, "Applying eigen cuts (2x2 minors)")
+        end
+    else
+        #default value
+        eigen_cuts_2minors = false
+    end
+
+    if "eigen_cuts_3minors" in keys(params)
+        eigen_cuts_3minors = params["eigen_cuts_3minors"]
+        if eigen_cuts_3minors
+            Memento.info(_LOGGER, "Applying eigen cuts (3x3 minors)")
+        end
+    else
+        #default value
+        eigen_cuts_3minors = false
+    end
+
     if "topology_flow_cuts" in keys(params)
         topology_flow_cuts = params["topology_flow_cuts"]
+    elseif data_dict["is_base_graph_connected"]
+        Memento.info(_LOGGER, "Deactivating topology flow cuts as the base graph is connected")
+        topology_flow_cuts = false
     else
         #default value
         Memento.info(_LOGGER, "Applying topology flow cuts")
@@ -93,7 +118,6 @@ function get_data(params::Dict{String, Any})
     end
 
     data = Dict{String, Any}("num_nodes"               => num_nodes,
-                             "instance"                => instance,
                              "num_edges_existing"      => data_dict["num_edges_existing"],
                              "num_edges_to_augment"    => data_dict["num_edges_to_augment"],
                              "augment_budget"          => augment_budget,
@@ -105,6 +129,8 @@ function get_data(params::Dict{String, Any})
                              "tol_psd"                 => tol_psd,
                              "eigen_cuts_full"         => eigen_cuts_full,
                              "soc_linearized_cuts"     => soc_linearized_cuts,
+                             "eigen_cuts_2minors"      => eigen_cuts_2minors,
+                             "eigen_cuts_3minors"      => eigen_cuts_3minors,
                              "lazycuts_logging"        => lazycuts_logging,
                              "topology_flow_cuts"      => topology_flow_cuts,
                              "lazy_callback_status"    => lazy_callback_status,
@@ -202,13 +228,21 @@ function _detect_infeasbility_in_data(data::Dict{String, Any})
     elseif data["num_edges_existing"] == num_nodes*(num_nodes-1)/2 
         Memento.error(_LOGGER, "Input graph is already a complete graph; augmentation is unnecessary")
     elseif (data["num_edges_existing"] == 0) && (data["augment_budget"] < (num_nodes-1))
-        Memento.error(_LOGGER, "Detected feasible solutions with disconnected graphs. `augment_budget` may be insufficient.")
-    elseif !isinteger(data["augment_budget"])
-        Memento.error(_LOGGER, "Edge augmentation budget has to be an integer-valued number")
+        Memento.error(_LOGGER, "Detected trivial solutions with disconnected graphs. `augment_budget` may be insufficient.")
+    elseif !isinteger(data["augment_budget"]) || (data["augment_budget"] < -1E-6)
+        Memento.error(_LOGGER, "Edge augmentation budget has to be a positive integer")
     end 
 
-    # Check for mutually exclusive sets of edges between base and augment graph
+    # Detect mutually exclusive sets of edges between base and augment graph
     if maximum((data["adjacency_augment_graph"] .> 0) + (data["adjacency_base_graph"] .> 0)) > 1
         Memento.error(_LOGGER, "Edge sets of base and augment graphs have to be mutually exclusive")
     end 
+
+    # Detect free vertices 
+    A = data["adjacency_augment_graph"] + data["adjacency_base_graph"]
+    for i=1:num_nodes
+        if isapprox(sum(A[i,:]), 0, atol=1E-6)
+            Memento.error(_LOGGER, "Detected trivial solutions with disconnected graphs due to free vertices.")
+        end
+    end
 end
