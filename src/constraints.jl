@@ -102,7 +102,7 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel; max_span_tree =
 
 end
 
-function constraint_soc_cuts_on_2minors(W_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptModel)
+function constraint_soc_cuts_on_2minors(W_val::Matrix{<:Number}, cb_cuts, lom::LaplacianOptModel)
     
     num_nodes = lom.data["num_nodes"]
 
@@ -133,13 +133,13 @@ function constraint_soc_cuts_on_2minors(W_val::Matrix{Float64}, cb_cuts, lom::La
     return
 end
 
-function constraint_eigen_cuts_on_full_matrix(W_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptModel)
+function constraint_eigen_cuts_on_full_matrix(W_val::Matrix{<:Number}, cb_cuts, lom::LaplacianOptModel)
     
     LOpt._add_eigen_cut_lazy(W_val, cb_cuts, lom, collect(1:lom.data["num_nodes"]))
     return
 end
 
-function constraint_eigen_cuts_on_2minors(W_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptModel)
+function constraint_eigen_cuts_on_2minors(W_val::Matrix{<:Number}, cb_cuts, lom::LaplacianOptModel)
     
     num_nodes = lom.data["num_nodes"]
     
@@ -153,7 +153,7 @@ function constraint_eigen_cuts_on_2minors(W_val::Matrix{Float64}, cb_cuts, lom::
     return
 end
 
-function constraint_eigen_cuts_on_3minors(W_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptModel)
+function constraint_eigen_cuts_on_3minors(W_val::Matrix{<:Number}, cb_cuts, lom::LaplacianOptModel)
     
     num_nodes = lom.data["num_nodes"]
 
@@ -169,7 +169,7 @@ function constraint_eigen_cuts_on_3minors(W_val::Matrix{Float64}, cb_cuts, lom::
     return
 end
 
-function _add_eigen_cut_lazy(W_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptModel, idx::Vector{Int64})
+function _add_eigen_cut_lazy(W_val::Matrix{<:Number}, cb_cuts, lom::LaplacianOptModel, idx::Vector{Int64})
     W_val_minor = W_val[idx, idx]
     W_var_minor = lom.variables[:W_var][idx, idx]
 
@@ -191,7 +191,7 @@ function _add_eigen_cut_lazy(W_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptM
 
 end
 
-function constraint_topology_flow_cuts(z_val::Matrix{Float64}, cb_cuts, lom::LaplacianOptModel)
+function constraint_topology_flow_cuts(z_val::Matrix{<:Number}, cb_cuts, lom::LaplacianOptModel)
 
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
 

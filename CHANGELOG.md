@@ -10,6 +10,7 @@ LaplacianOpt.jl Change Log
 - Added support for eigen cuts on 2x2 minors
 - Added support for eigen cuts on 3x3 minors
 - Added logo to the package
+- Docs and tests updated to reflect above changes
 
 ### v0.1.8
 - Added support for MOI v1.0+ 

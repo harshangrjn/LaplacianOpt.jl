@@ -25,7 +25,7 @@ function visualize_solution(results::Dict{String, Any}, data::Dict{String, Any};
     end
 end
 
-function plot_tikzgraph(adjacency_matrix::Matrix{Float64}; plot_file_format = "pdf", display_edge_weights = false)
+function plot_tikzgraph(adjacency_matrix::Matrix{<:Number}; plot_file_format = "pdf", display_edge_weights = false)
 
     num_nodes      = size(adjacency_matrix)[1]
     solution_graph = Graphs.SimpleGraph(num_nodes)
@@ -59,7 +59,7 @@ function plot_tikzgraph(adjacency_matrix::Matrix{Float64}; plot_file_format = "p
     
 end
 
-function plot_graphviz(adjacency_matrix::Matrix{Float64}; display_edge_weights = true)
+function plot_graphviz(adjacency_matrix::Matrix{<:Number}; display_edge_weights = true)
     
     num_nodes = size(adjacency_matrix)[1]
     file_path = joinpath(dirname(pathof(LaplacianOpt)),"..", "examples/plots/plot_$(num_nodes).dot")

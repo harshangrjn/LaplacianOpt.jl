@@ -194,3 +194,38 @@ end
     @test isapprox(result_1["solution"]["z_var"][2,5], 1.0)
     @test isapprox(result_1["solution"]["z_var"][3,4], 1.0)
 end
+
+@testset "Test base graph with existing edges" begin
+    function data_I()
+        data_dict = Dict{String, Any}()
+        data_dict["num_nodes"] = 4
+        data_dict["adjacency_base_graph"] = [0 2 0 0
+                                             2 0 3 0 
+                                             0 3 0 4
+                                             0 0 4 0]
+        data_dict["adjacency_augment_graph"] = [0 0 4 8
+                                                0 0 0 7 
+                                                4 0 0 0
+                                                8 7 0 0]
+        augment_budget = 2
+        return data_dict, augment_budget
+    end
+    data_dict, augment_budget = data_I()
+
+    params = Dict{String, Any}(
+        "data_dict" => data_dict,
+        "augment_budget" => augment_budget,
+        "eigen_cuts_full" => true,
+        "soc_linearized_cuts" => true,
+        "eigen_cuts_2minors"  => true,
+        "eigen_cuts_3minors"  => true
+    )
+
+    result = LaplacianOpt.run_LOpt(params, glpk_optimizer)
+    
+    @test result["termination_status"] == MOI.OPTIMAL
+    @test result["primal_status"] == MOI.FEASIBLE_POINT
+    @test isapprox(result["objective"], 7.8551986404, atol = 1E-6)
+    @test isapprox(result["solution"]["z_var"][1,4], 1.0)
+    @test isapprox(result["solution"]["z_var"][2,4], 1.0)
+end
