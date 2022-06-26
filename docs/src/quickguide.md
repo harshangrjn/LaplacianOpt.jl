@@ -2,17 +2,40 @@
 
 ## Getting started
 
-After the installation of LaplacianOpt and CPLEX (use GLPK if open-source is preferable) from the Julia package manager, and the cost matrix of the complete graph (for example, see [`examples/instances/5_nodes`](https://github.com/harshangrjn/LaplacianOpt.jl/tree/main/examples/instances/5_nodes)) is provided in the JSON format, an optimization model to maximize the algebraic connectivity of the weighted graph's Laplacian matrix can be executed with a few lines of code as follows:
+After the installation of LaplacianOpt and [Gurobi](https://github.com/jump-dev/Gurobi.jl) (use GLPK if an open-source mixed-integer solver is preferable) from the Julia package manager, provide user inputs based on your available graph data. [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl) supports input data either in the JSON format, or by directly providing a data dictionary. Here, is an example on providing a data dictionary as an input. However, check this example [script](https://github.com/harshangrjn/LaplacianOpt.jl/tree/main/examples/run_examples.jl) for providing data inputs using JSON files. A sample optimization model to maximize the algebraic connectivity of the weighted graph's Laplacian via edge augmentation can be executed with a few lines of code as follows:
 
 ```julia
 import LaplacianOpt as LOpt
 using JuMP
 using Gurobi
 
+function data()
+    data_dict = Dict{String, Any}()
+    data_dict["num_nodes"] = 4
+
+    # Base graph with 3 existing edges (fixed). Note this graph can also be empty. 
+    data_dict["adjacency_base_graph"] = [0 2 0 0
+                                         2 0 3 0 
+                                         0 3 0 4
+                                         0 0 4 0]
+
+    # Augmentation graph with 3 candidate edges
+    data_dict["adjacency_augment_graph"] = [0 0 4 8
+                                            0 0 0 7 
+                                            4 0 0 0
+                                            8 7 0 0]
+
+    # Augmentation budget on candidate edges
+    augment_budget = 2
+    return data_dict, augment_budget
+end
+
+data_dict, augment_budget = data()
+
 params = Dict{String, Any}(
-"num_nodes" => 5,
-"instance" => 1
-)
+    "data_dict"           => data_dict,
+    "augment_budget"      => augment_budget
+    )
 
 lopt_optimizer = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "presolve" => 1) 
 results = LOpt.run_LOpt(params, lopt_optimizer)
