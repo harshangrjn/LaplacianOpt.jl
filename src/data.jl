@@ -6,6 +6,8 @@ function get_data(params::Dict{String, Any})
         Memento.error(_LOGGER, "Data dictionary has to be specified in input params")
     end
 
+    data_dict = LOpt._pre_process_data(data_dict)
+
     num_nodes = data_dict["num_nodes"]
 
     if "augment_budget" in keys(params)
@@ -157,9 +159,6 @@ function parse_file(file_path::String)
 
     adjacency_base_graph    = Matrix{Float64}(zeros(num_nodes, num_nodes))
     adjacency_augment_graph = Matrix{Float64}(zeros(num_nodes, num_nodes))
-    
-    num_edges_existing   = 0 
-    num_edges_to_augment = 0 
 
     for k=1:length(data_dict["edges_existing"])
         i, j = data_dict["edges_existing"][k][1]
@@ -173,8 +172,6 @@ function parse_file(file_path::String)
         
         adjacency_base_graph[i,j] = w_ij
         adjacency_base_graph[j,i] = w_ij
-        
-        num_edges_existing += 1
     end
 
     for k=1:length(data_dict["edges_to_augment"])
@@ -189,7 +186,44 @@ function parse_file(file_path::String)
         
         adjacency_augment_graph[i,j] = w_ij
         adjacency_augment_graph[j,i] = w_ij
-        num_edges_to_augment += 1
+    end
+
+    data_dict_new = Dict{String, Any}("num_nodes"               => num_nodes,
+                                      "adjacency_base_graph"    => adjacency_base_graph,
+                                      "adjacency_augment_graph" => adjacency_augment_graph)
+    
+    return data_dict_new
+end
+
+function _pre_process_data(data_dict::Dict{String, Any})
+    num_edges_existing   = 0 
+    num_edges_to_augment = 0 
+
+    num_nodes               = data_dict["num_nodes"]
+    adjacency_base_graph    = data_dict["adjacency_base_graph"]
+    adjacency_augment_graph = data_dict["adjacency_augment_graph"]
+
+    for i=1:(num_nodes-1)
+        for j=(i+1):num_nodes
+            if isapprox(abs(adjacency_base_graph[i,j]), 0, atol = 1E-6)
+                adjacency_base_graph[i,j] = 0
+            end
+            if isapprox(abs(adjacency_augment_graph[i,j]), 0, atol = 1E-6)
+                adjacency_augment_graph[i,j] = 0
+            end
+            if !(isapprox(adjacency_base_graph[i,j], adjacency_base_graph[j,i], atol = 1E-5))
+                Memento.error("Adjacency matrix of the base graph has to be symmetric")
+            end
+            if !(isapprox(adjacency_augment_graph[i,j], adjacency_augment_graph[j,i], atol = 1E-5))
+                Memento.error("Adjacency matrix of the augment graph has to be symmetric")
+            end
+            if !(isapprox(adjacency_base_graph[i,j], 0, atol = 1E-6))
+                num_edges_existing += 1
+            end
+            if !(isapprox(adjacency_augment_graph[i,j], 0, atol = 1E-6))
+                num_edges_to_augment += 1
+            end
+        end
     end
 
     # Base graph connectivity
@@ -198,12 +232,13 @@ function parse_file(file_path::String)
         !(isapprox(abs(LOpt.algebraic_connectivity(adjacency_base_graph)), 0, atol=1E-6)) && (is_base_graph_connected = true) 
     end
 
-    data_dict_new = Dict{String, Any}("num_nodes"               => num_nodes,
-                                      "num_edges_existing"      => num_edges_existing,
-                                      "num_edges_to_augment"    => num_edges_to_augment,
-                                      "adjacency_base_graph"    => adjacency_base_graph,
-                                      "adjacency_augment_graph" => adjacency_augment_graph,
-                                      "is_base_graph_connected" => is_base_graph_connected)
+    data_dict_new = Dict{String, Any}()
+    data_dict_new["num_nodes"]               = num_nodes
+    data_dict_new["adjacency_base_graph"]    = adjacency_base_graph
+    data_dict_new["adjacency_augment_graph"] = adjacency_augment_graph
+    data_dict_new["num_edges_existing"]      = num_edges_existing
+    data_dict_new["num_edges_to_augment"]    = num_edges_to_augment
+    data_dict_new["is_base_graph_connected"] = is_base_graph_connected
     
     return data_dict_new
 end

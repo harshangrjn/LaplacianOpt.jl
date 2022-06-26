@@ -37,7 +37,9 @@ optimal_graph = LOpt.optimal_graph_edges(results["solution"]["z_var"])
 ```
 Further, algebraic connectivity and the Fiedler vector of the optimal graph topology (though can be applied on any graph topology) can be obtained from the adjacency matrix with,
 ```Julia
-optimal_adjacency = results["solution"]["z_var"] .* LOpt.get_data(params)["edge_weights"] 
+data = LOpt.get_data(params)
+adjacency_matrix = data["adjacency_base_graph"] + data["adjacency_augment_graph"]
+optimal_adjacency = results["solution"]["z_var"] .* adjacency_matrix 
 graph_data = LOpt.GraphData(optimal_adjacency)
 println("Algebraic connectivity: ", graph_data.ac)
 println("Fiedler vector: ", graph_data.fiedler)

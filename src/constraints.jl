@@ -49,7 +49,7 @@ function constraint_augment_edges_budget(lom::LaplacianOptModel)
     return
 end
 
-function constraint_lazycallback_wrapper(lom::LaplacianOptModel)
+function constraint_lazycallback_wrapper(lom::LaplacianOptModel; max_span_tree = false)
     
     function constraint_lazycallback_cuts(cb_cuts)
 
@@ -65,26 +65,30 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel)
             Memento.error(_LOGGER, "Callback status: unknown - solution may not be integer feasible")
 
         else status == MOI.CALLBACK_NODE_STATUS_INTEGER
-            
-            W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
 
-            if lom.data["eigen_cuts_full"]    
-                LOpt.constraint_eigen_cuts_on_full_matrix(W_val, cb_cuts, lom)
+            if !max_span_tree 
+                if lom.data["eigen_cuts_full"]    
+                    W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
+                    LOpt.constraint_eigen_cuts_on_full_matrix(W_val, cb_cuts, lom)
+                end
+
+                if lom.data["soc_linearized_cuts"]
+                    W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
+                    LOpt.constraint_soc_cuts_on_2minors(W_val, cb_cuts, lom)
+                end
+
+                if lom.data["eigen_cuts_2minors"]
+                    W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
+                    LOpt.constraint_eigen_cuts_on_2minors(W_val, cb_cuts, lom)
+                end
+
+                if lom.data["eigen_cuts_3minors"]
+                    W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
+                    LOpt.constraint_eigen_cuts_on_3minors(W_val, cb_cuts, lom)
+                end
             end
 
-            if lom.data["soc_linearized_cuts"]
-                LOpt.constraint_soc_cuts_on_2minors(W_val, cb_cuts, lom)
-            end
-
-            if lom.data["eigen_cuts_2minors"]
-                LOpt.constraint_eigen_cuts_on_2minors(W_val, cb_cuts, lom)
-            end
-
-            if lom.data["eigen_cuts_3minors"]
-                LOpt.constraint_eigen_cuts_on_3minors(W_val, cb_cuts, lom)
-            end
-
-            if !(lom.data["is_base_graph_connected"]) && (lom.data["topology_flow_cuts"])
+            if (!(lom.data["is_base_graph_connected"]) && (lom.data["topology_flow_cuts"])) || (max_span_tree)
                 z_val = abs.(JuMP.callback_value.(Ref(cb_cuts), lom.variables[:z_var]))         
                 LOpt.get_rounded_zeros_and_ones!(z_val, lom.data["tol_zero"])
                 LOpt.constraint_topology_flow_cuts(z_val, cb_cuts, lom)

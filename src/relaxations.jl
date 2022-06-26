@@ -15,7 +15,6 @@ function variable_domain(var::JuMP.VariableRef)
   (JuMP.is_binary(var)) && (ub = min(ub, 1.0))
 
   return (lower_bound=lb, upper_bound=ub)
-  
 end
 
 """

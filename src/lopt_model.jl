@@ -129,8 +129,8 @@ function constraint_MaxSpanTree_model(lom::LaplacianOptModel, lazy_callback::Boo
     LOpt.constraint_single_vertex_cutset(lom)
     LOpt.constraint_augment_edges_budget(lom)
     
-    if lazy_callback 
-        LOpt.constraint_lazycallback_wrapper(lom)
+    if lazy_callback
+        LOpt.constraint_lazycallback_wrapper(lom, max_span_tree = true)
     else
         LOpt.constraint_topology_multi_commodity_flow(lom)
     end

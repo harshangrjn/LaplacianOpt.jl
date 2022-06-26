@@ -1,11 +1,13 @@
 @testset "visualize_solution tests" begin
     
-    file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
-    include(file_path)
+    num_nodes = 5
+    instance  = 1
+    file_path = joinpath(@__DIR__, "..","examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json")
+    data_dict = LOpt.parse_file(file_path)
 
     params = Dict{String, Any}(
-        "num_nodes" => 5,
-        "instance" => 1,
+        "data_dict" => data_dict,
+        "augment_budget" => (num_nodes-1), 
         "tol_zero" => 1E-4,
         "tol_psd" => 1E-3,
         "eigen_cuts_full" => true,
