@@ -7,7 +7,7 @@ Building on the recent success of [Julia](https://julialang.org), [JuMP](https:/
 
 ```@raw html
 <align="center"/>
-<img width="550px" class="display-light-only" src="assets/LOpt_framework.png" alt="assets/LOpt_framework.png"/>
+<img width="550px" class="display-light-only" src="../assets/LOpt_framework.png" alt="../assets/LOpt_framework.png"/>
 ```
 
 ## Getting started
