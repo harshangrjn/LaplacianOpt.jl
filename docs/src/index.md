@@ -4,7 +4,7 @@
 <!-- <img width="700px" class="display-dark-only" src="assets/docs_header_dark.png" alt="assets/docs_header.png"/> -->
 ```
 
-# Documentation
+# Documentation 
 
 ```@meta
 CurrentModule = LaplacianOpt
