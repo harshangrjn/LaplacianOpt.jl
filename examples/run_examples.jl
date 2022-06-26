@@ -21,7 +21,7 @@ function data_I()
     # Data format has to be as given in this JSON file
     file_path = joinpath(@__DIR__, "instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json")
     data_dict = LOpt.parse_file(file_path)
-    augment_budget = (num_nodes-1)
+    augment_budget = (num_nodes-1) # spanning tree constraint
     return data_dict, augment_budget
 end
 
@@ -47,7 +47,7 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-data_dict, augment_budget = data_II()
+data_dict, augment_budget = data_I()
 
 params = Dict{String, Any}(
     "data_dict"           => data_dict,

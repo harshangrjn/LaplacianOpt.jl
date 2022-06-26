@@ -228,4 +228,30 @@ end
     @test isapprox(result["objective"], 7.8551986404, atol = 1E-6)
     @test isapprox(result["solution"]["z_var"][1,4], 1.0)
     @test isapprox(result["solution"]["z_var"][2,4], 1.0)
+
+    function data_II()
+        num_nodes = 5
+        instance  = 1
+        # Data format has to be as given in this JSON file
+        file_path = joinpath(@__DIR__, "..", "examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance)_test.json")
+        data_dict = LOpt.parse_file(file_path)
+        augment_budget = 3
+        return data_dict, augment_budget
+    end
+
+    data_dict, augment_budget = data_II()
+
+    params = Dict{String, Any}(
+        "data_dict" => data_dict,
+        "augment_budget" => augment_budget
+    )
+
+    result = LaplacianOpt.run_LOpt(params, glpk_optimizer)
+    
+    @test result["termination_status"] == MOI.OPTIMAL
+    @test result["primal_status"] == MOI.FEASIBLE_POINT
+    @test isapprox(result["objective"], 34.404789725, atol = 1E-6)
+    @test isapprox(result["solution"]["z_var"][1,4], 1.0)
+    @test isapprox(result["solution"]["z_var"][2,4], 1.0)
+    @test isapprox(result["solution"]["z_var"][2,5], 1.0)
 end
