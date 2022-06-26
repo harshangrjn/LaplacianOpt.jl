@@ -1,5 +1,5 @@
 <p align="center">
-<img width="790px" src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/logo.png" alt="https://github.com/harshangrjn/LaplacianOpt.jl/tree/master/docs/src/assets/docs_header_dark.png"/>
+<img width="700px" src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/logo.png" alt="https://github.com/harshangrjn/LaplacianOpt.jl/tree/master/docs/src/assets/docs_header_dark.png"/>
 </p>
 
 Status: 
@@ -7,7 +7,7 @@ Status:
 [![codecov](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl/branch/main/graph/badge.svg?token=7EKATOHLYL)](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl)
 [![Documentation](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/documentation.yml/badge.svg)](https://harshangrjn.github.io/LaplacianOpt.jl/dev/)
 ## LaplacianOpt
-**LaplacianOpt** is a Julia package which implements polyhedral relaxation-based algorithms for the maximimum algebraic connectivity augmentation problem on weighted graph Laplacians. More specifically, given a weighted base graph with existing edges (could be empty), a set of candidate weighted edges for augmentation, and an augmentation budget (`K`), this package finds a set of `K` edges to augment to the base graph such that the resulting graph has maximum algebraic conenctivity with optimality guarantees. For example, if the base graph with `N` vertices is empty, set of candidate edges form a complete graph, and `K = (N-1)`, this packages finds a spanning tree with maximum algebraic connectivity.
+**LaplacianOpt** is a Julia package which implements polyhedral relaxation-based algorithms for the maximimum algebraic connectivity augmentation problem on weighted graph Laplacians. More specifically, given a weighted base graph with existing edges (could be empty), a set of candidate weighted edges for augmentation, and an augmentation budget (`K`), this package finds a set of `K` edges to augment to the base graph such that the resulting graph has maximum algebraic conenctivity with optimality guarantees. For example, given a base graph with `N` vertices and `0` edges, set of candidate edges which form a complete graph, and `K = (N-1)`, this packages finds a spanning tree with maximum algebraic connectivity.
 
 [Algebraic connectivity](https://dml.cz/bitstream/handle/10338.dmlcz/101168/CzechMathJ_23-1973-2_11.pdf) is the second smallest eigenvalue of the graph Laplacian. The magnitude of this value reflects how well connected the overall graph is. This connectivity measure has been used in analyzing the robustness and synchronizability of complex networks, and in graph sparsification techniques. 
 

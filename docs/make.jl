@@ -19,8 +19,8 @@ makedocs(
     strict = true,
     authors = "Harsha Nagarajan",
     pages = [
-        "Introduction" => "index.md",
-        "Quick Start guide" => "quickguide.md",
+        "Introduction"        => "index.md",
+        "Quick Start guide"   => "quickguide.md",
         "Function References" => "function_references.md",
     ],
 )
