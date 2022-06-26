@@ -7,10 +7,10 @@ The composite mutable struct, `LaplacianOptModel`, holds dictionaries for input 
 variable references and result from solving the JuMP model.
 """
 mutable struct LaplacianOptModel 
-    data::Dict{String,Any}
-    model::JuMP.Model
-    variables::Dict{Symbol,Any}
-    result::Dict{String,Any}
+    data      :: Dict{String,Any}
+    model     :: JuMP.Model
+    variables :: Dict{Symbol,Any}
+    result    :: Dict{String,Any}
 
     "Contructor for struct `LaplacianOptModel`"
     function LaplacianOptModel(data::Dict{String,Any})
@@ -33,12 +33,12 @@ The composite mutable struct, `GraphData`, holds matrices of adjacency matrix, l
 fiedler vector and algebraic connectivity.
 """
 mutable struct GraphData
-    adjacency::Array{Float64}
-    laplacian::Array{Float64}
-    fiedler::Vector{Float64}
-    ac::Number
+    adjacency ::Array{<:Number}
+    laplacian ::Array{<:Number}
+    fiedler   ::Vector{<:Number}
+    ac        ::Number
     
-    function GraphData(adjacency::Array{Float64})
+    function GraphData(adjacency::Array{<:Number})
         adj_matrix = adjacency
         laplacian = LOpt.laplacian_matrix(adjacency)
         fiedler = LOpt.fiedler_vector(adjacency)

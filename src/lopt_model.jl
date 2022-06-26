@@ -1,7 +1,6 @@
 function build_LOModel(data::Dict{String, Any})
 
     lom = LaplacianOptModel(data)
-
     LOpt.variable_LOModel(lom)
     
     if lom.data["solution_type"] == "exact"
@@ -25,11 +24,8 @@ end
 function constraint_LOModel(lom::LaplacianOptModel)
     
     LOpt.constraint_build_W_var_matrix(lom)
-
-    LOpt.constraint_topology_no_self_loops(lom)
-    LOpt.constraint_topology_vertex_cutset(lom)
-    LOpt.constraint_topology_total_edges(lom)
-
+    LOpt.constraint_single_vertex_cutset(lom)
+    LOpt.constraint_augment_edges_budget(lom)
     LOpt.constraint_lazycallback_wrapper(lom)
     
     return
@@ -75,12 +71,10 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer=nothing)
     return lom.result
 end
 
-function run_LOpt_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz")
+function run_LOpt(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz")
 
-    data = LOpt.get_data(params)
-
+    data        = LOpt.get_data(params)
     model_lopt  = LOpt.build_LOModel(data)
-
     result_lopt = LOpt.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
 
     if visualize_solution
@@ -90,11 +84,9 @@ function run_LOpt_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerW
     return result_lopt
 end
 
-function run_MaxSpanTree_model(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz", lazy_callback = false)
-    data = LOpt.get_data(params)
-
-    model_mst = LOpt.build_MaxSpanTree_model(data, lazy_callback)
-
+function run_MaxSpanTree(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz", lazy_callback = false)
+    data       = LOpt.get_data(params)
+    model_mst  = LOpt.build_MaxSpanTree_model(data, lazy_callback)
     result_mst = LOpt.optimize_LOModel!(model_mst, optimizer = lom_optimizer)
 
     if visualize_solution
@@ -102,17 +94,13 @@ function run_MaxSpanTree_model(params::Dict{String, Any}, lom_optimizer::MOI.Opt
     end
 
     return result_mst
-
 end
 
 function build_MaxSpanTree_model(data::Dict{String, Any}, lazy_callback::Bool)
 
     m_mst = LaplacianOptModel(data)
-
     LOpt.variable_MaxSpanTree_model(m_mst, lazy_callback)
-    
     LOpt.constraint_MaxSpanTree_model(m_mst, lazy_callback)
-
     LOpt.objective_MaxSpanTree_model(m_mst)
 
     return m_mst
@@ -138,12 +126,11 @@ end
 
 function constraint_MaxSpanTree_model(lom::LaplacianOptModel, lazy_callback::Bool)
 
-    LOpt.constraint_topology_no_self_loops(lom)
-    LOpt.constraint_topology_vertex_cutset(lom)
-    LOpt.constraint_topology_total_edges(lom)
+    LOpt.constraint_single_vertex_cutset(lom)
+    LOpt.constraint_augment_edges_budget(lom)
     
-    if lazy_callback 
-        LOpt.constraint_lazycallback_wrapper(lom)
+    if lazy_callback
+        LOpt.constraint_lazycallback_wrapper(lom, max_span_tree = true)
     else
         LOpt.constraint_topology_multi_commodity_flow(lom)
     end

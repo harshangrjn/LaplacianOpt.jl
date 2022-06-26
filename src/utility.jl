@@ -1,4 +1,4 @@
-function get_rounded_zeros_and_ones!(v::Array{Float64}, tol_zero::Float64)
+function get_rounded_zeros_and_ones!(v::Array{<:Number}, tol_zero::Float64)
    
     for i in findall(abs.(v) .<= tol_zero)
         v[i] = 0
@@ -11,16 +11,15 @@ function get_rounded_zeros_and_ones!(v::Array{Float64}, tol_zero::Float64)
             v[i] = -1
         end
     end
-
 end 
 
 """
-    optimal_graph_edges(adjacency_matrix::Array{Float64}) 
+    optimal_graph_edges(adjacency_matrix::Array{<:Number}) 
 
 Returns a vector of tuples of edges corresponding 
 to an input adjacency matrix of the graph. 
 """
-function optimal_graph_edges(adjacency_matrix::Array{Float64})
+function optimal_graph_edges(adjacency_matrix::Array{<:Number})
 
     edges = Vector{Tuple{Int64, Int64}}()
     
@@ -48,11 +47,11 @@ function optimal_graph_edges(adjacency_matrix::Array{Float64})
 end
 
 """
-    laplacian_matrix(adjacency_matrix::Array{Float64}) 
+    laplacian_matrix(adjacency_matrix::Array{<:Number}) 
 
 Returns the weighted Laplacian matrix for an input weighted adjacency matrix of the graph. 
 """
-function laplacian_matrix(adjacency_matrix::Array{Float64})
+function laplacian_matrix(adjacency_matrix::Array{<:Number})
 
     if !LA.issymmetric(adjacency_matrix)
         Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
@@ -89,12 +88,12 @@ function laplacian_matrix(adjacency_matrix::Array{Float64})
 end
 
 """
-    fiedler_vector(adjacency_matrix::Array{Float64})
+    fiedler_vector(adjacency_matrix::Array{<:Number})
 
 Returns the Fiedler vector or the eigenvector corresponding to the 
 second smallest eigenvalue of the Laplacian matrix for an input weighted adjacency matrix of the graph. 
 """
-function fiedler_vector(adjacency_matrix::Array{Float64})
+function fiedler_vector(adjacency_matrix::Array{<:Number})
     
     L_mat = LOpt.laplacian_matrix(adjacency_matrix)
     ac    = LOpt.algebraic_connectivity(adjacency_matrix)
@@ -110,16 +109,55 @@ function fiedler_vector(adjacency_matrix::Array{Float64})
 end
 
 """
-    algebraic_connectivity(adjacency_matrix::Array{Float64}) 
+    algebraic_connectivity(adjacency_matrix::Array{<:Number}) 
     
 Returns the algebraic connectivity or the  
 second smallest eigenvalue of the Laplacian matrix, for an input weighted adjacency matrix of the graph. 
 """
-function algebraic_connectivity(adjacency_matrix::Array{Float64})
+function algebraic_connectivity(adjacency_matrix::Array{<:Number})
     
     L_mat = LOpt.laplacian_matrix(adjacency_matrix)
 
     ac = sort(LA.eigvals(L_mat))[2] 
     
     return ac
+end
+
+function _is_flow_cut_valid(cutset_f::Vector{Int64}, cutset_t::Vector{Int64}, adjacency::Array{<:Number})
+    for i in cutset_f
+        for j in cutset_t
+            if !(isapprox(adjacency[i,j], 0, atol = 1E-6))
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+"""
+    _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
+    
+Given a square symmetric matrix, this function returns an eigen vector corresponding to it's most 
+violated eigen value w.r.t positive semi-definiteness of the input matrix.  
+"""
+function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
+    W_eigvals = LA.eigvals(W)
+
+    if typeof(W_eigvals) != Vector{Float64}
+        Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
+    end
+
+    if LA.eigmin(W) <= -tol
+        
+        if W_eigvals[1] == LA.eigmin(W)
+            violated_eigen_vec = LA.eigvecs(W)[:,1]
+            LOpt.get_rounded_zeros_and_ones!(violated_eigen_vec, 1E-6)
+            return violated_eigen_vec
+        else
+            Memento.warn(_LOGGER, "Eigen cut corresponding to the negative eigenvalue could not be evaluated")
+        end
+    else
+        return
+    end
 end

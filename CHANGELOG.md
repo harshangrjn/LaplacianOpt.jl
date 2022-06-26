@@ -1,6 +1,17 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.2.0
+- Breaking changes: Major restructuring of data format and generalization for max. algebraic connectivity edge augmentation problem 
+- Data now takes a base graph with existing edges and the edges which can be augmented
+- User input on the budget of edges to be augmented 
+- data.jl updates to support new, generic data format 
+- Bug fix and clean-up in topology flow cuts for connected components
+- Added support for eigen cuts on 2x2 minors
+- Added support for eigen cuts on 3x3 minors
+- Added logo to the package
+- Docs and tests updated to reflect above changes
+
 ### v0.1.8
 - Added support for MOI v1.0+ 
 - Added support for Graphs v1.0+

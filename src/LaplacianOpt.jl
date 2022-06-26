@@ -9,8 +9,8 @@ import Graphs
 import TikzGraphs
 import TikzPictures
 
-const MOI = MathOptInterface
-const LA = LinearAlgebra
+const MOI  = MathOptInterface
+const LA   = LinearAlgebra
 const LOpt = LaplacianOpt
  
 # Create our module level logger (this will get precompiled)
