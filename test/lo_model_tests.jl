@@ -1,7 +1,4 @@
 @testset "Algebraic Connectivity: Optimal solution tests" begin
-    
-    # file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
-    # include(file_path)
 
     num_nodes = 5
     instance  = 1
@@ -57,9 +54,6 @@ end
     file_path = joinpath(@__DIR__, "..","examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json")
     data_dict = LOpt.parse_file(file_path)
 
-    # file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
-    # include(file_path)
-
     params = Dict{String, Any}(
         "data_dict"      => data_dict,
         "augment_budget" => (num_nodes-1)
@@ -82,9 +76,6 @@ end
 end
 
 @testset "Max Span Tree: Lazy callback tests" begin
-
-    # file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
-    # include(file_path)
 
     num_nodes = 15
     instance  = 1
@@ -125,9 +116,6 @@ end
 end
 
 @testset "SOC relaxations - 1: constraint_soc_cuts_on_2minors" begin
-
-    # file_path = joinpath(@__DIR__,"..", "examples/optimizer.jl")
-    # include(file_path)
 
     num_nodes = 5
     instance  = 5
@@ -232,7 +220,6 @@ end
     function data_II()
         num_nodes = 5
         instance  = 1
-        # Data format has to be as given in this JSON file
         file_path = joinpath(@__DIR__, "..", "examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance)_test.json")
         data_dict = LOpt.parse_file(file_path)
         augment_budget = 3
