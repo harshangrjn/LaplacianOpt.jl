@@ -1,8 +1,18 @@
 # Quick Start Guide
 
+## Framework
+Building on the recent success of [Julia](https://julialang.org), [JuMP](https://github.com/jump-dev/JuMP.jl) and mixed-integer programming (MIP) solvers, [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl), is an open-source toolkit for the problem of maximum algebraic connectivity augmentation on graphs. As illustrated in the figure below, LaplacianOpt is written in Julia, a relatively new and fast dynamic programming language used for technical computing with support for extensible type system and meta-programming. At a high level, this package provides an abstraction layer to achieve two primary goals:
+1. To capture user-specified inputs, such as the number of vertices of the graph, adjacency matrices of existing and augmentation graphs, and an augmentation budget, and to build a JuMP model of an MIP formulation with convex relaxations, and 
+2. To extract, analyze and post-process the solution from the JuMP model and to provide optimal connected graphs with maximum algebraic connectivity.
+
+```@raw html
+<align="center"/>
+<img width="550px" class="display-light-only" src="assets/LOpt_framework.png" alt="assets/LOpt_framework.png"/>
+```
+
 ## Getting started
 
-After the installation of LaplacianOpt and [Gurobi](https://github.com/jump-dev/Gurobi.jl) (use GLPK if an open-source mixed-integer solver is preferable) from the Julia package manager, provide user inputs based on your available graph data. [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl) supports input data either in the JSON format, or by directly providing a data dictionary. Here, is an example on providing a data dictionary as an input. However, check this example [script](https://github.com/harshangrjn/LaplacianOpt.jl/tree/main/examples/run_examples.jl) for providing data inputs using JSON files. A sample optimization model to maximize the algebraic connectivity of the weighted graph's Laplacian via edge augmentation can be executed with a few lines of code as follows:
+After the installation of [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl) and a MIP solver, [Gurobi.jl](https://github.com/jump-dev/Gurobi.jl) (use [GLPK](https://github.com/jump-dev/GLPK.jl) for an open-source MIP solver), from the Julia package manager, provide user inputs based on your available graph data. LaplacianOpt supports input data either in the JSON format, or by directly providing a data dictionary. Here, is an example on providing a data dictionary as an input. However, check this example [script](https://github.com/harshangrjn/LaplacianOpt.jl/tree/master/examples/run_examples.jl) for providing data inputs using JSON files. A sample optimization model to maximize the algebraic connectivity of the weighted graph's Laplacian via edge augmentation can be executed with a few lines of code as follows:
 
 ```julia
 import LaplacianOpt as LOpt
@@ -14,16 +24,10 @@ function data()
     data_dict["num_nodes"] = 4
 
     # Base graph with 3 existing edges (fixed). Note this graph can also be empty. 
-    data_dict["adjacency_base_graph"] = [0 2 0 0
-                                         2 0 3 0 
-                                         0 3 0 4
-                                         0 0 4 0]
+    data_dict["adjacency_base_graph"] = [0 2 0 0; 2 0 3 0; 0 3 0 4; 0 0 4 0]
 
     # Augmentation graph with 3 candidate edges
-    data_dict["adjacency_augment_graph"] = [0 0 4 8
-                                            0 0 0 7 
-                                            4 0 0 0
-                                            8 7 0 0]
+    data_dict["adjacency_augment_graph"] = [0 0 4 8; 0 0 0 7; 4 0 0 0; 8 7 0 0]
 
     # Augmentation budget on candidate edges
     augment_budget = 2

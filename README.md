@@ -1,5 +1,5 @@
 <p align="center">
-<img width="700px" src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/logo.png" alt="https://github.com/harshangrjn/LaplacianOpt.jl/tree/master/docs/src/assets/docs_header_dark.png"/>
+<img width="680px" src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/logo.png" alt="https://github.com/harshangrjn/LaplacianOpt.jl/tree/master/docs/src/assets/docs_header_dark.png"/>
 </p>
 
 Status: 
