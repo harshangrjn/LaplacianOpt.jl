@@ -1,3 +1,9 @@
+"""
+    get_data(params::Dict{String, Any})
+
+Given the input params, this function preprocesses the data, catches any error and missing data, 
+and outputs a detailed dictionary which forms the basis for building an optimization model. 
+"""
 function get_data(params::Dict{String, Any})
     
     if "data_dict" in keys(params)
@@ -244,6 +250,12 @@ function _pre_process_data(data_dict::Dict{String, Any})
     return data_dict_new
 end
 
+"""
+    _catch_data_input_error(num_nodes::Int64, i::Int64, j::Int64, w_ij::Number)
+
+Given the number of nodes, from and to nodes of an edge, and an edge weight, this function catches 
+any input data error in the JSON file. 
+"""
 function _catch_data_input_error(num_nodes::Int64, i::Int64, j::Int64, w_ij::Number)
     if (i > num_nodes) || (j > num_nodes)
         Memento.error(_LOGGER, "Node pair ($i,$j) does not match with total number of nodes, $num_nodes")
@@ -254,6 +266,12 @@ function _catch_data_input_error(num_nodes::Int64, i::Int64, j::Int64, w_ij::Num
     end
 end
 
+"""
+    _detect_infeasbility_in_data(data::Dict{String, Any})
+
+Given the pre-processed data dictionary, this function detects any infeasibility before 
+building the optimization model. 
+"""
 function _detect_infeasbility_in_data(data::Dict{String, Any})
    
     num_nodes = data["num_nodes"]

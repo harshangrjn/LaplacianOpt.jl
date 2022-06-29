@@ -90,7 +90,7 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel; max_span_tree =
 
             if (!(lom.data["is_base_graph_connected"]) && (lom.data["topology_flow_cuts"])) || (max_span_tree)
                 z_val = abs.(JuMP.callback_value.(Ref(cb_cuts), lom.variables[:z_var]))         
-                LOpt.get_rounded_zeros_and_ones!(z_val, lom.data["tol_zero"])
+                LOpt.get_rounded_zeros_and_ones!(z_val)
                 LOpt.constraint_topology_flow_cuts(z_val, cb_cuts, lom)
             end
         end 

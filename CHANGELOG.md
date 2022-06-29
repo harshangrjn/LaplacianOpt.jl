@@ -4,6 +4,7 @@ LaplacianOpt.jl Change Log
 ### v0.2.1
 - Update in `log.jl` for handling close to zero integral solutions before rounding
 - Update in `lopt_model.jl` to handle displaying edge wts in plotting 
+- Updated function references (for docs) in `data.jl` and `utility.jl`
 
 ### v0.2.0
 - Breaking changes: Major restructuring of data format and generalization for max. algebraic connectivity edge augmentation problem 

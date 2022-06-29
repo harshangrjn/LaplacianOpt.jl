@@ -1,10 +1,15 @@
-function get_rounded_zeros_and_ones!(v::Array{<:Number}, tol_zero::Float64)
+"""
+    get_rounded_zeros_and_ones!(v::Array{<:Number}; tol = 1E-6)
+
+Given a vector of numbers, this function updates the input vector by rounding the values closest to 0, 1 and -1. 
+"""
+function get_rounded_zeros_and_ones!(v::Array{<:Number}; tol = 1E-6)
    
-    for i in findall(abs.(v) .<= tol_zero)
+    for i in findall(abs.(v) .<= tol)
         v[i] = 0
     end
 
-    for i in findall(((1-tol_zero) .<= abs.(v) .<= (1+tol_zero)))
+    for i in findall(((1-tol) .<= abs.(v) .<= (1+tol)))
         if v[i] > 0 
             v[i] = 1
         elseif v[i] < 0 
@@ -49,7 +54,8 @@ end
 """
     laplacian_matrix(adjacency_matrix::Array{<:Number}) 
 
-Returns the weighted Laplacian matrix for an input weighted adjacency matrix of the graph. 
+Given a weighted adjacency matrix as an input, this function returns the 
+weighted Laplacian matrix of the graph. 
 """
 function laplacian_matrix(adjacency_matrix::Array{<:Number})
 
@@ -123,7 +129,15 @@ function algebraic_connectivity(adjacency_matrix::Array{<:Number})
     return ac
 end
 
-function _is_flow_cut_valid(cutset_f::Vector{Int64}, cutset_t::Vector{Int64}, adjacency::Array{<:Number})
+"""
+    _is_flow_cut_valid(cutset_f::Vector{Int64}, cutset_t::Vector{Int64}, adjacency::Array{<:Number})
+
+Given from and to sets of vertices of connected components of a graph, this function returns a 
+boolean if a candidate edge exists to augment or not, between these two sets of vertices. 
+"""
+function _is_flow_cut_valid(cutset_f::Vector{Int64}, 
+                            cutset_t::Vector{Int64}, 
+                            adjacency::Array{<:Number})
     for i in cutset_f
         for j in cutset_t
             if !(isapprox(adjacency[i,j], 0, atol = 1E-6))
@@ -152,7 +166,7 @@ function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
         
         if W_eigvals[1] == LA.eigmin(W)
             violated_eigen_vec = LA.eigvecs(W)[:,1]
-            LOpt.get_rounded_zeros_and_ones!(violated_eigen_vec, 1E-6)
+            LOpt.get_rounded_zeros_and_ones!(violated_eigen_vec)
             return violated_eigen_vec
         else
             Memento.warn(_LOGGER, "Eigen cut corresponding to the negative eigenvalue could not be evaluated")
