@@ -1,12 +1,16 @@
 import LaplacianOpt as LOpt
 using JuMP
-using Gurobi
+# using Gurobi
+using CPLEX
 # using GLPK
-# using CPLEX
 
 include("optimizer.jl")
 
-lopt_optimizer = get_gurobi()
+#----------------------------------------#
+#         User-defined MIP solver        #
+# (Cplex 20.1 seems to perform the best) #
+#----------------------------------------#
+lopt_optimizer = get_cplex()
 
 #-------------------------------------#
 #      User-defined input graphs      #
@@ -41,7 +45,7 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-data_dict, augment_budget = data_I()
+data_dict, augment_budget = data_II()
 
 params = Dict{String, Any}(
     "data_dict"           => data_dict,
@@ -52,13 +56,13 @@ params = Dict{String, Any}(
     "eigen_cuts_3minors"  => false
     )
 
-#-------------------------------------------#
-#      Optimization model and solution      #
-#-------------------------------------------#
-result = LOpt.run_LOpt(params, lopt_optimizer)
-
-#------------------------------------#
-#      Visualize solution graph      #
-#------------------------------------#
-# data = LOpt.get_data(params)
-# LOpt.visualize_solution(result, data; display_edge_weights = false)
+#----------------------------------------------------------------#
+#      Optimization model and visualize solution (optional)      #
+#   Graph plots can be located inside `examples/plots` folder    #
+#----------------------------------------------------------------#
+result = LOpt.run_LOpt(params, 
+                       lopt_optimizer;
+                       # Make this true to plot the graph solution
+                       visualize_solution   = false,   
+                       visualizing_tool     = "tikz", # "graphviz" is another option
+                       display_edge_weights = false)

@@ -1,8 +1,12 @@
-function visualize_solution(results::Dict{String, Any}, data::Dict{String, Any}; visualizing_tool = "tikz", plot_file_format = "pdf", display_edge_weights = true)
+function visualize_solution(results::Dict{String, Any}, data::Dict{String, Any}; 
+                            visualizing_tool = "tikz", 
+                            plot_file_format = "pdf", 
+                            display_edge_weights = true)
     
     num_edges_existing      = data["num_edges_existing"]
     adjacency_base_graph    = data["adjacency_base_graph"]
     adjacency_augment_graph = data["adjacency_augment_graph"]
+
     adjacency_full_graph    = adjacency_augment_graph
     (num_edges_existing > 0) && (adjacency_full_graph += adjacency_base_graph)
 
@@ -14,9 +18,13 @@ function visualize_solution(results::Dict{String, Any}, data::Dict{String, Any};
         Memento.info(_LOGGER, "Plotting the graph of integral solution")
         
         if visualizing_tool == "tikz"
-            LOpt.plot_tikzgraph(results["solution"]["z_var"] .* adjacency_full_graph, plot_file_format = plot_file_format, display_edge_weights = display_edge_weights)
+            LOpt.plot_tikzgraph(results["solution"]["z_var"] .* adjacency_full_graph, 
+                                plot_file_format = plot_file_format, 
+                                display_edge_weights = display_edge_weights)
+
         elseif visualizing_tool == "graphviz"
-            LOpt.plot_graphviz(results["solution"]["z_var"] .* adjacency_full_graph, display_edge_weights = display_edge_weights)
+            LOpt.plot_graphviz(results["solution"]["z_var"] .* adjacency_full_graph, 
+                               display_edge_weights = display_edge_weights)
         end
 
     else 
@@ -25,7 +33,9 @@ function visualize_solution(results::Dict{String, Any}, data::Dict{String, Any};
     end
 end
 
-function plot_tikzgraph(adjacency_matrix::Matrix{<:Number}; plot_file_format = "pdf", display_edge_weights = false)
+function plot_tikzgraph(adjacency_matrix::Matrix{<:Number}; 
+                        plot_file_format = "pdf", 
+                        display_edge_weights = false)
 
     num_nodes      = size(adjacency_matrix)[1]
     solution_graph = Graphs.SimpleGraph(num_nodes)
@@ -34,7 +44,7 @@ function plot_tikzgraph(adjacency_matrix::Matrix{<:Number}; plot_file_format = "
     for i=1:(num_nodes-1)
         for j=(i+1):num_nodes
 
-            if !isapprox(adjacency_matrix[i,j], 0, atol=1E-6)
+            if !isapprox(abs(adjacency_matrix[i,j]), 0, atol=1E-6)
                 Graphs.add_edge!(solution_graph, i, j)
                 edge_labels[(i,j)] = string(ceil(adjacency_matrix[i,j], digits=2))
             end
@@ -44,9 +54,14 @@ function plot_tikzgraph(adjacency_matrix::Matrix{<:Number}; plot_file_format = "
 
     if display_edge_weights
         # Plot with edge weights - graphs do not look great
-        t = TikzGraphs.plot(solution_graph, edge_labels=edge_labels, node_style="draw, rounded corners, fill=blue!10", TikzGraphs.Layouts.SpringElectrical())
+        t = TikzGraphs.plot(solution_graph, 
+                            edge_labels=edge_labels, 
+                            node_style="draw, rounded corners, fill=blue!10", 
+                            TikzGraphs.Layouts.SpringElectrical())
     else
-        t = TikzGraphs.plot(solution_graph, node_style="draw, rounded corners, fill=blue!10", TikzGraphs.Layouts.SpringElectrical())
+        t = TikzGraphs.plot(solution_graph, 
+                            node_style="draw, rounded corners, fill=blue!10", 
+                            TikzGraphs.Layouts.SpringElectrical())
     end
 
     file_path = joinpath(dirname(pathof(LaplacianOpt)),"..", "examples/plots/plot_$(num_nodes)")
@@ -59,7 +74,8 @@ function plot_tikzgraph(adjacency_matrix::Matrix{<:Number}; plot_file_format = "
     
 end
 
-function plot_graphviz(adjacency_matrix::Matrix{<:Number}; display_edge_weights = true)
+function plot_graphviz(adjacency_matrix::Matrix{<:Number}; 
+                       display_edge_weights = true)
     
     num_nodes = size(adjacency_matrix)[1]
     file_path = joinpath(dirname(pathof(LaplacianOpt)),"..", "examples/plots/plot_$(num_nodes).dot")
@@ -74,7 +90,7 @@ function plot_graphviz(adjacency_matrix::Matrix{<:Number}; display_edge_weights 
 
         for i=1:(num_nodes-1)
             for j=(i+1):num_nodes
-                if !isapprox(adjacency_matrix[i,j], 0, atol=1E-6)  
+                if !isapprox(abs(adjacency_matrix[i,j]), 0, atol=1E-6)  
                     if display_edge_weights 
                         w_ij = string(ceil(adjacency_matrix[i,j], digits=3))
                         write(file, "$i -- $j [label = \"$w_ij\", fontsize=9, fontname=\"Helvetica\"]; \n")

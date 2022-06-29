@@ -55,7 +55,6 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer=nothing)
     end
     
     start_time = time()
-
     _, solve_time, solve_bytes_alloc, sec_in_gc = @timed JuMP.optimize!(lom.model)
 
     try
@@ -65,32 +64,47 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer=nothing)
     end
     
     Memento.debug(_LOGGER, "JuMP model optimize time: $(time() - start_time)")
-    
     lom.result = LOpt.build_LOModel_result(lom, solve_time) 
 
     return lom.result
 end
 
-function run_LOpt(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz")
+function run_LOpt(params::Dict{String, Any}, 
+                  lom_optimizer::MOI.OptimizerWithAttributes; 
+                  visualize_solution = false, 
+                  visualizing_tool = "tikz",
+                  display_edge_weights = false)
 
     data        = LOpt.get_data(params)
     model_lopt  = LOpt.build_LOModel(data)
     result_lopt = LOpt.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
 
     if visualize_solution
-        LOpt.visualize_solution(result_lopt, data, visualizing_tool = visualizing_tool)
+        LOpt.visualize_solution(result_lopt, 
+                                data, 
+                                visualizing_tool = visualizing_tool, 
+                                display_edge_weights = display_edge_weights)
     end
 
     return result_lopt
 end
 
-function run_MaxSpanTree(params::Dict{String, Any}, lom_optimizer::MOI.OptimizerWithAttributes; visualize_solution = false, visualizing_tool = "graphviz", lazy_callback = false)
+function run_MaxSpanTree(params::Dict{String, Any}, 
+                         lom_optimizer::MOI.OptimizerWithAttributes; 
+                         visualize_solution = false, 
+                         visualizing_tool = "tikz",
+                         display_edge_weights = false, 
+                         lazy_callback = false)
+
     data       = LOpt.get_data(params)
     model_mst  = LOpt.build_MaxSpanTree_model(data, lazy_callback)
     result_mst = LOpt.optimize_LOModel!(model_mst, optimizer = lom_optimizer)
 
     if visualize_solution
-        LOpt.visualize_solution(result_mst, data, visualizing_tool = visualizing_tool)
+        LOpt.visualize_solution(result_mst, 
+                                data, 
+                                visualizing_tool = visualizing_tool,
+                                display_edge_weights = display_edge_weights)
     end
 
     return result_mst

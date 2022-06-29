@@ -23,7 +23,8 @@ function get_data(params::Dict{String, Any})
     end
 
     Memento.info(_LOGGER, "Number of edges in the base graph: $(data_dict["num_edges_existing"])")
-    Memento.info(_LOGGER, "Number of edges available to augment: $(data_dict["num_edges_to_augment"])")
+    Memento.info(_LOGGER, "Number of candidate edges to augment: $(data_dict["num_edges_to_augment"])")
+    Memento.info(_LOGGER, "Augment budget: $(augment_budget)")
 
     # Solution type 
     if "solution_type" in keys(params)
