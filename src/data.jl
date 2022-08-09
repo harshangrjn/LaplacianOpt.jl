@@ -39,12 +39,23 @@ function get_data(params::Dict{String, Any})
         solution_type = "exact"
     end
 
-    # Relax Integrality 
+    # Relax integrality 
     if "relax_integrality" in keys(params)
         relax_integrality = params["relax_integrality"]
     else
         # default value
         relax_integrality = false
+    end
+
+    # Graph type
+    if "graph_type" in keys(params)
+        graph_type = params["graph_type"]
+        if !(graph_type in ["any", "hamiltonian_cycle"])
+            Memento.error(_LOGGER, "Invalid graph type, $graph_type, in input params")
+        end
+    else
+        # default value
+        graph_type = "any"
     end
 
     # Tolerance to verify zero values
@@ -134,6 +145,7 @@ function get_data(params::Dict{String, Any})
                              "adjacency_augment_graph" => data_dict["adjacency_augment_graph"],
                              "is_base_graph_connected" => data_dict["is_base_graph_connected"],
                              "solution_type"           => solution_type,
+                             "graph_type"              => graph_type,
                              "tol_zero"                => tol_zero,
                              "tol_psd"                 => tol_psd,
                              "eigen_cuts_full"         => eigen_cuts_full,
@@ -299,4 +311,12 @@ function _detect_infeasbility_in_data(data::Dict{String, Any})
             Memento.error(_LOGGER, "Detected trivial solutions with disconnected graphs due to free vertices.")
         end
     end
+
+    # Detect tour infeasibility
+    if (data["graph_type"] == "hamiltonian_cycle") && (data["num_edges_existing"] == 0) 
+        if !(data["num_edges_to_augment"] >= data["num_nodes"]) || !(data["augment_budget"] == data["num_nodes"])
+            Memento.error(_LOGGER, "Detected infeasibility due to the number of augmentation edges incompatible for a hamiltonian cycle")
+        end
+    end
+
 end

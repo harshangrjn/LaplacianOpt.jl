@@ -1,7 +1,7 @@
 import LaplacianOpt as LOpt
 using JuMP
-# using Gurobi
 using CPLEX
+# using Gurobi
 # using GLPK
 
 include("optimizer.jl")
@@ -53,7 +53,8 @@ params = Dict{String, Any}(
     "eigen_cuts_full"     => true,
     "soc_linearized_cuts" => false,
     "eigen_cuts_2minors"  => false,
-    "eigen_cuts_3minors"  => false
+    "eigen_cuts_3minors"  => false,
+    # "graph_type"          => "hamiltonian_cycle"
     )
 
 #----------------------------------------------------------------#
@@ -62,7 +63,6 @@ params = Dict{String, Any}(
 #----------------------------------------------------------------#
 result = LOpt.run_LOpt(params, 
                        lopt_optimizer;
-                       # Make this true to plot the graph solution
-                       visualize_solution   = false,   
+                       visualize_solution   = false,  # Make this true to plot the graph solution
                        visualizing_tool     = "tikz", # "graphviz" is another option
                        display_edge_weights = false)
