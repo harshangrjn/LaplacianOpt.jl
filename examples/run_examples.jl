@@ -54,6 +54,7 @@ params = Dict{String, Any}(
     "soc_linearized_cuts" => false,
     "eigen_cuts_2minors"  => false,
     "eigen_cuts_3minors"  => false,
+    "topology_flow_cuts"  => true,
     # "graph_type"          => "hamiltonian_cycle"
     )
 

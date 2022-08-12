@@ -126,7 +126,17 @@ function get_data(params::Dict{String, Any})
         topology_flow_cuts = true
     end
 
-    if eigen_cuts_full || topology_flow_cuts || soc_linearized_cuts
+    if "topology_multi_commodity" in keys(params)
+        topology_multi_commodity = params["topology_multi_commodity"]
+    elseif data_dict["is_base_graph_connected"]
+        Memento.info(_LOGGER, "Deactivating topology multi commodity formulation as the base graph is connected")
+        topology_multi_commodity = false
+    else
+        #default value
+        topology_multi_commodity = false
+    end
+
+    if eigen_cuts_full || topology_flow_cuts || soc_linearized_cuts || eigen_cuts_2minors || eigen_cuts_3minors
         lazy_callback_status = true
     end
 
@@ -137,25 +147,26 @@ function get_data(params::Dict{String, Any})
         lazycuts_logging = false
     end
 
-    data = Dict{String, Any}("num_nodes"               => num_nodes,
-                             "num_edges_existing"      => data_dict["num_edges_existing"],
-                             "num_edges_to_augment"    => data_dict["num_edges_to_augment"],
-                             "augment_budget"          => augment_budget,
-                             "adjacency_base_graph"    => data_dict["adjacency_base_graph"],
-                             "adjacency_augment_graph" => data_dict["adjacency_augment_graph"],
-                             "is_base_graph_connected" => data_dict["is_base_graph_connected"],
-                             "solution_type"           => solution_type,
-                             "graph_type"              => graph_type,
-                             "tol_zero"                => tol_zero,
-                             "tol_psd"                 => tol_psd,
-                             "eigen_cuts_full"         => eigen_cuts_full,
-                             "soc_linearized_cuts"     => soc_linearized_cuts,
-                             "eigen_cuts_2minors"      => eigen_cuts_2minors,
-                             "eigen_cuts_3minors"      => eigen_cuts_3minors,
-                             "lazycuts_logging"        => lazycuts_logging,
-                             "topology_flow_cuts"      => topology_flow_cuts,
-                             "lazy_callback_status"    => lazy_callback_status,
-                             "relax_integrality"       => relax_integrality)
+    data = Dict{String, Any}("num_nodes"                => num_nodes,
+                             "num_edges_existing"       => data_dict["num_edges_existing"],
+                             "num_edges_to_augment"     => data_dict["num_edges_to_augment"],
+                             "augment_budget"           => augment_budget,
+                             "adjacency_base_graph"     => data_dict["adjacency_base_graph"],
+                             "adjacency_augment_graph"  => data_dict["adjacency_augment_graph"],
+                             "is_base_graph_connected"  => data_dict["is_base_graph_connected"],
+                             "solution_type"            => solution_type,
+                             "graph_type"               => graph_type,
+                             "tol_zero"                 => tol_zero,
+                             "tol_psd"                  => tol_psd,
+                             "eigen_cuts_full"          => eigen_cuts_full,
+                             "soc_linearized_cuts"      => soc_linearized_cuts,
+                             "eigen_cuts_2minors"       => eigen_cuts_2minors,
+                             "eigen_cuts_3minors"       => eigen_cuts_3minors,
+                             "lazycuts_logging"         => lazycuts_logging,
+                             "topology_flow_cuts"       => topology_flow_cuts,
+                             "topology_multi_commodity" => topology_multi_commodity,
+                             "lazy_callback_status"     => lazy_callback_status,
+                             "relax_integrality"        => relax_integrality)
 
     # Optimizer
     if "optimizer" in keys(params)
