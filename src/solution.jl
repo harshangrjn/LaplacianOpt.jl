@@ -16,13 +16,15 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
     end
 
     result = Dict{String,Any}(
-        "optimizer" => JuMP.solver_name(lom.model),
-        "termination_status" => JuMP.termination_status(lom.model),
-        "primal_status" => JuMP.primal_status(lom.model),
-        "objective" => get_objective_value(lom.model),
-        "objective_ub" => get_objective_bound(lom.model),
-        "solve_time" => solve_time,
-        "solution" => solution,
+        "optimizer"               => JuMP.solver_name(lom.model),
+        "termination_status"      => JuMP.termination_status(lom.model),
+        "primal_status"           => JuMP.primal_status(lom.model),
+        "objective"               => get_objective_value(lom.model),
+        "objective_ub"            => get_objective_bound(lom.model),
+        "solve_time"              => solve_time,
+        "solution"                => solution,
+        "adjacency_base_graph"    => lom.data["adjacency_base_graph"],
+        "adjacency_augment_graph" => lom.data["adjacency_augment_graph"],
     )
 
     return result

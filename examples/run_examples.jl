@@ -1,7 +1,7 @@
 import LaplacianOpt as LOpt
 using JuMP
-# using Gurobi
 using CPLEX
+# using Gurobi
 # using GLPK
 
 include("optimizer.jl")
@@ -29,7 +29,7 @@ function data_I()
     return data_dict, augment_budget
 end
 
-#=
+#=  
  Option II: Directly input the data dictionary (data_dict) with 
             num_nodes, adjacency_base_graph and adjacency_augment_graph
 =#
@@ -38,7 +38,7 @@ function data_II()
     data_dict["num_nodes"] = 4
     data_dict["adjacency_base_graph"] = [0 2 0 0; 2 0 3 0; 0 3 0 4; 0 0 4 0]
     data_dict["adjacency_augment_graph"] = [0 0 4 8; 0 0 0 7; 4 0 0 0; 8 7 0 0]
-    augment_budget = 2
+    augment_budget = 3
     return data_dict, augment_budget
 end
 
@@ -53,7 +53,9 @@ params = Dict{String, Any}(
     "eigen_cuts_full"     => true,
     "soc_linearized_cuts" => false,
     "eigen_cuts_2minors"  => false,
-    "eigen_cuts_3minors"  => false
+    "eigen_cuts_3minors"  => false,
+    "topology_flow_cuts"  => true,
+    # "time_limit"          => 3600,
     )
 
 #----------------------------------------------------------------#
@@ -62,7 +64,6 @@ params = Dict{String, Any}(
 #----------------------------------------------------------------#
 result = LOpt.run_LOpt(params, 
                        lopt_optimizer;
-                       # Make this true to plot the graph solution
-                       visualize_solution   = false,   
+                       visualize_solution   = false,  # Make this true to plot the graph solution
                        visualizing_tool     = "tikz", # "graphviz" is another option
                        display_edge_weights = false)

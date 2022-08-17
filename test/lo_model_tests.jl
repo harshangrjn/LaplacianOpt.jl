@@ -169,7 +169,8 @@ end
         "augment_budget" => (num_nodes-1),
         "eigen_cuts_full" => true,
         "eigen_cuts_2minors"  => true,
-        "eigen_cuts_3minors"  => true
+        "eigen_cuts_3minors"  => true,
+        "topology_multi_commodity" => true
     )
 
     result_1 = LaplacianOpt.run_LOpt(params_1, glpk_optimizer)
@@ -206,7 +207,8 @@ end
         "eigen_cuts_full" => true,
         "soc_linearized_cuts" => true,
         "eigen_cuts_2minors"  => true,
-        "eigen_cuts_3minors"  => true
+        "eigen_cuts_3minors"  => true,
+        "topology_multi_commodity" => true,
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer)
@@ -241,4 +243,60 @@ end
     @test isapprox(result["solution"]["z_var"][1,4], 1.0)
     @test isapprox(result["solution"]["z_var"][2,4], 1.0)
     @test isapprox(result["solution"]["z_var"][2,5], 1.0)
+end
+
+@testset "Test hamiltonian cycle problem" begin
+    function data_II()
+        data_dict = Dict{String, Any}()
+        data_dict["num_nodes"] = 5
+        data_dict["adjacency_base_graph"] = zeros(5,5)
+        data_dict["adjacency_augment_graph"] = [0 10 14 12 15; 10 0 9 6 7; 14 9 0 8 9; 12 6 8 0 3; 15 7 9 3 0]
+        augment_budget = 5
+        return data_dict, augment_budget
+    end
+    data_dict, augment_budget = data_II()
+
+    params = Dict{String, Any}(
+        "data_dict" => data_dict,
+        "augment_budget" => augment_budget,
+        "eigen_cuts_full" => true,
+        "graph_type" => "hamiltonian_cycle"
+    )
+
+    result = LaplacianOpt.run_LOpt(params, glpk_optimizer)
+    
+    @test result["termination_status"] == MOI.OPTIMAL
+    @test result["primal_status"] == MOI.FEASIBLE_POINT
+    @test isapprox(result["objective"], 11.53910488161, atol = 1E-6)
+    @test isapprox(result["solution"]["z_var"][1,3], 1.0)
+    @test isapprox(result["solution"]["z_var"][1,5], 1.0)
+    @test isapprox(result["solution"]["z_var"][2,4], 1.0)
+    @test isapprox(result["solution"]["z_var"][2,5], 1.0)
+    @test isapprox(result["solution"]["z_var"][3,4], 1.0)
+end
+
+@testset "Test topology flow cuts" begin
+    function data_I()
+        num_nodes = 8
+        instance  = 1
+        file_path = joinpath(@__DIR__, "..", "examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json")
+        data_dict = LOpt.parse_file(file_path)
+        augment_budget = 7
+        return data_dict, augment_budget
+    end
+
+    data_dict, augment_budget = data_I()
+
+    params = Dict{String, Any}(
+        "data_dict"           => data_dict,
+        "augment_budget"      => augment_budget,
+        "eigen_cuts_full"     => false,
+        "eigen_cuts_2minors"  => true,
+        "topology_flow_cuts"  => true,
+        "time_limit"          => 1.5,
+    )
+
+    result = LaplacianOpt.run_LOpt(params, glpk_optimizer)
+    @test result["termination_status"] == MOI.TIME_LIMIT
+    @test result["primal_status"] == MOI.FEASIBLE_POINT
 end

@@ -133,15 +133,21 @@ end
     _is_flow_cut_valid(cutset_f::Vector{Int64}, cutset_t::Vector{Int64}, adjacency::Array{<:Number})
 
 Given from and to sets of vertices of connected components of a graph, this function returns a 
-boolean if a candidate edge exists to augment or not, between these two sets of vertices. 
+boolean if the input `num_edges` number of candidate edge exist to augment or not, between these two sets of vertices. 
 """
 function _is_flow_cut_valid(cutset_f::Vector{Int64}, 
                             cutset_t::Vector{Int64}, 
+                            num_edges::Int64,
                             adjacency::Array{<:Number})
+    
+    k = 0 
     for i in cutset_f
         for j in cutset_t
             if !(isapprox(adjacency[i,j], 0, atol = 1E-6))
-                return true
+                k += 1
+                if k == num_edges
+                    return true
+                end
             end
         end
     end

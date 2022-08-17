@@ -15,7 +15,7 @@ function constraint_build_W_var_matrix(lom::LaplacianOptModel)
     JuMP.@constraint(lom.model, [i=1:num_nodes], lom.variables[:W_var][i,i] == sum(adjacency_full_graph[i,:] .* lom.variables[:z_var][i,:]) - lom.variables[:γ_var]*(num_nodes-1)/num_nodes)
 
     # Off-diagonal entries
-    JuMP.@constraint(lom.model, [i=1:(num_nodes-1), j=(i+1):num_nodes], lom.variables[:W_var][i,j] == -adjacency_full_graph[i,j] * lom.variables[:z_var][i,j] + lom.variables[:γ_var]/num_nodes)
+    JuMP.@constraint(lom.model, [i=1:(num_nodes-1), j=(i+1):num_nodes], lom.variables[:W_var][i,j] == -(adjacency_full_graph[i,j] * lom.variables[:z_var][i,j]) + lom.variables[:γ_var]/num_nodes)
 
     return
 end
@@ -25,13 +25,22 @@ function constraint_single_vertex_cutset(lom::LaplacianOptModel)
     num_edges_existing      = lom.data["num_edges_existing"]
     adjacency_base_graph    = lom.data["adjacency_base_graph"]
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
+    graph_type              = lom.data["graph_type"]
 
     adjacency_full_graph = adjacency_augment_graph
     (num_edges_existing > 0) && (adjacency_full_graph += adjacency_base_graph)
 
-    for i = 1:num_nodes
-        if sum(adjacency_full_graph[i,:]) > 0
-            JuMP.@constraint(lom.model, sum(lom.variables[:z_var][i,j] for j in setdiff((1:num_nodes), i)) >= 1)
+    if graph_type == "hamiltonian_cycle"
+        for i = 1:num_nodes
+            if sum(adjacency_full_graph[i,:] .> 0) >= 2
+                JuMP.@constraint(lom.model, sum(lom.variables[:z_var][i,j] for j in setdiff((1:num_nodes), i)) == 2)
+            end
+        end
+    else # for any other graph_type
+        for i = 1:num_nodes
+            if sum(adjacency_full_graph[i,:] .> 0) >= 1
+                JuMP.@constraint(lom.model, sum(lom.variables[:z_var][i,j] for j in setdiff((1:num_nodes), i)) >= 1)
+            end
         end
     end
     
@@ -162,7 +171,7 @@ function constraint_eigen_cuts_on_3minors(W_val::Matrix{<:Number}, cb_cuts, lom:
             for j = (i+1):num_nodes
                 for k = (j+1):num_nodes
                     LOpt._add_eigen_cut_lazy(W_val, cb_cuts, lom, [i,j,k])
-                end     
+                end
             end
         end
     end
@@ -193,27 +202,58 @@ end
 
 function constraint_topology_flow_cuts(z_val::Matrix{<:Number}, cb_cuts, lom::LaplacianOptModel)
 
+    num_nodes               = lom.data["num_nodes"]
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
-
-    cc_lazy = Graphs.connected_components(Graphs.SimpleGraph(abs.(z_val)))
+    graph_type              = lom.data["graph_type"]
+    num_edges_existing      = lom.data["num_edges_existing"]
+    augment_budget          = lom.data["augment_budget"]
+    cc_lazy                 = Graphs.connected_components(Graphs.SimpleGraph(abs.(z_val)))
     
-    max_cc  = 5 # increase this to any greater integer value and it works
-    if length(cc_lazy) > max_cc
-        Memento.info(_LOGGER, "Polyhedral relaxation: flow cuts not added for integer solutions with $(length(cc_lazy)) connected components")
+    is_spanning_tree = false 
+    if (num_edges_existing == 0) && (augment_budget == (num_nodes-1))
+        is_spanning_tree = true
     end
 
-    if length(cc_lazy) in 2:max_cc
-       
-        for k = 1:(length(cc_lazy)-1)
+    max_cc = 5 # increase this to any greater integer value and it works
+    if length(cc_lazy) > max_cc
+        Memento.info(_LOGGER, "Polyhedral relaxation: flow cuts not added for integer solutions with $(length(cc_lazy)) connected components")
+    elseif length(cc_lazy) == 1 
+        return
+    end
+
+    min_cc_size       = minimum(length.(cc_lazy))
+    min_cc_loc        = argmin(length.(cc_lazy))
+    cc_size_threshold = ceil(lom.data["num_nodes"]/4)
+    
+    # Subtour elimination (for cycle or tree graphs)
+    if (2 <= min_cc_size <= cc_size_threshold) && ((graph_type == "hamiltonian_cycle") || (is_spanning_tree))
+        for k = 1:(length(cc_lazy))
+            cc_lazy_size = length(cc_lazy[k])
+            if cc_lazy_size <= cc_size_threshold
+                cc = cc_lazy[k]    
+                con = JuMP.@build_constraint(sum(lom.variables[:z_var][cc[i],cc[j]] for i=1:(cc_lazy_size-1), j=(i+1):cc_lazy_size 
+                                            if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) <= (cc_lazy_size - 1))
+                MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
+            end
+        end
+    
+    # Flow cuts for connected components    
+    elseif length(cc_lazy) in 2:max_cc
+
+        num_edges_cutset = 1 
+        if graph_type == "hamiltonian_cycle"
+            num_edges_cutset = 2
+        end
+
+        for k = 1:(length(cc_lazy)-1)   
             # From cutset  
-            cutset_f = cc_lazy[k]        
+            cutset_f = cc_lazy[k]
             # To cutset
             ii = setdiff(1:length(cc_lazy), k)
             cutset_t = reduce(vcat, cc_lazy[ii])
-            
-            if LOpt._is_flow_cut_valid(cutset_f, cutset_t, adjacency_augment_graph)
+            if LOpt._is_flow_cut_valid(cutset_f, cutset_t, num_edges_cutset, adjacency_augment_graph)
                 con = JuMP.@build_constraint(sum(lom.variables[:z_var][i,j] for i in cutset_f, j in cutset_t 
-                                            if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) >= 1)
+                                            if !(isapprox(adjacency_augment_graph[i,j], 0, atol=1E-6))) >= num_edges_cutset)
 
                 MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
             end

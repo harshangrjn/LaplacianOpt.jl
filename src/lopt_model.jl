@@ -16,6 +16,7 @@ function variable_LOModel(lom::LaplacianOptModel)
 
     LOpt.variable_lifted_W_matrix(lom)
     LOpt.variable_edge_onoff(lom)
+    lom.data["topology_multi_commodity"] && LOpt.variable_multi_commodity_flow(lom)
     LOpt.variable_algebraic_connectivity(lom)
 
     return
@@ -26,6 +27,7 @@ function constraint_LOModel(lom::LaplacianOptModel)
     LOpt.constraint_build_W_var_matrix(lom)
     LOpt.constraint_single_vertex_cutset(lom)
     LOpt.constraint_augment_edges_budget(lom)
+    lom.data["topology_multi_commodity"] && LOpt.constraint_topology_multi_commodity_flow(lom)
     LOpt.constraint_lazycallback_wrapper(lom)
     
     return
@@ -41,6 +43,8 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer=nothing)
     if lom.data["relax_integrality"]
         JuMP.relax_integrality(lom.model)
     end
+
+    JuMP.set_time_limit_sec(lom.model, lom.data["time_limit"])
 
     if JuMP.mode(lom.model) != JuMP.DIRECT && optimizer !== nothing
         if lom.model.moi_backend.state == MOI.Utilities.NO_OPTIMIZER
