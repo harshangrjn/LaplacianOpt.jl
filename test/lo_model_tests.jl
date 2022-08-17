@@ -242,3 +242,33 @@ end
     @test isapprox(result["solution"]["z_var"][2,4], 1.0)
     @test isapprox(result["solution"]["z_var"][2,5], 1.0)
 end
+
+@testset "Test hamiltonian cycle problem" begin
+    function data_II()
+        data_dict = Dict{String, Any}()
+        data_dict["num_nodes"] = 5
+        data_dict["adjacency_base_graph"] = zeros(5,5)
+        data_dict["adjacency_augment_graph"] = [0 10 14 12 15; 10 0 9 6 7; 14 9 0 8 9; 12 6 8 0 3; 15 7 9 3 0]
+        augment_budget = 5
+        return data_dict, augment_budget
+    end
+    data_dict, augment_budget = data_II()
+
+    params = Dict{String, Any}(
+        "data_dict" => data_dict,
+        "augment_budget" => augment_budget,
+        "eigen_cuts_full" => true,
+        "graph_type" => "hamiltonian_cycle"
+    )
+
+    result = LaplacianOpt.run_LOpt(params, glpk_optimizer)
+    
+    @test result["termination_status"] == MOI.OPTIMAL
+    @test result["primal_status"] == MOI.FEASIBLE_POINT
+    @test isapprox(result["objective"], 11.53910488161, atol = 1E-6)
+    @test isapprox(result["solution"]["z_var"][1,3], 1.0)
+    @test isapprox(result["solution"]["z_var"][1,5], 1.0)
+    @test isapprox(result["solution"]["z_var"][2,4], 1.0)
+    @test isapprox(result["solution"]["z_var"][2,5], 1.0)
+    @test isapprox(result["solution"]["z_var"][3,4], 1.0)
+end

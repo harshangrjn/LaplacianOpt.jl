@@ -38,7 +38,7 @@ function data_II()
     data_dict["num_nodes"] = 4
     data_dict["adjacency_base_graph"] = [0 2 0 0; 2 0 3 0; 0 3 0 4; 0 0 4 0]
     data_dict["adjacency_augment_graph"] = [0 0 4 8; 0 0 0 7; 4 0 0 0; 8 7 0 0]
-    augment_budget = 2
+    augment_budget = 3
     return data_dict, augment_budget
 end
 

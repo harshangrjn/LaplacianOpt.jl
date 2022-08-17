@@ -76,54 +76,42 @@ function get_data(params::Dict{String, Any})
 
     if "eigen_cuts_full" in keys(params)
         eigen_cuts_full = params["eigen_cuts_full"]
-        if eigen_cuts_full
-            Memento.info(_LOGGER, "Applying full-sized eigen cuts")
-        end
     else
         #default value
-        Memento.info(_LOGGER, "Applying full-sized eigen cuts")
         eigen_cuts_full = true
+    end
+    if eigen_cuts_full
+        Memento.info(_LOGGER, "Applying full-sized eigen cuts")
     end
 
     if "soc_linearized_cuts" in keys(params)
         soc_linearized_cuts = params["soc_linearized_cuts"]
-        if soc_linearized_cuts
-            Memento.info(_LOGGER, "Applying linearized SOC cuts (2x2 minors)")
-        end
     else
         #default value
         soc_linearized_cuts = false
     end
+    if soc_linearized_cuts
+        Memento.info(_LOGGER, "Applying linearized SOC cuts (2x2 minors)")
+    end
 
     if "eigen_cuts_2minors" in keys(params)
         eigen_cuts_2minors = params["eigen_cuts_2minors"]
-        if eigen_cuts_2minors
-            Memento.info(_LOGGER, "Applying eigen cuts (2x2 minors)")
-        end
     else
         #default value
         eigen_cuts_2minors = false
     end
+    if eigen_cuts_2minors
+        Memento.info(_LOGGER, "Applying eigen cuts (2x2 minors)")
+    end
 
     if "eigen_cuts_3minors" in keys(params)
         eigen_cuts_3minors = params["eigen_cuts_3minors"]
-        if eigen_cuts_3minors
-            Memento.info(_LOGGER, "Applying eigen cuts (3x3 minors)")
-        end
     else
         #default value
         eigen_cuts_3minors = false
     end
-
-    if "topology_flow_cuts" in keys(params)
-        topology_flow_cuts = params["topology_flow_cuts"]
-    elseif data_dict["is_base_graph_connected"]
-        Memento.info(_LOGGER, "Deactivating topology flow cuts as the base graph is connected")
-        topology_flow_cuts = false
-    else
-        #default value
-        Memento.info(_LOGGER, "Applying topology flow cuts")
-        topology_flow_cuts = true
+    if eigen_cuts_3minors
+        Memento.info(_LOGGER, "Applying eigen cuts (3x3 minors)")
     end
 
     if "topology_multi_commodity" in keys(params)
@@ -134,6 +122,24 @@ function get_data(params::Dict{String, Any})
     else
         #default value
         topology_multi_commodity = false
+    end
+    if topology_multi_commodity
+        Memento.info(_LOGGER, "Applying topology multi commodity constraints")
+    end
+
+    if "topology_flow_cuts" in keys(params)
+        topology_flow_cuts = params["topology_flow_cuts"]
+    elseif data_dict["is_base_graph_connected"]
+        Memento.info(_LOGGER, "Deactivating topology flow cuts as the base graph is connected")
+        topology_flow_cuts = false
+    elseif topology_multi_commodity
+        topology_flow_cuts = false
+    else
+        #default value
+        topology_flow_cuts = true
+    end
+    if topology_flow_cuts
+        Memento.info(_LOGGER, "Applying topology flow cuts")
     end
 
     if eigen_cuts_full || topology_flow_cuts || soc_linearized_cuts || eigen_cuts_2minors || eigen_cuts_3minors
