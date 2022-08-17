@@ -207,7 +207,8 @@ end
         "eigen_cuts_full" => true,
         "soc_linearized_cuts" => true,
         "eigen_cuts_2minors"  => true,
-        "eigen_cuts_3minors"  => true
+        "eigen_cuts_3minors"  => true,
+        "topology_multi_commodity" => true,
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer)
