@@ -141,7 +141,6 @@ function _is_flow_cut_valid(cutset_f::Vector{Int64},
                             adjacency::Array{<:Number})
     
     k = 0 
-    println("--------here 1 --------")
     for i in cutset_f
         for j in cutset_t
             if !(isapprox(adjacency[i,j], 0, atol = 1E-6))

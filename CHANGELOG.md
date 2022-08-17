@@ -1,11 +1,13 @@
 LaplacianOpt.jl Change Log
 =========================
 
-### v0.2.2
+### v0.3.0
 - Includes adjacency of base and augments graphs in results dictionary
 - Constraints added to support cycle graphs with max algberaic connectivity using `hamiltonian_cycle` in `graph_type`
 - `_is_flow_cut_valid` can handle variable number of edges to be verified in cutset
 - Added support for subtour elimination constraints
+- Added option for `time_limit` in params (default = 10800 s)
+- Clean up in `data.jl` for logging
 
 ### v0.2.1
 - Update in `log.jl` for handling close to zero integral solutions before rounding

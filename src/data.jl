@@ -114,29 +114,27 @@ function get_data(params::Dict{String, Any})
         Memento.info(_LOGGER, "Applying eigen cuts (3x3 minors)")
     end
 
+    topology_multi_commodity = false # default
     if "topology_multi_commodity" in keys(params)
         topology_multi_commodity = params["topology_multi_commodity"]
-    elseif data_dict["is_base_graph_connected"]
+    end
+    if topology_multi_commodity && data_dict["is_base_graph_connected"]
+        topology_multi_commodity = false
         Memento.info(_LOGGER, "Deactivating topology multi commodity formulation as the base graph is connected")
-        topology_multi_commodity = false
-    else
-        #default value
-        topology_multi_commodity = false
     end
     if topology_multi_commodity
         Memento.info(_LOGGER, "Applying topology multi commodity constraints")
     end
 
+    topology_flow_cuts = true # default
     if "topology_flow_cuts" in keys(params)
         topology_flow_cuts = params["topology_flow_cuts"]
-    elseif data_dict["is_base_graph_connected"]
-        Memento.info(_LOGGER, "Deactivating topology flow cuts as the base graph is connected")
+    end
+    if topology_flow_cuts && data_dict["is_base_graph_connected"]
         topology_flow_cuts = false
+        Memento.info(_LOGGER, "Deactivating topology flow cuts as the base graph is connected")
     elseif topology_multi_commodity
         topology_flow_cuts = false
-    else
-        #default value
-        topology_flow_cuts = true
     end
     if topology_flow_cuts
         Memento.info(_LOGGER, "Applying topology flow cuts")
@@ -151,6 +149,13 @@ function get_data(params::Dict{String, Any})
     else
         #default value
         lazycuts_logging = false
+    end
+
+    if "time_limit" in keys(params)
+        time_limit = params["time_limit"]
+    else
+        #default value (in seconds)
+        time_limit = 10800
     end
 
     data = Dict{String, Any}("num_nodes"                => num_nodes,
@@ -172,7 +177,8 @@ function get_data(params::Dict{String, Any})
                              "topology_flow_cuts"       => topology_flow_cuts,
                              "topology_multi_commodity" => topology_multi_commodity,
                              "lazy_callback_status"     => lazy_callback_status,
-                             "relax_integrality"        => relax_integrality)
+                             "relax_integrality"        => relax_integrality,
+                             "time_limit"               => time_limit)
 
     # Optimizer
     if "optimizer" in keys(params)

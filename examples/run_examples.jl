@@ -29,7 +29,7 @@ function data_I()
     return data_dict, augment_budget
 end
 
-#=
+#=  
  Option II: Directly input the data dictionary (data_dict) with 
             num_nodes, adjacency_base_graph and adjacency_augment_graph
 =#
@@ -55,7 +55,7 @@ params = Dict{String, Any}(
     "eigen_cuts_2minors"  => false,
     "eigen_cuts_3minors"  => false,
     "topology_flow_cuts"  => true,
-    # "graph_type"          => "hamiltonian_cycle"
+    # "time_limit"          => 3600,
     )
 
 #----------------------------------------------------------------#

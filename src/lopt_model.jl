@@ -44,6 +44,8 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer=nothing)
         JuMP.relax_integrality(lom.model)
     end
 
+    JuMP.set_time_limit_sec(lom.model, lom.data["time_limit"])
+
     if JuMP.mode(lom.model) != JuMP.DIRECT && optimizer !== nothing
         if lom.model.moi_backend.state == MOI.Utilities.NO_OPTIMIZER
             JuMP.set_optimizer(lom.model, optimizer)
