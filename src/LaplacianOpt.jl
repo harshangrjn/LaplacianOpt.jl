@@ -9,10 +9,10 @@ import Graphs
 import TikzGraphs
 import TikzPictures
 
-const MOI  = MathOptInterface
-const LA   = LinearAlgebra
+const MOI = MathOptInterface
+const LA = LinearAlgebra
 const LOpt = LaplacianOpt
- 
+
 # Create our module level logger (this will get precompiled)
 const _LOGGER = Memento.getlogger(@__MODULE__)
 
@@ -22,13 +22,16 @@ __init__() = Memento.register(_LOGGER)
 
 "Suppresses information and warning messages output by LaplacianOpt, for fine grained control use the Memento package"
 function silence()
-    Memento.info(_LOGGER, "Suppressing information and warning messages for the rest of this session.  Use the Memento package for more fine-grained control of logging.")
-    Memento.setlevel!(Memento.getlogger(LaplacianOpt), "error")
+    Memento.info(
+        _LOGGER,
+        "Suppressing information and warning messages for the rest of this session.  Use the Memento package for more fine-grained control of logging.",
+    )
+    return Memento.setlevel!(Memento.getlogger(LaplacianOpt), "error")
 end
 
 "allows the user to set the logging level without the need to add Memento"
 function logger_config!(level)
-    Memento.config!(Memento.getlogger("LaplacianOpt"), level)
+    return Memento.config!(Memento.getlogger("LaplacianOpt"), level)
 end
 
 include("data.jl")

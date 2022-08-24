@@ -8,8 +8,8 @@ import GLPK
 import MathOptInterface
 
 const LOpt = LaplacianOpt
-const LA   = LinearAlgebra
-const MOI  = MathOptInterface
+const LA = LinearAlgebra
+const MOI = MathOptInterface
 
 # Suppress warnings during testing
 LOpt.logger_config!("error")
@@ -17,10 +17,8 @@ LOpt.logger_config!("error")
 glpk_optimizer = JuMP.optimizer_with_attributes(GLPK.Optimizer, MOI.Silent() => true)
 
 @testset "LaplacianOpt" begin
-    
     include("utility_tests.jl")
     include("lo_model_tests.jl")
     include("relaxations_test.jl")
     include("log_tests.jl")
-
 end

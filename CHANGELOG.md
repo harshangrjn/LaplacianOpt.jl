@@ -1,6 +1,10 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.3.1
+- Minor change in `src/variables.jl`
+- Added JuliaFormatter.toml and formatting workfow
+
 ### v0.3.0
 - Includes adjacency of base and augments graphs in results dictionary
 - Constraints added to support cycle graphs with max algberaic connectivity using `hamiltonian_cycle` in `graph_type`
