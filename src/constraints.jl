@@ -47,8 +47,7 @@ function constraint_single_vertex_cutset(lom::LaplacianOptModel)
             if sum(adjacency_full_graph[i, :] .> 0) >= 2
                 JuMP.@constraint(
                     lom.model,
-                    sum(lom.variables[:z_var][i, j] for j in setdiff((1:num_nodes), i)) ==
-                    2
+                    sum(lom.variables[:z_var][i, j] for j in setdiff((1:num_nodes), i)) == 2
                 )
             end
         end
@@ -57,8 +56,7 @@ function constraint_single_vertex_cutset(lom::LaplacianOptModel)
             if sum(adjacency_full_graph[i, :] .> 0) >= 1
                 JuMP.@constraint(
                     lom.model,
-                    sum(lom.variables[:z_var][i, j] for j in setdiff((1:num_nodes), i)) >=
-                    1
+                    sum(lom.variables[:z_var][i, j] for j in setdiff((1:num_nodes), i)) >= 1
                 )
             end
         end
@@ -287,7 +285,7 @@ function constraint_topology_flow_cuts(
     min_cc_loc = argmin(length.(cc_lazy))
     cc_size_threshold = ceil(lom.data["num_nodes"] / 4)
 
-    # Subtour elimination (for cycle or tree graphs)
+    # Subtour elimination (for cycle/tree graphs)
     if (2 <= min_cc_size <= cc_size_threshold) &&
        ((graph_type == "hamiltonian_cycle") || (is_spanning_tree))
         for k in 1:(length(cc_lazy))
