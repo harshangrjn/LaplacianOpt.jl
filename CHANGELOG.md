@@ -1,6 +1,10 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.3.2
+- Logo update in README.md
+- README.md added in the `src/examples`
+
 ### v0.3.1
 - Minor change in `src/variables.jl`
 - Added JuliaFormatter.toml and formatting workfow

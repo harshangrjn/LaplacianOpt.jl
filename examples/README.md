@@ -1,0 +1,2 @@
+# Examples for LaplacianOpt
+`run_examples.jl` file contains the main driver file which can be executed to synthesize an optimal graph with maximum algebraic connectivity, for a given weighted graph. Multiple weighted complete graphs can be used as instances in the `instances` folder. Overall run times for the formulated MISDPs with outer-approximation eigen cuts perform best in the Cplex (version 20.1 or 22.1) solver. 

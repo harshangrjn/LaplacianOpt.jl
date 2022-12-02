@@ -25,12 +25,17 @@ end
 # MIP solvers (open-source, but slow)  #
 #======================================#
 
-function get_cbc()
-    return JuMP.optimizer_with_attributes(Cbc.Optimizer, MOI.Silent() => false)
-end
-
 function get_glpk()
     return JuMP.optimizer_with_attributes(GLPK.Optimizer, MOI.Silent() => false)
+end
+
+# https://github.com/jump-dev/HiGHS.jl
+function get_highs()
+    return JuMP.optimizer_with_attributes(
+        HiGHS.Optimizer,
+        "presolve" => "on",
+        "log_to_console" => true,
+    )
 end
 
 #========================================================#

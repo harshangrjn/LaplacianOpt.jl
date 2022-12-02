@@ -6,10 +6,10 @@ using CPLEX
 
 include("optimizer.jl")
 
-#----------------------------------------#
-#         User-defined MIP solver        #
-# (Cplex 20.1 seems to perform the best) #
-#----------------------------------------#
+#---------------------------------------------#
+#         User-defined MIP solver             #
+# (Cplex 20.1/22.1 seems to perform the best) #
+#---------------------------------------------#
 lopt_optimizer = get_cplex()
 
 #-------------------------------------#
@@ -46,7 +46,7 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-data_dict, augment_budget = data_II()
+data_dict, augment_budget = data_I()
 
 params = Dict{String,Any}(
     "data_dict" => data_dict,
