@@ -1,9 +1,3 @@
-<!-- ```@raw html
-<align="center"/>
-<img width="650px" class="display-light-only" src="assets/docs_header.png" alt="assets/docs_header.png"/>
-<img width="650px" class="display-dark-only" src="assets/docs_header_dark.png" alt="assets/docs_header.png"/>
-``` -->
-
 # LaplacianOpt Documentation
 
 ```@meta
