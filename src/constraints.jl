@@ -75,8 +75,8 @@ function constraint_augment_edges_budget(lom::LaplacianOptModel)
     JuMP.@constraint(
         lom.model,
         sum(
-            lom.variables[:z_var][i, j] for
-            i = 1:(num_nodes-1), j = (i+1):num_nodes if adjacency_augment_graph[i, j] > 0
+            lom.variables[:z_var][i, j] for i in 1:(num_nodes-1), j in (i+1):num_nodes if
+            adjacency_augment_graph[i, j] > 0
         ) == augment_budget
     )
 
@@ -297,7 +297,7 @@ function constraint_topology_flow_cuts(
                 con = JuMP.@build_constraint(
                     sum(
                         lom.variables[:z_var][cc[i], cc[j]] for
-                        i = 1:(cc_lazy_size-1), j = (i+1):cc_lazy_size if
+                        i in 1:(cc_lazy_size-1), j in (i+1):cc_lazy_size if
                         !(isapprox(adjacency_augment_graph[i, j], 0, atol = 1E-6))
                     ) <= (cc_lazy_size - 1)
                 )

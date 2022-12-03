@@ -15,7 +15,8 @@ function objective_maximize_spanning_tree_cost(lom::LaplacianOptModel)
         Max,
         sum(
             adjacency_augment_graph[i, j] * lom.variables[:z_var][i, j] for
-            i = 1:(num_nodes-1), j = (i+1):num_nodes if adjacency_augment_graph[i, j] > 0
+            i in 1:(num_nodes-1), j in (i+1):num_nodes if
+            adjacency_augment_graph[i, j] > 0
         )
     )
 end
