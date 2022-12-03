@@ -1,8 +1,8 @@
 <h1 align="center" margin=0px>
-  <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/docs_header.png#gh-light-mode-only" width=80%>
+  <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_light.png#gh-light-mode-only" width=80%>
   <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_dark.png#gh-dark-mode-only"   width=80%>
   <br>
-  A Julia Package for Maximizing Graph Algebraic Connectivity
+  A Julia Package for Maximizing Algebraic Connectivity of Graphs
 </h1>
 
 Status: 

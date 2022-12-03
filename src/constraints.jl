@@ -47,7 +47,8 @@ function constraint_single_vertex_cutset(lom::LaplacianOptModel)
             if sum(adjacency_full_graph[i, :] .> 0) >= 2
                 JuMP.@constraint(
                     lom.model,
-                    sum(lom.variables[:z_var][i, j] for j in setdiff((1:num_nodes), i)) == 2
+                    sum(lom.variables[:z_var][i, j] for j in setdiff((1:num_nodes), i)) ==
+                    2
                 )
             end
         end
@@ -56,7 +57,8 @@ function constraint_single_vertex_cutset(lom::LaplacianOptModel)
             if sum(adjacency_full_graph[i, :] .> 0) >= 1
                 JuMP.@constraint(
                     lom.model,
-                    sum(lom.variables[:z_var][i, j] for j in setdiff((1:num_nodes), i)) >= 1
+                    sum(lom.variables[:z_var][i, j] for j in setdiff((1:num_nodes), i)) >=
+                    1
                 )
             end
         end
