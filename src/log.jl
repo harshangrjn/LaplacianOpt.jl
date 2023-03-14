@@ -19,23 +19,23 @@ function visualize_solution(
         )
     end
 
-    if !data["relax_integrality"]
-        Memento.info(_LOGGER, "Plotting the graph of integral solution")
+    M = (isapprox.(results["solution"]["z_var"], 0, atol=1E-5)) + (isapprox.(results["solution"]["z_var"], 1, atol=1E-5))
 
+    if sum(M) == data["num_nodes"]^2
+        Memento.info(_LOGGER, "Plotting the graph of integral solution")
         if visualizing_tool == "tikz"
             LOpt.plot_tikzgraph(
-                results["solution"]["z_var"] .* adjacency_full_graph,
+                abs.(results["solution"]["z_var"]) .* adjacency_full_graph,
                 plot_file_format = plot_file_format,
                 display_edge_weights = display_edge_weights,
             )
 
         elseif visualizing_tool == "graphviz"
             LOpt.plot_graphviz(
-                results["solution"]["z_var"] .* adjacency_full_graph,
+                abs.(results["solution"]["z_var"]) .* adjacency_full_graph,
                 display_edge_weights = display_edge_weights,
             )
         end
-
     else
         Memento.info(
             _LOGGER,

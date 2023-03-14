@@ -13,8 +13,6 @@ function get_data(params::Dict{String,Any})
 
     data_dict = LOpt._pre_process_data(data_dict)
 
-    num_nodes = data_dict["num_nodes"]
-
     if "augment_budget" in keys(params)
         if params["augment_budget"] <= data_dict["num_edges_to_augment"]
             augment_budget = params["augment_budget"]
@@ -43,21 +41,6 @@ function get_data(params::Dict{String,Any})
     )
     Memento.info(_LOGGER, "Augment budget: $(augment_budget)")
 
-    # Solution type 
-    if "solution_type" in keys(params)
-        solution_type = params["solution_type"]
-    else
-        solution_type = "exact"
-    end
-
-    # Relax integrality 
-    if "relax_integrality" in keys(params)
-        relax_integrality = params["relax_integrality"]
-    else
-        # default value
-        relax_integrality = false
-    end
-
     # Graph type
     if "graph_type" in keys(params)
         graph_type = params["graph_type"]
@@ -69,144 +52,16 @@ function get_data(params::Dict{String,Any})
         graph_type = "any"
     end
 
-    # Tolerance to verify zero values
-    if "tol_zero" in keys(params)
-        tol_zero = params["tol_zero"]
-    else
-        # default value
-        tol_zero = 1E-6
-    end
-
-    # Tolerance to verify PSD-ness of a matrix
-    if "tol_psd" in keys(params)
-        tol_psd = params["tol_psd"]
-    else
-        # default value
-        tol_psd = 1E-6
-    end
-
-    if "eigen_cuts_full" in keys(params)
-        eigen_cuts_full = params["eigen_cuts_full"]
-    else
-        #default value
-        eigen_cuts_full = true
-    end
-    if eigen_cuts_full
-        Memento.info(_LOGGER, "Applying full-sized eigen cuts")
-    end
-
-    if "soc_linearized_cuts" in keys(params)
-        soc_linearized_cuts = params["soc_linearized_cuts"]
-    else
-        #default value
-        soc_linearized_cuts = false
-    end
-    if soc_linearized_cuts
-        Memento.info(_LOGGER, "Applying linearized SOC cuts (2x2 minors)")
-    end
-
-    if "eigen_cuts_2minors" in keys(params)
-        eigen_cuts_2minors = params["eigen_cuts_2minors"]
-    else
-        #default value
-        eigen_cuts_2minors = false
-    end
-    if eigen_cuts_2minors
-        Memento.info(_LOGGER, "Applying eigen cuts (2x2 minors)")
-    end
-
-    if "eigen_cuts_3minors" in keys(params)
-        eigen_cuts_3minors = params["eigen_cuts_3minors"]
-    else
-        #default value
-        eigen_cuts_3minors = false
-    end
-    if eigen_cuts_3minors
-        Memento.info(_LOGGER, "Applying eigen cuts (3x3 minors)")
-    end
-
-    topology_multi_commodity = false # default
-    if "topology_multi_commodity" in keys(params)
-        topology_multi_commodity = params["topology_multi_commodity"]
-    end
-    if topology_multi_commodity && data_dict["is_base_graph_connected"]
-        topology_multi_commodity = false
-        Memento.info(
-            _LOGGER,
-            "Deactivating topology multi commodity formulation as the base graph is connected",
-        )
-    end
-    if topology_multi_commodity
-        Memento.info(_LOGGER, "Applying topology multi commodity constraints")
-    end
-
-    topology_flow_cuts = true # default
-    if "topology_flow_cuts" in keys(params)
-        topology_flow_cuts = params["topology_flow_cuts"]
-    end
-    if topology_flow_cuts && data_dict["is_base_graph_connected"]
-        topology_flow_cuts = false
-        Memento.info(
-            _LOGGER,
-            "Deactivating topology flow cuts as the base graph is connected",
-        )
-    elseif topology_multi_commodity
-        topology_flow_cuts = false
-    end
-    if topology_flow_cuts
-        Memento.info(_LOGGER, "Applying topology flow cuts")
-    end
-
-    if eigen_cuts_full ||
-       topology_flow_cuts ||
-       soc_linearized_cuts ||
-       eigen_cuts_2minors ||
-       eigen_cuts_3minors
-        lazy_callback_status = true
-    end
-
-    if "lazycuts_logging" in keys(params)
-        lazycuts_logging = params["lazycuts_logging"]
-    else
-        #default value
-        lazycuts_logging = false
-    end
-
-    if "time_limit" in keys(params)
-        time_limit = params["time_limit"]
-    else
-        #default value (in seconds)
-        time_limit = 10800
-    end
-
     data = Dict{String,Any}(
-        "num_nodes" => num_nodes,
+        "num_nodes" => data_dict["num_nodes"],
         "num_edges_existing" => data_dict["num_edges_existing"],
         "num_edges_to_augment" => data_dict["num_edges_to_augment"],
         "augment_budget" => augment_budget,
         "adjacency_base_graph" => data_dict["adjacency_base_graph"],
         "adjacency_augment_graph" => data_dict["adjacency_augment_graph"],
         "is_base_graph_connected" => data_dict["is_base_graph_connected"],
-        "solution_type" => solution_type,
-        "graph_type" => graph_type,
-        "tol_zero" => tol_zero,
-        "tol_psd" => tol_psd,
-        "eigen_cuts_full" => eigen_cuts_full,
-        "soc_linearized_cuts" => soc_linearized_cuts,
-        "eigen_cuts_2minors" => eigen_cuts_2minors,
-        "eigen_cuts_3minors" => eigen_cuts_3minors,
-        "lazycuts_logging" => lazycuts_logging,
-        "topology_flow_cuts" => topology_flow_cuts,
-        "topology_multi_commodity" => topology_multi_commodity,
-        "lazy_callback_status" => lazy_callback_status,
-        "relax_integrality" => relax_integrality,
-        "time_limit" => time_limit,
+        "graph_type" => graph_type
     )
-
-    # Optimizer
-    if "optimizer" in keys(params)
-        data["optimizer"] = params["optimizer"]
-    end
 
     LOpt._detect_infeasbility_in_data(data)
 
