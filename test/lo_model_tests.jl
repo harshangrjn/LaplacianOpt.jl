@@ -16,6 +16,7 @@
     model_options = Dict{Symbol, Any}(
     :eigen_cuts_full     => true,
     :eigen_cuts_2minors  => false,
+    :projected_eigen_cuts => false,
     :topology_flow_cuts  => true,
     :solution_type       => "optimal",
     :relax_integrality   => false
@@ -177,6 +178,7 @@ end
 
     model_options = Dict{Symbol, Any}(
         :eigen_cuts_full     => true,
+        :projected_eigen_cuts => false,
         :eigen_cuts_2minors  => false,
         :soc_linearized_cuts => true,
         :topology_flow_cuts  => true,
@@ -215,6 +217,7 @@ end
         :eigen_cuts_full     => true,
         :eigen_cuts_2minors  => true,
         :eigen_cuts_3minors  => true,
+        :projected_eigen_cuts => false,
         :topology_multi_commodity  => true,
         :topology_flow_cuts  => false,
         :solution_type       => "optimal",
@@ -262,6 +265,7 @@ end
         :soc_linearized_cuts => true,
         :eigen_cuts_2minors  => true,
         :eigen_cuts_3minors  => true,
+        :projected_eigen_cuts => false,
         :topology_multi_commodity  => true,
         :topology_flow_cuts  => false,
         :solution_type       => "optimal",
@@ -323,6 +327,7 @@ end
     
     model_options = Dict{Symbol, Any}(
         :eigen_cuts_full     => true,
+        :projected_eigen_cuts => false,
         :solution_type       => "optimal",
     )
 
@@ -352,6 +357,7 @@ end
         :eigen_cuts_full     => true,
         :eigen_cuts_2minors  => false,
         :topology_flow_cuts  => true,
+        :projected_eigen_cuts => true,
         :time_limit          => 2.0,
         :solution_type       => "optimal",
     )
@@ -373,6 +379,7 @@ end
 
     model_options = Dict{Symbol, Any}(
         :eigen_cuts_full     => true,
+        :projected_eigen_cuts => false,
         :topology_flow_cuts  => true,
         :cheeger_cuts        => true,
         :best_lower_bound    => 11.1591873084,
@@ -403,6 +410,7 @@ end
    
     model_options = Dict{Symbol, Any}(
         :eigen_cuts_full     => true,
+        :projected_eigen_cuts => false,
         :topology_flow_cuts  => true,
         :sdp_relaxation      => true,
         :solution_type       => "optimal",

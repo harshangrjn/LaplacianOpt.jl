@@ -12,6 +12,7 @@ mutable struct LaplacianOptModelOptions
     eigen_cuts_full                    :: Bool
     eigen_cuts_2minors                 :: Bool
     eigen_cuts_3minors                 :: Bool
+    projected_eigen_cuts               :: Bool
     soc_linearized_cuts                :: Bool
     topology_multi_commodity           :: Bool
     topology_flow_cuts                 :: Bool
@@ -42,6 +43,7 @@ function get_default_options()
     eigen_cuts_full               = true   # true, false     
     eigen_cuts_2minors            = true   # true, false
     eigen_cuts_3minors            = false  # true, false
+    projected_eigen_cuts          = true  # true, false
     soc_linearized_cuts           = false  # true, false
     topology_multi_commodity      = false  # true, false
     topology_flow_cuts            = true   # true, false
@@ -65,6 +67,7 @@ function get_default_options()
                                     eigen_cuts_full,
                                     eigen_cuts_2minors,
                                     eigen_cuts_3minors,
+                                    projected_eigen_cuts,
                                     soc_linearized_cuts,
                                     topology_multi_commodity,
                                     topology_flow_cuts,

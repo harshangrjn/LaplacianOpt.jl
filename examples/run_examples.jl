@@ -44,8 +44,8 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-num_nodes = 8
-instance = 1
+num_nodes = 10
+instance = 9
 data_dict, augment_budget = data_I(num_nodes, instance)
 
 params = Dict{String,Any}(
@@ -58,7 +58,7 @@ params = Dict{String,Any}(
 #   Graph plots can be located inside `examples/plots` folder    #
 #----------------------------------------------------------------#
 
-# For more options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
+# For more model options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
 model_options = Dict{Symbol, Any}(
     :eigen_cuts_full     => true,
     :eigen_cuts_2minors  => true,

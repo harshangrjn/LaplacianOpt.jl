@@ -232,7 +232,7 @@ function _add_eigen_cut_lazy(
 )
     num_nodes = lom.data["num_nodes"]
     W_val_minor = W_val[idx, idx]
-    # W_var_minor = lom.variables[:W_var][idx, idx]
+    W_var_minor = lom.variables[:W_var][idx, idx]
     
     if size(W_val_minor)[1] in [2, 3, num_nodes]
         z_var = lom.variables[:z_var]
@@ -248,12 +248,12 @@ function _add_eigen_cut_lazy(
     if violated_eigen_vec !== nothing
         
         # NxN minors
-        if size(W_val_minor)[1] == lom.data["num_nodes"]
+        if (size(W_val_minor)[1] == lom.data["num_nodes"]) && (lom.options.projected_eigen_cuts)
             con = JuMP.@build_constraint(
                 sum(adjacency[i,j] * (violated_eigen_vec[i] - violated_eigen_vec[j])^2 for i=1:(num_nodes -1), j=((i+1):num_nodes)) >= γ_var
             )
         # 2x2 minors
-        elseif size(W_val_minor)[1] == 2
+        elseif (size(W_val_minor)[1] == 2) && (lom.options.projected_eigen_cuts)
             i = idx[1]
             j = idx[2]
             v_12 = violated_eigen_vec[1] * violated_eigen_vec[2]
@@ -264,7 +264,7 @@ function _add_eigen_cut_lazy(
                 - 2 * adjacency[i,j] * v_12 >= γ_var*(num_nodes - 1 - 2*v_12)/num_nodes
             )
         # 3x3 minors
-        elseif size(W_val_minor)[1] == 3
+        elseif (size(W_val_minor)[1] == 3) && (lom.options.projected_eigen_cuts)
             i = idx[1]
             j = idx[2]
             k = idx[3]
@@ -280,11 +280,11 @@ function _add_eigen_cut_lazy(
                 - 2 * adjacency[i,k] * v_13 
                 - 2 * adjacency[j,k] * v_23 >= γ_var*(num_nodes - 1 - 2*(v_12 + v_23 + v_13))/num_nodes
             )
-        # Other minors
-        # else 
-        #     con = JuMP.@build_constraint(
-        #         violated_eigen_vec' * W_var_minor * violated_eigen_vec >= 0
-        #     )
+        # Eigen cuts in W-space
+        elseif (size(W_val_minor)[1] > 3) || !(lom.options.projected_eigen_cuts)
+            con = JuMP.@build_constraint(
+                violated_eigen_vec' * W_var_minor * violated_eigen_vec >= 0
+            )
         end
         
         MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
