@@ -8,18 +8,16 @@
     )
     data_dict = LOpt.parse_file(file_path)
 
-    params = Dict{String,Any}(
-        "data_dict" => data_dict,
-        "augment_budget" => (num_nodes - 1)
-    )
+    params =
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
 
-    model_options = Dict{Symbol, Any}(
-    :eigen_cuts_full     => true,
-    :eigen_cuts_2minors  => false,
-    :projected_eigen_cuts => false,
-    :topology_flow_cuts  => true,
-    :solution_type       => "optimal",
-    :relax_integrality   => false
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => true,
+        :eigen_cuts_2minors => false,
+        :projected_eigen_cuts => false,
+        :topology_flow_cuts => true,
+        :solution_type => "optimal",
+        :relax_integrality => false,
     )
     result_lo = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
 
@@ -67,11 +65,11 @@ end
     params =
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
 
-    model_options = Dict{Symbol, Any}(
-    :formulation_type => "max_span_tree",        
-    :topology_flow_cuts  => false,
-    :topology_multi_commodity  => true,
-    :solution_type       => "optimal"
+    model_options = Dict{Symbol,Any}(
+        :formulation_type => "max_span_tree",
+        :topology_flow_cuts => false,
+        :topology_multi_commodity => true,
+        :solution_type => "optimal",
     )
     result_mst = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
 
@@ -101,13 +99,13 @@ end
     params =
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
 
-        model_options = Dict{Symbol, Any}(
-            :formulation_type => "max_span_tree",
-            :topology_flow_cuts  => true,
-            :topology_multi_commodity  => false,
-            :solution_type       => "optimal"
-            )
-            result_mst = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
+    model_options = Dict{Symbol,Any}(
+        :formulation_type => "max_span_tree",
+        :topology_flow_cuts => true,
+        :topology_multi_commodity => false,
+        :solution_type => "optimal",
+    )
+    result_mst = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
 
     @test result_mst["termination_status"] == MOI.OPTIMAL
     @test result_mst["primal_status"] == MOI.FEASIBLE_POINT
@@ -130,8 +128,7 @@ end
     # Test multi commodity flow
     model_options[:topology_flow_cuts] = false
     model_options[:topology_multi_commodity] = true
-    result_mst_1 =
-        LaplacianOpt.run_LOpt(params, glpk_optimizer, options = model_options)
+    result_mst_1 = LaplacianOpt.run_LOpt(params, glpk_optimizer, options = model_options)
     @test result_mst_1["termination_status"] == MOI.OPTIMAL
     @test result_mst_1["primal_status"] == MOI.FEASIBLE_POINT
     @test isapprox(result_mst_1["objective"], 3625.89701005, atol = 1E-6)
@@ -147,18 +144,16 @@ end
     )
     data_dict = LOpt.parse_file(file_path)
 
-    params_1 = Dict{String,Any}(
-        "data_dict" => data_dict,
-        "augment_budget" => (num_nodes - 1)
-    )
+    params_1 =
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
 
-    model_options = Dict{Symbol, Any}(
-        :eigen_cuts_full     => false,
-        :eigen_cuts_2minors  => false,
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => false,
+        :eigen_cuts_2minors => false,
         :soc_linearized_cuts => true,
-        :topology_flow_cuts  => true,
-        :solution_type       => "optimal",
-        )
+        :topology_flow_cuts => true,
+        :solution_type => "optimal",
+    )
 
     result_1 = LaplacianOpt.run_LOpt(params_1, glpk_optimizer; options = model_options)
 
@@ -171,19 +166,17 @@ end
     @test isapprox(result_1["solution"]["z_var"][3, 5], 1.0)
     @test isapprox(result_1["solution"]["z_var"][4, 3], 1.0)
 
-    params_2 = Dict{String,Any}(
-        "data_dict" => data_dict,
-        "augment_budget" => (num_nodes - 1)
-    )
+    params_2 =
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
 
-    model_options = Dict{Symbol, Any}(
-        :eigen_cuts_full     => true,
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => true,
         :projected_eigen_cuts => false,
-        :eigen_cuts_2minors  => false,
+        :eigen_cuts_2minors => false,
         :soc_linearized_cuts => true,
-        :topology_flow_cuts  => true,
-        :solution_type       => "optimal",
-        )
+        :topology_flow_cuts => true,
+        :solution_type => "optimal",
+    )
 
     result_2 = LaplacianOpt.run_LOpt(params_2, glpk_optimizer; options = model_options)
 
@@ -208,20 +201,18 @@ end
     )
     data_dict = LOpt.parse_file(file_path)
 
-    params_1 = Dict{String,Any}(
-        "data_dict" => data_dict,
-        "augment_budget" => (num_nodes - 1)
-    )
+    params_1 =
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
 
-    model_options = Dict{Symbol, Any}(
-        :eigen_cuts_full     => true,
-        :eigen_cuts_2minors  => true,
-        :eigen_cuts_3minors  => true,
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => true,
+        :eigen_cuts_2minors => true,
+        :eigen_cuts_3minors => true,
         :projected_eigen_cuts => false,
-        :topology_multi_commodity  => true,
-        :topology_flow_cuts  => false,
-        :solution_type       => "optimal",
-        )
+        :topology_multi_commodity => true,
+        :topology_flow_cuts => false,
+        :solution_type => "optimal",
+    )
 
     result_1 = LaplacianOpt.run_LOpt(params_1, glpk_optimizer; options = model_options)
 
@@ -255,20 +246,18 @@ end
     end
     data_dict, augment_budget = data_II()
 
-    params = Dict{String,Any}(
-        "data_dict" => data_dict,
-        "augment_budget" => augment_budget,
-    )
+    params =
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
-    model_options = Dict{Symbol, Any}(
-        :eigen_cuts_full     => true,
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => true,
         :soc_linearized_cuts => true,
-        :eigen_cuts_2minors  => true,
-        :eigen_cuts_3minors  => true,
+        :eigen_cuts_2minors => true,
+        :eigen_cuts_3minors => true,
         :projected_eigen_cuts => false,
-        :topology_multi_commodity  => true,
-        :topology_flow_cuts  => false,
-        :solution_type       => "optimal",
+        :topology_multi_commodity => true,
+        :topology_flow_cuts => false,
+        :solution_type => "optimal",
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -324,11 +313,11 @@ end
         "augment_budget" => augment_budget,
         "graph_type" => "hamiltonian_cycle",
     )
-    
-    model_options = Dict{Symbol, Any}(
-        :eigen_cuts_full     => true,
+
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => true,
         :projected_eigen_cuts => false,
-        :solution_type       => "optimal",
+        :solution_type => "optimal",
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -348,51 +337,44 @@ end
     instance = 1
     data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
 
-    params = Dict{String,Any}(
-        "data_dict" => data_dict,
-        "augment_budget" => augment_budget
-    )
+    params =
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
-    model_options = Dict{Symbol, Any}(
-        :eigen_cuts_full     => true,
-        :eigen_cuts_2minors  => false,
-        :topology_flow_cuts  => true,
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => true,
+        :eigen_cuts_2minors => false,
+        :topology_flow_cuts => true,
         :projected_eigen_cuts => true,
-        :time_limit          => 2.0,
-        :solution_type       => "optimal",
+        :time_limit => 2.0,
+        :solution_type => "optimal",
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
     @test result["termination_status"] == MOI.TIME_LIMIT
 end
 
-
 @testset "Test Cheeger cuts and best_incumbent warm start" begin
     num_nodes = 5
     instance = 1
     data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
 
-    params = Dict{String,Any}(
-        "data_dict" => data_dict,
-        "augment_budget" => augment_budget
-    )
+    params =
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
-    model_options = Dict{Symbol, Any}(
-        :eigen_cuts_full     => true,
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => true,
         :projected_eigen_cuts => false,
-        :topology_flow_cuts  => true,
-        :cheeger_cuts        => true,
-        :best_lower_bound    => 11.1591873084,
-        :solution_type       => "optimal",
+        :topology_flow_cuts => true,
+        :cheeger_cuts => true,
+        :best_lower_bound => 11.1591873084,
+        :solution_type => "optimal",
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
     @test result["termination_status"] == MOI.OPTIMAL
     @test isapprox(result["objective"], 11.1591873084, atol = 1E-6)
 
-    model_options = Dict{Symbol, Any}(
-        :best_incumbent => [(1,4), (2,4), (3,4), (3,5)]
-    )
+    model_options = Dict{Symbol,Any}(:best_incumbent => [(1, 4), (2, 4), (3, 4), (3, 5)])
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
     @test result["termination_status"] == MOI.OPTIMAL
     @test isapprox(result["objective"], 11.1591873084, atol = 1E-6)
@@ -402,24 +384,22 @@ end
     num_nodes = 5
     instance = 1
     data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
- 
-    params = Dict{String,Any}(
-        "data_dict" => data_dict,
-        "augment_budget" => augment_budget
-    )
-   
-    model_options = Dict{Symbol, Any}(
-        :eigen_cuts_full     => true,
+
+    params =
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
+
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => true,
         :projected_eigen_cuts => false,
-        :topology_flow_cuts  => true,
-        :sdp_relaxation      => true,
-        :solution_type       => "optimal",
+        :topology_flow_cuts => true,
+        :sdp_relaxation => true,
+        :solution_type => "optimal",
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
     @test result["termination_status"] == MOI.OPTIMAL
     @test isapprox(result["objective"], 23.9350775692, atol = 1E-6)
-    @test isapprox(result["solution"]["z_var"][1,4], 1.0, atol = 1E-6)
-    @test isapprox(result["solution"]["z_var"][1,2], 0.425365873794, atol = 1E-6)
-    @test isapprox(result["solution"]["z_var"][3,5], 0.614568536054, atol = 1E-6)
+    @test isapprox(result["solution"]["z_var"][1, 4], 1.0, atol = 1E-6)
+    @test isapprox(result["solution"]["z_var"][1, 2], 0.425365873794, atol = 1E-6)
+    @test isapprox(result["solution"]["z_var"][3, 5], 0.614568536054, atol = 1E-6)
 end

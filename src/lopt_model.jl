@@ -1,9 +1,6 @@
-function build_LOModel(data::Dict{String,Any}; 
-                       optimizer = nothing,
-                       options = nothing)
-    
+function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = nothing)
     lom = LOpt.LaplacianOptModel(data)
-    
+
     # Update defaults to user-defined options
     if options !== nothing
         for i in keys(options)
@@ -18,7 +15,7 @@ function build_LOModel(data::Dict{String,Any};
             LOpt.variable_LOModel(lom)
             LOpt.constraint_LOModel(lom; optimizer = optimizer)
             LOpt.objective_LOModel(lom)
-            
+
         elseif lom.options.solution_type == "heuristic"
             LOpt.heuristic_kopt(lom.data, lom.options.kopt_parameter)
         end
@@ -26,9 +23,12 @@ function build_LOModel(data::Dict{String,Any};
         if lom.options.solution_type == "optimal"
             LOpt.variable_MaxSpanTree_model(lom)
             LOpt.constraint_MaxSpanTree_model(lom)
-            LOpt.objective_MaxSpanTree_model(lom) 
+            LOpt.objective_MaxSpanTree_model(lom)
         elseif lom.options.solution_type == "heuristic"
-            Memento.warn(_LOGGER, "Heuristic is not implemented for max span tree formulation type")
+            Memento.warn(
+                _LOGGER,
+                "Heuristic is not implemented for max span tree formulation type",
+            )
         end
     end
 
@@ -55,7 +55,8 @@ function constraint_LOModel(lom::LaplacianOptModel; optimizer = nothing)
         LOpt.constraint_topology_multi_commodity_flow(lom)
     end
     lom.options.sdp_relaxation && LOpt.constraint_sdp_relaxation_dummy(lom)
-    LOpt.lazycallback_status(lom) && LOpt.constraint_lazycallback_wrapper(lom, optimizer = optimizer)
+    LOpt.lazycallback_status(lom) &&
+        LOpt.constraint_lazycallback_wrapper(lom, optimizer = optimizer)
 
     return
 end
@@ -66,9 +67,7 @@ function objective_LOModel(lom::LaplacianOptModel)
     return
 end
 
-function optimize_LOModel!(lom::LaplacianOptModel; 
-                           optimizer = nothing)
-                           
+function optimize_LOModel!(lom::LaplacianOptModel; optimizer = nothing)
     if lom.options.relax_integrality
         JuMP.relax_integrality(lom.model)
     end
@@ -118,7 +117,7 @@ function run_LOpt(
     visualize_solution = false,
     visualizing_tool = "tikz",
     display_edge_weights = false,
-    options = nothing
+    options = nothing,
 )
     data = LOpt.get_data(params)
     model_lopt = LOpt.build_LOModel(data, optimizer = lom_optimizer, options = options)
@@ -166,41 +165,46 @@ function constraint_MaxSpanTree_model(lom::LaplacianOptModel)
 end
 
 function set_option(lom::LaplacianOptModel, s::Symbol, val)
-    Base.setproperty!(lom.options, s, val)
+    return Base.setproperty!(lom.options, s, val)
 end
 
 function lazycallback_status(lom::LaplacianOptModel)
-    if  lom.options.eigen_cuts_full ||
-        lom.options.topology_flow_cuts ||
-        lom.options.soc_linearized_cuts ||
-        lom.options.eigen_cuts_2minors ||
-        lom.options.eigen_cuts_3minors ||
-        lom.options.cheeger_cuts || 
-        lom.options.sdp_relaxation
-          return true
-     else 
-          return false
-     end
+    if lom.options.eigen_cuts_full ||
+       lom.options.topology_flow_cuts ||
+       lom.options.soc_linearized_cuts ||
+       lom.options.eigen_cuts_2minors ||
+       lom.options.eigen_cuts_3minors ||
+       lom.options.cheeger_cuts ||
+       lom.options.sdp_relaxation
+        return true
+    else
+        return false
+    end
 end
 
 function _logging_info(lom::LaplacianOptModel)
     if lom.options.solution_type == "optimal"
-        lom.options.eigen_cuts_full && Memento.info(_LOGGER, "Applying eigen cuts (NxN matrix)")
-        lom.options.soc_linearized_cuts && Memento.info(_LOGGER, "Applying linearized SOC cuts (2x2 minors)")
-        lom.options.eigen_cuts_2minors && Memento.info(_LOGGER, "Applying eigen cuts (2x2 minors)")
-        lom.options.eigen_cuts_3minors && Memento.info(_LOGGER, "Applying eigen cuts (3x3 minors)")
-        lom.options.cheeger_cuts && Memento.info(_LOGGER, "Applying Cheeger inequality-based cuts")
-        lom.options.sdp_relaxation && Memento.info(_LOGGER, "Applying SDP relaxation formulation")
+        lom.options.eigen_cuts_full &&
+            Memento.info(_LOGGER, "Applying eigen cuts (NxN matrix)")
+        lom.options.soc_linearized_cuts &&
+            Memento.info(_LOGGER, "Applying linearized SOC cuts (2x2 minors)")
+        lom.options.eigen_cuts_2minors &&
+            Memento.info(_LOGGER, "Applying eigen cuts (2x2 minors)")
+        lom.options.eigen_cuts_3minors &&
+            Memento.info(_LOGGER, "Applying eigen cuts (3x3 minors)")
+        lom.options.cheeger_cuts &&
+            Memento.info(_LOGGER, "Applying Cheeger inequality-based cuts")
+        lom.options.sdp_relaxation &&
+            Memento.info(_LOGGER, "Applying SDP relaxation formulation")
 
         if !lom.data["is_base_graph_connected"] && lom.options.topology_multi_commodity
             Memento.info(_LOGGER, "Applying topology multi commodity constraints")
         end
-        
+
         if !lom.data["is_base_graph_connected"] && lom.options.topology_flow_cuts
             Memento.info(_LOGGER, "Applying topology flow cuts")
         end
     elseif lom.options.solution_type == "heuristic"
         Memento.info(_LOGGER, "Applying heuristics to obtain a lower bound")
     end
-
 end

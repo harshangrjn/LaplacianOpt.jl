@@ -197,17 +197,18 @@ Combinatorics, Paul Erdos is Eighty, 2(157-172), pp.13-2, 1996.
 (II) Mohar, B., 1989. Isoperimetric numbers of graphs. Journal of combinatorial theory, 
 Series B, 47(3), pp.274-291. Link: https://doi.org/10.1016/0095-8956(89)90029-4
 """
-function cheeger_constant(G::Matrix{<:Number}, 
-                          optimizer::MOI.OptimizerWithAttributes; 
-                          cheeger_ub = 1E4,
-                          optimizer_log = false)
-
+function cheeger_constant(
+    G::Matrix{<:Number},
+    optimizer::MOI.OptimizerWithAttributes;
+    cheeger_ub = 1E4,
+    optimizer_log = false,
+)
     if size(G)[1] !== size(G)[2]
         Memento.error(_LOGGER, "Input adjacency has to be a square matrix")
     end
     num_nodes = size(G)[1]
-    
-    result_cheeger = Dict{String, Any}("cheeger_constant" => 0)
+
+    result_cheeger = Dict{String,Any}("cheeger_constant" => 0)
 
     if !isapprox(LOpt.algebraic_connectivity(G), 0, atol = 1E-5)
         m_cheeger = JuMP.Model(optimizer)
@@ -223,16 +224,22 @@ function cheeger_constant(G::Matrix{<:Number},
 
         # Constraints
         JuMP.@constraint(m_cheeger, sum(z) >= 1)
-        JuMP.@constraint(m_cheeger, sum(z) <= floor(num_nodes/2))
-        JuMP.@constraint(m_cheeger, sum(cheeger_z) >= sum(G[i,j] * (z[i] + z[j] -2*Z[i,j]) 
-                            for i=1:(num_nodes-1), j = (i+1):num_nodes if !(isapprox(G[i,j], 0, atol=1E-5))))
+        JuMP.@constraint(m_cheeger, sum(z) <= floor(num_nodes / 2))
+        JuMP.@constraint(
+            m_cheeger,
+            sum(cheeger_z) >= sum(
+                G[i, j] * (z[i] + z[j] - 2 * Z[i, j]) for
+                i in 1:(num_nodes-1), j in (i+1):num_nodes if
+                !(isapprox(G[i, j], 0, atol = 1E-5))
+            )
+        )
 
-        for i=1:(num_nodes-1)
-            for j=1(i+1):num_nodes
-                LOpt.relaxation_bilinear(m_cheeger, Z[i,j], z[i], z[j])
+        for i in 1:(num_nodes-1)
+            for j in 1(i+1):num_nodes
+                LOpt.relaxation_bilinear(m_cheeger, Z[i, j], z[i], z[j])
             end
         end
-        for i=1:num_nodes
+        for i in 1:num_nodes
             LOpt.relaxation_bilinear(m_cheeger, cheeger_z[i], cheeger, z[i])
         end
 
@@ -242,10 +249,12 @@ function cheeger_constant(G::Matrix{<:Number},
         JuMP.optimize!(m_cheeger)
 
         result_cheeger["cheeger_constant"] = JuMP.objective_value(m_cheeger)
-        result_cheeger["S"] = Set(findall(isapprox.(abs.(JuMP.value.(z)), 1, atol=1E-5)))
-        result_cheeger["S_complement"] = Set(findall(isapprox.(abs.(JuMP.value.(z)), 0, atol=1E-5)))
+        result_cheeger["S"] =
+            Set(findall(isapprox.(abs.(JuMP.value.(z)), 1, atol = 1E-5)))
+        result_cheeger["S_complement"] =
+            Set(findall(isapprox.(abs.(JuMP.value.(z)), 0, atol = 1E-5)))
         result_cheeger["solve_time"] = JuMP.solve_time(m_cheeger)
     end
-    
+
     return result_cheeger
 end

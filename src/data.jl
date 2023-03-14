@@ -60,7 +60,7 @@ function get_data(params::Dict{String,Any})
         "adjacency_base_graph" => data_dict["adjacency_base_graph"],
         "adjacency_augment_graph" => data_dict["adjacency_augment_graph"],
         "is_base_graph_connected" => data_dict["is_base_graph_connected"],
-        "graph_type" => graph_type
+        "graph_type" => graph_type,
     )
 
     LOpt._detect_infeasbility_in_data(data)

@@ -48,10 +48,7 @@ num_nodes = 10
 instance = 9
 data_dict, augment_budget = data_I(num_nodes, instance)
 
-params = Dict{String,Any}(
-    "data_dict" => data_dict,
-    "augment_budget" => augment_budget,
-)
+params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
 #----------------------------------------------------------------#
 #      Optimization model and visualize solution (optional)      #
@@ -59,11 +56,11 @@ params = Dict{String,Any}(
 #----------------------------------------------------------------#
 
 # For more model options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
-model_options = Dict{Symbol, Any}(
-    :eigen_cuts_full     => true,
-    :eigen_cuts_2minors  => true,
-    :topology_flow_cuts  => true,
-    :solution_type       => "optimal"
+model_options = Dict{Symbol,Any}(
+    :eigen_cuts_full => true,
+    :eigen_cuts_2minors => true,
+    :topology_flow_cuts => true,
+    :solution_type => "optimal",
 )
 
 result = LOpt.run_LOpt(

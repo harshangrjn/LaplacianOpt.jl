@@ -19,7 +19,9 @@ function visualize_solution(
         )
     end
 
-    M = (isapprox.(results["solution"]["z_var"], 0, atol=1E-5)) + (isapprox.(results["solution"]["z_var"], 1, atol=1E-5))
+    M =
+        (isapprox.(results["solution"]["z_var"], 0, atol = 1E-5)) +
+        (isapprox.(results["solution"]["z_var"], 1, atol = 1E-5))
 
     if sum(M) == data["num_nodes"]^2
         Memento.info(_LOGGER, "Plotting the graph of integral solution")

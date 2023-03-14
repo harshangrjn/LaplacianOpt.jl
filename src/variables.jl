@@ -20,24 +20,28 @@ function variable_edge_onoff(lom::LaplacianOptModel)
     adjacency_base_graph = lom.data["adjacency_base_graph"]
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
 
-    lom.variables[:z_var] =
-        JuMP.@variable(lom.model, 0 <= z_var[1:num_nodes, 1:num_nodes] <= 1, Bin, Symmetric)
+    lom.variables[:z_var] = JuMP.@variable(
+        lom.model,
+        0 <= z_var[1:num_nodes, 1:num_nodes] <= 1,
+        Bin,
+        Symmetric
+    )
 
     if lom.options.sdp_relaxation
-        for i=1:num_nodes, j=i:num_nodes
-            JuMP.unset_binary(z_var[i,j])
-        end
-    end
-    
-    # Warm start with the provided best incumbent solution
-    if lom.options.best_incumbent !== nothing 
-        for k=1:length(lom.options.best_incumbent)
-            e = lom.options.best_incumbent[k]
-            JuMP.set_start_value(z_var[e[1],e[2]], 1.0)
+        for i in 1:num_nodes, j in i:num_nodes
+            JuMP.unset_binary(z_var[i, j])
         end
     end
 
-    for i in 1:num_nodes, j=1:num_nodes
+    # Warm start with the provided best incumbent solution
+    if lom.options.best_incumbent !== nothing
+        for k in 1:length(lom.options.best_incumbent)
+            e = lom.options.best_incumbent[k]
+            JuMP.set_start_value(z_var[e[1], e[2]], 1.0)
+        end
+    end
+
+    for i in 1:num_nodes, j in 1:num_nodes
         # No self-loop at nodes
         if i == j
             JuMP.fix(z_var[i, i], 0; force = true)
@@ -78,10 +82,8 @@ function variable_multi_commodity_flow(lom::LaplacianOptModel)
 end
 
 function variable_sdp_relaxation_dummy(lom::LaplacianOptModel)
-    lom.variables[:sdp_dummy_var] = JuMP.@variable(
-        lom.model,
-        0 <= sdp_dummy_var[1:2] <= 1, Bin
-    )
+    lom.variables[:sdp_dummy_var] =
+        JuMP.@variable(lom.model, 0 <= sdp_dummy_var[1:2] <= 1, Bin)
 
     return
 end

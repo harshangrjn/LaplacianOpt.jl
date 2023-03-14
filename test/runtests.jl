@@ -25,7 +25,7 @@ function data_spanning_tree(num_nodes::Int, instance::Int)
         "examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json",
     )
     data_dict = LOpt.parse_file(file_path)
-    augment_budget = num_nodes-1
+    augment_budget = num_nodes - 1
     return data_dict, augment_budget
 end
 

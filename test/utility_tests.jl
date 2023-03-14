@@ -44,15 +44,15 @@ end
 end
 
 @testset "utility tests: cheeger constant evaluation" begin
-    
+
     # Complete bipartite graph
     n = 6
-    n1 = Int(ceil(n/2))
-    G = zeros(n,n)
-    for i=1:n1, j=(n1+1):n
-        G[i,j] = 1.0
-        G[j,i] = G[i,j]
+    n1 = Int(ceil(n / 2))
+    G = zeros(n, n)
+    for i in 1:n1, j in (n1+1):n
+        G[i, j] = 1.0
+        G[j, i] = G[i, j]
     end
     cheeger = LOpt.cheeger_constant(G, glpk_optimizer)
-    @test isapprox(cheeger["cheeger_constant"], 5/3, atol = 1E-6)
+    @test isapprox(cheeger["cheeger_constant"], 5 / 3, atol = 1E-6)
 end
