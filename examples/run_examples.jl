@@ -44,29 +44,46 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-num_nodes = 10
-instance = 9
-data_dict, augment_budget = data_I(num_nodes, instance)
+gamma_lb_8 = [22.804157, 24.320666, 26.411124, 28.691222, 22.505054, 25.216707, 22.875174, 28.439690, 26.796540, 27.491292]
+gamma_lb_10 = [34.237096, 41.448828, 37.730852, 41.461819, 34.319331, 39.972654, 36.165099, 42.329072, 39.403384, 34.916098]
+gamma_lb_12 = [54.0522, 53.2107, 47.2228, 43.9330, 51.1286, 56.9622, 57.2901, 53.2338, 53.5628, 50.6987]
 
-params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
+result_tab = zeros(10, 3)
+num_nodes = 8
 
-#----------------------------------------------------------------#
-#      Optimization model and visualize solution (optional)      #
-#   Graph plots can be located inside `examples/plots` folder    #
-#----------------------------------------------------------------#
+for k = 1:10
+    println("Instance number: ", k)
+    instance = k
+    data_dict, augment_budget = data_I(num_nodes, instance)
 
-# For more model options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
-model_options = Dict{Symbol,Any}(
-    :eigen_cuts_full => true,
-    :eigen_cuts_2minors => true,
-    :topology_flow_cuts => true,
-    :solution_type => "optimal",
-)
+    params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
-result = LOpt.run_LOpt(
-    params,
-    lopt_optimizer;
-    options = model_options,
-    visualize_solution = false,  # Make this true to plot the graph solution
-    visualizing_tool = "tikz",   # "graphviz" is another option
-)
+    #----------------------------------------------------------------#
+    #      Optimization model and visualize solution (optional)      #
+    #   Graph plots can be located inside `examples/plots` folder    #
+    #----------------------------------------------------------------#
+   
+    # For more model options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
+    model_options = Dict{Symbol,Any}(
+        :eigen_cuts_full => false,
+        :eigen_cuts_2minors => true,
+        :eigen_cuts_2minors => true,
+        :topology_flow_cuts => true,
+        :cheeger_cuts => false,
+        :best_lower_bound => eval(Symbol(:gamma_lb_, num_nodes))[k],
+        :solution_type => "optimal",
+    )
+
+    result = LOpt.run_LOpt(
+        params,
+        lopt_optimizer;
+        options = model_options,
+        visualize_solution = false,  # Make this true to plot the graph solution
+        visualizing_tool = "tikz",   # "graphviz" is another option
+    )
+
+    result_tab[k,1] = k
+    result_tab[k,2] = result["objective"]
+    result_tab[k,3] = (result["solve_time"] - result["cheeger_cuts_separation_time"])
+    @show result_tab[k,:]
+end

@@ -218,7 +218,7 @@ function cheeger_constant(
 
         # Variables
         JuMP.@variable(m_cheeger, 0 <= z[1:num_nodes] <= 1, Bin)
-        JuMP.@variable(m_cheeger, 0 <= Z[1:num_nodes, 1:num_nodes] <= 1)
+        JuMP.@variable(m_cheeger, -1 <= Z[1:num_nodes, 1:num_nodes] <= 1)
         JuMP.@variable(m_cheeger, 0 <= cheeger <= cheeger_ub)
         JuMP.@variable(m_cheeger, cheeger_z[1:num_nodes] >= 0)
 
@@ -228,17 +228,15 @@ function cheeger_constant(
         JuMP.@constraint(
             m_cheeger,
             sum(cheeger_z) >= sum(
-                G[i, j] * (z[i] + z[j] - 2 * Z[i, j]) for
+                G[i, j] * Z[i, j] for
                 i in 1:(num_nodes-1), j in (i+1):num_nodes if
                 !(isapprox(G[i, j], 0, atol = 1E-5))
             )
         )
 
-        for i in 1:(num_nodes-1)
-            for j in 1(i+1):num_nodes
-                LOpt.relaxation_bilinear(m_cheeger, Z[i, j], z[i], z[j])
-            end
-        end
+        JuMP.@constraint(m_cheeger, [i = 1:(num_nodes-1), j=(i+1):num_nodes], Z[i,j] >= z[i] - z[j])
+        JuMP.@constraint(m_cheeger, [i = 1:(num_nodes-1), j=(i+1):num_nodes], Z[i,j] >= z[j] - z[i])
+
         for i in 1:num_nodes
             LOpt.relaxation_bilinear(m_cheeger, cheeger_z[i], cheeger, z[i])
         end

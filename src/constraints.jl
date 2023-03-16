@@ -259,7 +259,7 @@ function _add_eigen_cut_lazy(
                     i in 1:(num_nodes-1), j in ((i+1):num_nodes)
                 ) >= γ_var
             )
-            # 2x2 minors
+        # 2x2 minors
         elseif (size(W_val_minor)[1] == 2) && (lom.options.projected_eigen_cuts)
             i = idx[1]
             j = idx[2]
@@ -271,7 +271,7 @@ function _add_eigen_cut_lazy(
                 2 * adjacency[i, j] * v_12 >=
                 γ_var * (num_nodes - 1 - 2 * v_12) / num_nodes
             )
-            # 3x3 minors
+        # 3x3 minors
         elseif (size(W_val_minor)[1] == 3) && (lom.options.projected_eigen_cuts)
             i = idx[1]
             j = idx[2]
@@ -288,7 +288,7 @@ function _add_eigen_cut_lazy(
                 2 * adjacency[j, k] * v_23 >=
                 γ_var * (num_nodes - 1 - 2 * (v_12 + v_23 + v_13)) / num_nodes
             )
-            # Eigen cuts in W-space
+        # Eigen cuts in W-space
         elseif (size(W_val_minor)[1] > 3) || !(lom.options.projected_eigen_cuts)
             con = JuMP.@build_constraint(
                 violated_eigen_vec' * W_var_minor * violated_eigen_vec >= 0
