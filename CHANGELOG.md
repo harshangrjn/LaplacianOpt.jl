@@ -5,7 +5,7 @@ LaplacianOpt.jl Change Log
 - Moved all the model options (including cuts) to `types.jl` into `LaplacianOptModelOptions`, a struct form 
 - Streamlined default options for `LaplacianOptModelOptions`
 - Clean up in `data.jl`
-- Added Cheeger cuts within callback
+- Added evaluation of cheeger constant
 - Added option to input `best_incumbent` to warm-start the solver
 - Added certificate of optimality for MISDP problem
 - Updated docs and unit tests to reflect above changes
