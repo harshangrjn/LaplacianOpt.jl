@@ -1,15 +1,10 @@
 @testset "Algebraic Connectivity: Optimal solution tests" begin
     num_nodes = 5
     instance = 1
-    file_path = joinpath(
-        @__DIR__,
-        "..",
-        "examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json",
-    )
-    data_dict = LOpt.parse_file(file_path)
+    data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
 
     params =
-        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
         :eigen_cuts_full => true,
@@ -55,15 +50,10 @@ end
 @testset "Max Span Tree: Optimal solution tests" begin
     num_nodes = 5
     instance = 1
-    file_path = joinpath(
-        @__DIR__,
-        "..",
-        "examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json",
-    )
-    data_dict = LOpt.parse_file(file_path)
+    data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
 
     params =
-        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
         :formulation_type => "max_span_tree",
@@ -89,15 +79,10 @@ end
 @testset "Max Span Tree: Lazy callback tests" begin
     num_nodes = 15
     instance = 1
-    file_path = joinpath(
-        @__DIR__,
-        "..",
-        "examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json",
-    )
-    data_dict = LOpt.parse_file(file_path)
+    data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
 
     params =
-        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
         :formulation_type => "max_span_tree",
@@ -137,19 +122,15 @@ end
 @testset "SOC relaxations - 1: constraint_soc_cuts_on_2minors" begin
     num_nodes = 5
     instance = 5
-    file_path = joinpath(
-        @__DIR__,
-        "..",
-        "examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json",
-    )
-    data_dict = LOpt.parse_file(file_path)
-
+    data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
+    
     params_1 =
-        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
         :eigen_cuts_full => false,
         :eigen_cuts_2minors => false,
+        :projected_eigen_cuts => false,
         :soc_linearized_cuts => true,
         :topology_flow_cuts => true,
         :solution_type => "optimal",
@@ -167,7 +148,7 @@ end
     @test isapprox(result_1["solution"]["z_var"][4, 3], 1.0)
 
     params_2 =
-        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
         :eigen_cuts_full => true,
@@ -194,15 +175,10 @@ end
 @testset "Minor-based eigen relaxations: 2x2 and 3x3" begin
     num_nodes = 5
     instance = 3
-    file_path = joinpath(
-        @__DIR__,
-        "..",
-        "examples/instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json",
-    )
-    data_dict = LOpt.parse_file(file_path)
+    data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
 
     params_1 =
-        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => (num_nodes - 1))
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
         :eigen_cuts_full => true,
