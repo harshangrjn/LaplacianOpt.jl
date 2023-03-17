@@ -1,8 +1,8 @@
-@testset "utility tests: get_rounded_zeros_and_ones!" begin
+@testset "utility tests: round_zeros_ones!" begin
     A1 = [0 -0.99999; 0.999999 2.000000001; 1.0000001 -1.000001; -0.000001 0.0000001]
     A2 = [0 -0.99999; 0.999999 2.000000001; 1.0000001 -1.000001; -0.000001 0.0000001]
 
-    LOpt.get_rounded_zeros_and_ones!(A1, tol = 1E-5)
+    LOpt.round_zeros_ones!(A1, tol = 1E-5)
     @test A1[1, 2] == -1
     @test A1[2, 1] == 1
     @test A1[2, 2] > 2
@@ -11,7 +11,7 @@
     @test A1[4, 1] == 0
     @test A1[4, 2] == 0
 
-    LOpt.get_rounded_zeros_and_ones!(A2, tol = 1E-6)
+    LOpt.round_zeros_ones!(A2, tol = 1E-6)
     @test A2[1, 2] > -1
 end
 
@@ -41,4 +41,18 @@ end
     @test isapprox(graph_data.ac, 0, atol = 1E-6)
     v = [0.5773502691896258, 0.5773502691896273, 0.5773502691896241, 0.0]
     @test isapprox(v, graph_data.fiedler, atol = 1E-6)
+end
+
+@testset "utility tests: cheeger constant evaluation" begin
+
+    # Complete bipartite graph
+    n = 6
+    n1 = Int(ceil(n / 2))
+    G = zeros(n, n)
+    for i in 1:n1, j in (n1+1):n
+        G[i, j] = 1.0
+        G[j, i] = G[i, j]
+    end
+    cheeger = LOpt.cheeger_constant(G, glpk_optimizer)
+    @test isapprox(cheeger["cheeger_constant"], 5 / 3, atol = 1E-6)
 end

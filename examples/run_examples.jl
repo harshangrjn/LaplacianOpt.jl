@@ -6,10 +6,10 @@ using CPLEX
 
 include("optimizer.jl")
 
-#---------------------------------------------#
-#         User-defined MIP solver             #
-# (Cplex 20.1/22.1 seems to perform the best) #
-#---------------------------------------------#
+#----------------------------------#
+#            MIP solver            #
+# (Cplex 22.1 performs the best)   #
+#----------------------------------#
 lopt_optimizer = get_cplex()
 
 #-------------------------------------#
@@ -19,9 +19,7 @@ lopt_optimizer = get_cplex()
  Option I: Let the package parse a JSON file and obtain the data dictionary (data_dict)
  Sample JSON format: Check examples/instances
 =#
-function data_I()
-    num_nodes = 8
-    instance = 1
+function data_I(num_nodes::Int, instance::Int)
     # Data format has to be as given in this JSON file
     file_path =
         joinpath(@__DIR__, "instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json")
@@ -30,7 +28,7 @@ function data_I()
     return data_dict, augment_budget
 end
 
-#=  
+#=
  Option II: Directly input the data dictionary (data_dict) with 
             num_nodes, adjacency_base_graph and adjacency_augment_graph
 =#
@@ -39,34 +37,36 @@ function data_II()
     data_dict["num_nodes"] = 4
     data_dict["adjacency_base_graph"] = [0 2 0 0; 2 0 3 0; 0 3 0 4; 0 0 4 0]
     data_dict["adjacency_augment_graph"] = [0 0 4 8; 0 0 0 7; 4 0 0 0; 8 7 0 0]
-    augment_budget = 3
+    augment_budget = 2
     return data_dict, augment_budget
 end
 
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-data_dict, augment_budget = data_I()
+num_nodes = 8
+instance = 1
+data_dict, augment_budget = data_I(num_nodes, instance)
 
-params = Dict{String,Any}(
-    "data_dict" => data_dict,
-    "augment_budget" => augment_budget,
-    "eigen_cuts_full" => true,
-    "soc_linearized_cuts" => false,
-    "eigen_cuts_2minors" => false,
-    "eigen_cuts_3minors" => false,
-    "topology_flow_cuts" => true,
-    # "time_limit"          => 3600,
-)
+params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
 #----------------------------------------------------------------#
 #      Optimization model and visualize solution (optional)      #
 #   Graph plots can be located inside `examples/plots` folder    #
 #----------------------------------------------------------------#
+
+# For more model options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
+model_options = Dict{Symbol,Any}(
+    :eigen_cuts_full => true,
+    :eigen_cuts_2minors => true,
+    :topology_flow_cuts => true,
+    :solution_type => "optimal",
+)
+
 result = LOpt.run_LOpt(
     params,
     lopt_optimizer;
+    options = model_options,
     visualize_solution = false,  # Make this true to plot the graph solution
-    visualizing_tool = "tikz", # "graphviz" is another option
-    display_edge_weights = false,
+    visualizing_tool = "tikz",   # "graphviz" is another option
 )

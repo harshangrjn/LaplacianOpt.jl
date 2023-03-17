@@ -1,10 +1,10 @@
 #=====================================#
 # MIP solvers (commercial, but fast)  #
 #=====================================#
-
 function get_gurobi()
-    return JuMP.optimizer_with_attributes(
-        Gurobi.Optimizer,
+    GRB_ENV = Gurobi.Env()
+    return optimizer_with_attributes(
+        () -> Gurobi.Optimizer(GRB_ENV),
         MOI.Silent() => false,
         # "MIPFocus" => 3, # Focus on optimality over feasibility 
         "Presolve" => 1,
@@ -15,8 +15,9 @@ function get_cplex()
     return JuMP.optimizer_with_attributes(
         CPLEX.Optimizer,
         MOI.Silent() => false,
-        # "CPX_PARAM_EPGAP" => 1E-4,
-        # "CPX_PARAM_MIPEMPHASIS" => 2 # Focus on optimality over feasibility 
+        # "CPX_PARAM_EPGAP" => 1E-6,
+        # "CPX_PARAM_EPOPT" => 1E-8,
+        # "CPX_PARAM_MIPEMPHASIS" => 1, # Focus on optimality over feasibility 
         "CPX_PARAM_PREIND" => 1,
     )
 end

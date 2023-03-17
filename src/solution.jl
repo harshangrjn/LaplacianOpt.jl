@@ -25,13 +25,18 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
         "optimizer" => JuMP.solver_name(lom.model),
         "termination_status" => JuMP.termination_status(lom.model),
         "primal_status" => JuMP.primal_status(lom.model),
-        "objective" => get_objective_value(lom.model),
-        "objective_ub" => get_objective_bound(lom.model),
+        "objective" => LOpt.get_objective_value(lom.model),
+        "objective_ub" => LOpt.get_objective_bound(lom.model),
         "solve_time" => solve_time,
         "solution" => solution,
         "adjacency_base_graph" => lom.data["adjacency_base_graph"],
         "adjacency_augment_graph" => lom.data["adjacency_augment_graph"],
     )
+
+    status = LOpt.optimality_certificate_MISDP(lom, result)
+    if status in [true, false]
+        result["optimality_certificate_MISDP"] = status
+    end
 
     return result
 end
@@ -72,4 +77,27 @@ function build_LOModel_solution(lom::LaplacianOptModel)
     end
 
     return solution
+end
+
+"""
+    optimality_certificate_MISDP(lom::LaplacianOptModel, result::Dict{String,Any})
+
+Given the LaplacianOpt model (`lom`) and the results dictionary, this function returns 
+a boolean if the integer solution satisfies the optimality certificate for the MISDP problem. 
+"""
+function optimality_certificate_MISDP(lom::LaplacianOptModel, result::Dict{String,Any})
+    if ("z_var" in keys(result["solution"])) &&
+       !(lom.options.formulation_type == "max_span_tree")
+        adjacency_full_graph = lom.data["adjacency_augment_graph"]
+        (lom.data["num_edges_existing"] > 0) &&
+            (adjacency_full_graph += lom.data["adjacency_base_graph"])
+        ac = LOpt.algebraic_connectivity(
+            abs.(result["solution"]["z_var"]) .* adjacency_full_graph,
+        )
+        if isapprox(ac, result["objective"], atol = 1E-5)
+            return true
+        else
+            return false
+        end
+    end
 end
