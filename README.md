@@ -9,6 +9,7 @@ Status:
 [![CI](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl/branch/main/graph/badge.svg?token=7EKATOHLYL)](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl)
 [![Documentation](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/documentation.yml/badge.svg)](https://harshangrjn.github.io/LaplacianOpt.jl/dev/)
+[![version](https://juliahub.com/docs/LaplacianOpt/version.svg)](https://juliahub.com/ui/Packages/LaplacianOpt/V1JEg/)
 ## LaplacianOpt
 **LaplacianOpt** is a Julia package which implements polyhedral relaxation-based algorithms for the maximimum algebraic connectivity augmentation problem on weighted graph Laplacians. More specifically, given a weighted base graph with existing edges (could be empty), a set of candidate weighted edges for augmentation, and an augmentation budget (`K`), this package finds a set of `K` edges to augment to the base graph such that the resulting graph has maximum algebraic conenctivity with optimality guarantees. For example, given a base graph with `N` vertices and `0` edges, set of candidate edges which form a complete graph, and `K = (N-1)`, this packages finds a spanning tree with maximum algebraic connectivity.
 
