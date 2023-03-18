@@ -13,6 +13,7 @@
         :topology_flow_cuts => true,
         :solution_type => "optimal",
         :relax_integrality => false,
+        :time_limit => test_time_limit(),
     )
     result_lo = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
 
@@ -60,6 +61,7 @@ end
         :topology_flow_cuts => false,
         :topology_multi_commodity => true,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
     result_mst = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
 
@@ -89,6 +91,7 @@ end
         :topology_flow_cuts => true,
         :topology_multi_commodity => false,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
     result_mst = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
 
@@ -134,6 +137,7 @@ end
         :soc_linearized_cuts => true,
         :topology_flow_cuts => true,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
 
     result_1 = LaplacianOpt.run_LOpt(params_1, glpk_optimizer; options = model_options)
@@ -156,6 +160,7 @@ end
         :soc_linearized_cuts => true,
         :topology_flow_cuts => true,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
 
     result_2 = LaplacianOpt.run_LOpt(params_2, glpk_optimizer; options = model_options)
@@ -182,6 +187,7 @@ end
         :topology_multi_commodity => true,
         :topology_flow_cuts => false,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
 
     result_1 = LaplacianOpt.run_LOpt(params_1, glpk_optimizer; options = model_options)
@@ -228,6 +234,7 @@ end
         :topology_multi_commodity => true,
         :topology_flow_cuts => false,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -288,6 +295,7 @@ end
         :eigen_cuts_full => true,
         :projected_eigen_cuts => false,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -317,6 +325,7 @@ end
         :projected_eigen_cuts => true,
         :time_limit => 2.0,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -338,6 +347,7 @@ end
         :cheeger_cuts => true,
         :best_lower_bound => 11.1591873084,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -364,6 +374,7 @@ end
         :topology_flow_cuts => true,
         :sdp_relaxation => true,
         :solution_type => "optimal",
+        :time_limit => test_time_limit(),
     )
 
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)

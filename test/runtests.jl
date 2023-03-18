@@ -29,6 +29,8 @@ function data_spanning_tree(num_nodes::Int, instance::Int)
     return data_dict, augment_budget
 end
 
+test_time_limit() = 60
+
 @testset "LaplacianOpt" begin
     include("utility_tests.jl")
     include("lo_model_tests.jl")

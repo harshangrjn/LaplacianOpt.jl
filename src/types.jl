@@ -58,7 +58,7 @@ function get_default_options()
 
     tol_zero = 1E-6   # > 0 value
     tol_psd = 1E-6   # > 0 value (tolerance to verify PSD-ness of a matrix)
-    time_limit = 10800  # float value (seconds)
+    time_limit = 10800  # > 0 value (seconds)
     relax_integrality = false  # true, false
     lazycuts_logging = false  # true, false
 
