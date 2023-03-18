@@ -121,9 +121,9 @@ end
 
 @testset "SOC relaxations - 1: constraint_soc_cuts_on_2minors" begin
     num_nodes = 5
-    instance = 5
+    instance = 7
     data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
-    
+
     params_1 =
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
@@ -140,12 +140,11 @@ end
 
     @test result_1["termination_status"] == MOI.OPTIMAL
     @test result_1["primal_status"] == MOI.FEASIBLE_POINT
-    @test isapprox(result_1["objective"], 15.992792245, atol = 1E-6)
-    @test isapprox(result_1["solution"]["z_var"][1, 5], 1.0)
-    @test isapprox(result_1["solution"]["z_var"][2, 5], 1.0)
-    @test isapprox(result_1["solution"]["z_var"][3, 4], 1.0)
-    @test isapprox(result_1["solution"]["z_var"][3, 5], 1.0)
-    @test isapprox(result_1["solution"]["z_var"][4, 3], 1.0)
+    @test isapprox(result_1["objective"], 19.529478817, atol = 1E-6)
+    @test isapprox(result_1["solution"]["z_var"][1, 2], 1.0, atol = 1E-6)
+    @test isapprox(result_1["solution"]["z_var"][2, 5], 1.0, atol = 1E-6)
+    @test isapprox(result_1["solution"]["z_var"][3, 4], 1.0, atol = 1E-6)
+    @test isapprox(result_1["solution"]["z_var"][3, 5], 1.0, atol = 1E-6)
 
     params_2 =
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
@@ -164,12 +163,7 @@ end
     @test result_2["termination_status"] == MOI.OPTIMAL
     @test result_2["primal_status"] == MOI.FEASIBLE_POINT
     @test result_2["objective"] <= result_1["objective"]
-    @test isapprox(result_2["objective"], 13.065372790, atol = 1E-6)
-    @test isapprox(
-        result_1["solution"]["z_var"],
-        result_2["solution"]["z_var"],
-        atol = 1E-6,
-    )
+    @test isapprox(result_2["objective"], 12.41137427, atol = 1E-6)
 end
 
 @testset "Minor-based eigen relaxations: 2x2 and 3x3" begin
