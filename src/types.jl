@@ -16,6 +16,7 @@ mutable struct LaplacianOptModelOptions
     soc_linearized_cuts::Bool
     topology_multi_commodity::Bool
     topology_flow_cuts::Bool
+    max_cycle_length::Union{Int64,Nothing}
     cheeger_cuts::Bool
     cheeger_cuts_factor::Float64
 
@@ -47,6 +48,7 @@ function get_default_options()
     soc_linearized_cuts = false  # true, false
     topology_multi_commodity = false  # true, false
     topology_flow_cuts = true   # true, false
+    max_cycle_length = nothing # >= 0 integer value 
     cheeger_cuts = false  # true, false
     cheeger_cuts_factor = 0.5    # > 0.5 may make cheeger_cuts a heuristic cut
 
@@ -72,6 +74,7 @@ function get_default_options()
         soc_linearized_cuts,
         topology_multi_commodity,
         topology_flow_cuts,
+        max_cycle_length,
         cheeger_cuts,
         cheeger_cuts_factor,
         sdp_relaxation,

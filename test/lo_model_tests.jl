@@ -229,9 +229,7 @@ end
         :eigen_cuts_full => true,
         :soc_linearized_cuts => true,
         :eigen_cuts_2minors => true,
-        :eigen_cuts_3minors => true,
         :projected_eigen_cuts => false,
-        :topology_multi_commodity => true,
         :topology_flow_cuts => false,
         :solution_type => "optimal",
         :time_limit => test_time_limit(),
@@ -310,8 +308,8 @@ end
     @test isapprox(result["solution"]["z_var"][3, 4], 1.0)
 end
 
-@testset "Test topology flow cuts" begin
-    num_nodes = 8
+@testset "Test topology flow/cycle and 3-minor cuts" begin
+    num_nodes = 5
     instance = 1
     data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
 
@@ -319,17 +317,32 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => true,
+        :eigen_cuts_full => false,
         :eigen_cuts_2minors => false,
-        :topology_flow_cuts => true,
+        :eigen_cuts_3minors => true,
+        :topology_flow_cuts => false,
         :projected_eigen_cuts => true,
-        :time_limit => 2.0,
         :solution_type => "optimal",
+        :lazycuts_logging => true,
         :time_limit => test_time_limit(),
     )
 
-    result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
-    @test result["termination_status"] == MOI.TIME_LIMIT
+    result_1 = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
+    @test result_1["termination_status"] == MOI.OPTIMAL
+    @test isapprox(result_1["objective"], 11.16208322, atol = 1E-6)
+
+    # Test flow cuts
+    model_options[:max_cycle_length] = 0
+    model_options[:topology_flow_cuts] = true
+    result_2 = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
+    @test result_2["termination_status"] == MOI.OPTIMAL
+    @test isapprox(result_2["objective"], 11.16208322, atol = 1E-6)
+
+    # Test cycle elimination cuts
+    model_options[:max_cycle_length] = num_nodes
+    result_3 = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
+    @test result_3["termination_status"] == MOI.OPTIMAL
+    @test isapprox(result_3["objective"], 11.16208322, atol = 1E-6)
 end
 
 @testset "Test Cheeger cuts and best_incumbent warm start" begin
@@ -342,7 +355,7 @@ end
 
     model_options = Dict{Symbol,Any}(
         :eigen_cuts_full => true,
-        :projected_eigen_cuts => false,
+        :projected_eigen_cuts => true,
         :topology_flow_cuts => true,
         :cheeger_cuts => true,
         :best_lower_bound => 11.1591873084,

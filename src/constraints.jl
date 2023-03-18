@@ -195,11 +195,9 @@ function constraint_eigen_cuts_on_2minors(
     cb_cuts,
     lom::LaplacianOptModel,
 )
-    num_nodes = lom.data["num_nodes"]
-
-    if num_nodes >= 3
-        for i in 1:(num_nodes-1)
-            for j in (i+1):num_nodes
+    if lom.data["num_nodes"] >= 3
+        for i in 1:(lom.data["num_nodes"]-1)
+            for j in (i+1):lom.data["num_nodes"]
                 LOpt._add_eigen_cut_lazy(W_val, cb_cuts, lom, [i, j])
             end
         end
@@ -212,12 +210,10 @@ function constraint_eigen_cuts_on_3minors(
     cb_cuts,
     lom::LaplacianOptModel,
 )
-    num_nodes = lom.data["num_nodes"]
-
-    if num_nodes >= 4
-        for i in 1:(num_nodes-2)
-            for j in (i+1):num_nodes
-                for k in (j+1):num_nodes
+    if lom.data["num_nodes"] >= 4
+        for i in 1:(lom.data["num_nodes"]-2)
+            for j in (i+1):lom.data["num_nodes"]
+                for k in (j+1):lom.data["num_nodes"]
                     LOpt._add_eigen_cut_lazy(W_val, cb_cuts, lom, [i, j, k])
                 end
             end
@@ -251,8 +247,7 @@ function _add_eigen_cut_lazy(
     if violated_eigen_vec !== nothing
 
         # NxN minors
-        if (size(W_val_minor)[1] == lom.data["num_nodes"]) &&
-           (lom.options.projected_eigen_cuts)
+        if (size(W_val_minor)[1] == num_nodes) && (lom.options.projected_eigen_cuts)
             con = JuMP.@build_constraint(
                 sum(
                     adjacency[i, j] * (violated_eigen_vec[i] - violated_eigen_vec[j])^2 for
@@ -298,13 +293,10 @@ function _add_eigen_cut_lazy(
         MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
 
         if lom.options.lazycuts_logging
-            if length(idx) == 2
-                Memento.info(_LOGGER, "Polyhedral relaxation cuts: 2x2 minor (eigen)")
-            elseif length(idx) == 3
-                Memento.info(_LOGGER, "Polyhedral relaxation cuts: 3x3 minor (eigen)")
-            elseif length(idx) == lom.data["num_nodes"]
-                Memento.info(_LOGGER, "Polyhedral relaxation cuts: nxn matrix (eigen)")
-            end
+            Memento.info(
+                _LOGGER,
+                "Polyhedral relaxation cuts: $(length(idx))x$(length(idx)) minor (eigen)",
+            )
         end
     end
 end
@@ -348,12 +340,9 @@ function constraint_topology_flow_cuts(
     graph_type = lom.data["graph_type"]
     num_edges_existing = lom.data["num_edges_existing"]
     augment_budget = lom.data["augment_budget"]
-    cc_lazy = Graphs.connected_components(Graphs.SimpleGraph(abs.(z_val)))
 
-    is_spanning_tree = false
-    if (num_edges_existing == 0) && (augment_budget == (num_nodes - 1))
-        is_spanning_tree = true
-    end
+    G = Graphs.SimpleGraph(abs.(z_val))
+    cc_lazy = Graphs.connected_components(G)
 
     max_cc = 5 # increase this to any greater integer value and it works
     if length(cc_lazy) > max_cc
@@ -365,30 +354,61 @@ function constraint_topology_flow_cuts(
         return
     end
 
-    min_cc_size = minimum(length.(cc_lazy))
-    # min_cc_loc = argmin(length.(cc_lazy))
-    cc_size_threshold = ceil(lom.data["num_nodes"] / 4)
+    is_spanning_tree = false
+    if (num_edges_existing == 0) && (augment_budget == (num_nodes - 1))
+        is_spanning_tree = true
+    end
 
     # Subtour elimination (for cycle/tree graphs)
-    if (2 <= min_cc_size <= cc_size_threshold) &&
-       ((graph_type == "hamiltonian_cycle") || (is_spanning_tree))
-        for k in 1:(length(cc_lazy))
-            cc_lazy_size = length(cc_lazy[k])
-            if cc_lazy_size <= cc_size_threshold
-                cc = cc_lazy[k]
-                con = JuMP.@build_constraint(
-                    sum(
-                        lom.variables[:z_var][cc[i], cc[j]] for
-                        i in 1:(cc_lazy_size-1), j in (i+1):cc_lazy_size if
-                        !(isapprox(adjacency_augment_graph[i, j], 0, atol = 1E-6))
-                    ) <= (cc_lazy_size - 1)
-                )
-                MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
-            end
+    cycle_elimination = false
+
+    if ((graph_type == "hamiltonian_cycle") || (is_spanning_tree))
+        if lom.options.max_cycle_length == nothing
+            max_cycle_length = Int(ceil(num_nodes / 2)) # default value
+        else
+            max_cycle_length = lom.options.max_cycle_length
         end
 
-        # Flow cuts for connected components    
-    elseif length(cc_lazy) in 2:max_cc
+        cycles = Set()
+        (max_cycle_length >= 3) && (cycles = LOpt.get_unique_cycles(G, max_cycle_length))
+
+        if length(cycles) >= 1
+            cycle_elimination = true
+
+            for i in 1:length(cycles)
+                cyc = collect(cycles)[i]
+                cyc_length = length(cyc)
+                expr = JuMP.AffExpr()
+
+                for ii in 1:cyc_length
+                    jj = ii + 1
+                    (ii == cyc_length) && (jj = 1)
+                    if !(isapprox(
+                        adjacency_augment_graph[cyc[ii], cyc[jj]],
+                        0,
+                        atol = 1E-6,
+                    ))
+                        expr += lom.variables[:z_var][
+                            min(cyc[ii], cyc[jj]),
+                            max(cyc[ii], cyc[jj]),
+                        ]
+                    end
+                end
+                con = JuMP.@build_constraint(expr <= (cyc_length - 1))
+                MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
+
+                if lom.options.lazycuts_logging
+                    Memento.info(
+                        _LOGGER,
+                        "Polyhedral relaxation cuts: cycle elimination added (size = $cyc_length)",
+                    )
+                end
+            end
+        end
+    end
+
+    # Flow cuts on connected components    
+    if !(cycle_elimination) && (length(cc_lazy) in 2:max_cc)
         num_edges_cutset = 1
         if graph_type == "hamiltonian_cycle"
             num_edges_cutset = 2
@@ -416,13 +436,10 @@ function constraint_topology_flow_cuts(
 
                 MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
             end
-        end
 
-        if lom.options.lazycuts_logging
-            Memento.info(
-                _LOGGER,
-                "Polyhedral relaxation cuts: graph connectivity (#cc = $(length(cc_lazy)))",
-            )
+            if lom.options.lazycuts_logging
+                Memento.info(_LOGGER, "Polyhedral relaxation cuts: flow cuts added")
+            end
         end
     end
 

@@ -8,6 +8,7 @@ LaplacianOpt.jl Change Log
 - Added evaluation of cheeger constant
 - Added option to input `best_incumbent` to warm-start the solver
 - Added certificate of optimality for MISDP problem
+- Bug fix in cycle elimination cuts and clean up of flow cuts
 - Updated docs and unit tests to reflect above changes
 
 ### v0.3.2

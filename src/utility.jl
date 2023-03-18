@@ -263,3 +263,29 @@ function cheeger_constant(
 
     return result_cheeger
 end
+
+"""
+    get_unique_cycles(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, 
+        max_cycle_length::Int, 
+        min_cycle_length = 3, 
+        ceiling = 100)
+
+Given an undirected graph of type `Graphs.SimpleGraphs`, 
+this function returns unique cycles of maximum length given by `max_cycle_length`. 
+"""
+function get_unique_cycles(
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    max_cycle_length::Int,
+    min_cycle_length = 3,
+    ceiling = 100,
+)
+    cycles = Graphs.simplecycles_limited_length(G, max_cycle_length, ceiling)
+    cycles_set = Set()
+    for i in 1:length(cycles)
+        if length(cycles[i]) >= min_cycle_length
+            push!(cycles_set, cycles[i])
+        end
+    end
+
+    return collect(cycles_set)[unique(i -> sort.(cycles_set)[i], 1:length(cycles_set))]
+end
