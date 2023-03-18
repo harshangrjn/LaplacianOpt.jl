@@ -67,6 +67,6 @@ result = LOpt.run_LOpt(
     params,
     lopt_optimizer;
     options = model_options,
-    visualize_solution = false,  # Make this true to plot the graph solution
+    visualize_solution = false,  # Make it true to plot the graph solution
     visualizing_tool = "tikz",   # "graphviz" is another option
 )

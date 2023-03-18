@@ -122,6 +122,34 @@ end
     @test isapprox(result_mst_1["objective"], 3625.89701005, atol = 1E-6)
 end
 
+@testset "Max Span Tree: Flow cuts tests" begin
+    num_nodes = 15
+    instance = 3
+    data_dict, augment_budget = data_spanning_tree(num_nodes, instance)
+
+    params =
+        Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
+
+    model_options = Dict{Symbol,Any}(
+        :formulation_type => "max_span_tree",
+        :topology_flow_cuts => true,
+        :solution_type => "optimal",
+        :time_limit => test_time_limit(),
+    )
+    result_mst = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
+
+    @test result_mst["termination_status"] == MOI.OPTIMAL
+    @test result_mst["primal_status"] == MOI.FEASIBLE_POINT
+    @test isapprox(result_mst["objective"], 3695.02394015, atol = 1E-6)
+
+    # Without flow cuts
+    model_options[:topology_flow_cuts] = false
+    result_mst_1 = LaplacianOpt.run_LOpt(params, glpk_optimizer, options = model_options)
+    @test result_mst_1["termination_status"] == MOI.OPTIMAL
+    @test result_mst_1["primal_status"] == MOI.FEASIBLE_POINT
+    @test isapprox(result_mst_1["objective"], 3695.82875361, atol = 1E-6)
+end
+
 @testset "SOC relaxations - 1: constraint_soc_cuts_on_2minors" begin
     num_nodes = 5
     instance = 7
