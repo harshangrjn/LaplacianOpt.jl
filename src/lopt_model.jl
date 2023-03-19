@@ -20,15 +20,10 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
             LOpt.heuristic_kopt(lom.data, lom.options.kopt_parameter)
         end
     elseif lom.options.formulation_type == "max_span_tree"
-        if lom.options.solution_type == "optimal"
+        if lom.options.solution_type in ["optimal", "heuristic"]
             LOpt.variable_MaxSpanTree_model(lom)
             LOpt.constraint_MaxSpanTree_model(lom)
             LOpt.objective_MaxSpanTree_model(lom)
-        elseif lom.options.solution_type == "heuristic"
-            Memento.warn(
-                _LOGGER,
-                "Heuristic is not implemented for max span tree formulation type",
-            )
         end
     end
 

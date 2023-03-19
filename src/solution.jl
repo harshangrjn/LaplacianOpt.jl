@@ -29,6 +29,7 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
         "objective_ub" => LOpt.get_objective_bound(lom.model),
         "solve_time" => solve_time,
         "solution" => solution,
+        "solution_type" => lom.options.solution_type,
         "adjacency_base_graph" => lom.data["adjacency_base_graph"],
         "adjacency_augment_graph" => lom.data["adjacency_augment_graph"],
     )

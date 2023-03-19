@@ -34,6 +34,7 @@ test_time_limit() = 60
 @testset "LaplacianOpt" begin
     include("utility_tests.jl")
     include("lo_model_tests.jl")
+    include("heuristics_tests.jl")
     include("relaxations_test.jl")
     include("log_tests.jl")
 end
