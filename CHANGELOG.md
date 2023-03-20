@@ -9,6 +9,7 @@ LaplacianOpt.jl Change Log
 - Added option to input `best_incumbent` to warm-start the solver
 - Added certificate of optimality for MISDP problem
 - Bug fix in cycle elimination cuts and clean up of flow cuts
+- Added Pkg dependency
 - Updated docs and unit tests to reflect above changes
 
 ### v0.3.2

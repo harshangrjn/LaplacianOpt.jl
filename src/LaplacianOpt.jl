@@ -8,6 +8,7 @@ import JSON
 import Graphs
 import TikzGraphs
 import TikzPictures
+import Pkg
 
 const MOI = MathOptInterface
 const LA = LinearAlgebra

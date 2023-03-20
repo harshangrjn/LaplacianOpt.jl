@@ -5,7 +5,7 @@ function get_gurobi()
     GRB_ENV = Gurobi.Env()
     return optimizer_with_attributes(
         () -> Gurobi.Optimizer(GRB_ENV),
-        MOI.Silent() => false,
+        MOI.Silent() => true,
         # "MIPFocus" => 3, # Focus on optimality over feasibility 
         "Presolve" => 1,
     )
@@ -14,7 +14,7 @@ end
 function get_cplex()
     return JuMP.optimizer_with_attributes(
         CPLEX.Optimizer,
-        MOI.Silent() => false,
+        MOI.Silent() => true,
         # "CPX_PARAM_EPGAP" => 1E-6,
         # "CPX_PARAM_EPOPT" => 1E-8,
         # "CPX_PARAM_MIPEMPHASIS" => 1, # Focus on optimality over feasibility 
