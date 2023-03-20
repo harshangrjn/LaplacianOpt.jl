@@ -363,14 +363,9 @@ function constraint_topology_flow_cuts(
     cycle_elimination = false
 
     if ((graph_type == "hamiltonian_cycle") || (is_spanning_tree))
-        if lom.options.max_cycle_length == nothing
-            max_cycle_length = Int(ceil(num_nodes / 2)) # default value
-        else
-            max_cycle_length = lom.options.max_cycle_length
-        end
-
         cycles = Set()
-        (max_cycle_length >= 3) && (cycles = LOpt.get_unique_cycles(G, max_cycle_length))
+        (lom.options.max_cycle_length >= 3) &&
+            (cycles = LOpt.get_unique_cycles(G, lom.options.max_cycle_length))
 
         if length(cycles) >= 1
             cycle_elimination = true
