@@ -5,8 +5,14 @@ Given the input params, this function preprocesses the data, catches any error a
 and outputs a detailed dictionary which forms the basis for building an optimization model. 
 """
 function get_data(params::Dict{String,Any})
-    _header_color = :cyan 
-    printstyled("LaplacianOpt version: ", Pkg.TOML.parse(read(string(pkgdir(LOpt), "/Project.toml"), String))["version"], "\n"; color = _header_color, bold = true)
+    _header_color = :cyan
+    printstyled(
+        "LaplacianOpt version: ",
+        Pkg.TOML.parse(read(string(pkgdir(LOpt), "/Project.toml"), String))["version"],
+        "\n";
+        color = _header_color,
+        bold = true,
+    )
 
     if "data_dict" in keys(params)
         data_dict = params["data_dict"]
