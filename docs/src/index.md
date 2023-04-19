@@ -34,7 +34,7 @@ Pkg.test("LaplacianOpt")
 ```
 
 ## Citing LaplacianOpt
-If you find LaplacianOpt.jl useful in your work, we request you to cite the following papers [\[link-1\]](https://doi.org/10.1109/ECC.2015.7330770) [\[link-2\]](https://doi.org/10.1115/1.4028955): 
+If you find LaplacianOpt.jl useful in your work, we request you to cite the following papers [\[link-1\]](https://doi.org/10.1109/ECC.2015.7330770) [\[link-2\]](https://arxiv.org/abs/2304.08571): 
 ```bibtex
 @inproceedings{LOpt_ECC2015,
   title={On maximizing algebraic connectivity of networks for various engineering applications},
@@ -45,14 +45,11 @@ If you find LaplacianOpt.jl useful in your work, we request you to cite the foll
   organization={IEEE}
 }
 
-@article{LOpt_ASME2015,
-  title={Synthesizing robust communication networks for unmanned aerial vehicles with resource constraints},
-  author={Nagarajan, Harsha and Rathinam, Sivakumar and Darbha, Swaroop},
-  journal={Journal of Dynamic Systems, Measurement, and Control},
-  volume={137},
-  number={6},
-  pages={061001},
-  year={2015},
-  publisher={American Society of Mechanical Engineers}
+@article{LOpt_arXiv2023,
+  title={Optimal Robust Network Design: Formulations and Algorithms for Maximizing Algebraic Connectivity},
+  author={Somisetty, Neelkamal and Nagarajan, Harsha and Darbha, Swaroop},
+  journal={arXiv preprint:2304.08571},
+  url = {https://arxiv.org/abs/2304.08571},
+  year={2023}
 }
 ```

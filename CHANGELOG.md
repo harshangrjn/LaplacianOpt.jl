@@ -1,6 +1,10 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.4.1
+- Added more dense-graph instances, including the 9, 25 and 40 nodes instances in `src/examples` folder. 
+- Added reference to the paper https://arxiv.org/abs/2304.08571
+
 ### v0.4.0
 - Moved all the model options (including cuts) to `types.jl` into `LaplacianOptModelOptions`, a struct form 
 - Streamlined default options for `LaplacianOptModelOptions`
