@@ -96,24 +96,16 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel; optimizer = not
         elseif status in
                [MOI.CALLBACK_NODE_STATUS_INTEGER, MOI.CALLBACK_NODE_STATUS_FRACTIONAL]
             if !(lom.options.formulation_type == "max_span_tree")
-                if lom.options.eigen_cuts_full || lom.options.sdp_relaxation
+                if (size(lom.options.eigen_cuts_sizes)[1] > 0 && 
+                    minimum(lom.options.eigen_cuts_sizes) >= 2) || 
+                    lom.options.sdp_relaxation
                     W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
-                    LOpt.constraint_eigen_cuts_on_full_matrix(W_val, cb_cuts, lom)
+                    LOpt.constraint_eigen_cuts(W_val, cb_cuts, lom)
                 end
 
                 if lom.options.soc_linearized_cuts
                     W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
                     LOpt.constraint_soc_cuts_on_2minors(W_val, cb_cuts, lom)
-                end
-
-                if lom.options.eigen_cuts_2minors
-                    W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
-                    LOpt.constraint_eigen_cuts_on_2minors(W_val, cb_cuts, lom)
-                end
-
-                if lom.options.eigen_cuts_3minors
-                    W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
-                    LOpt.constraint_eigen_cuts_on_3minors(W_val, cb_cuts, lom)
                 end
 
                 if lom.options.cheeger_cuts
@@ -181,41 +173,15 @@ function constraint_soc_cuts_on_2minors(
     return
 end
 
-function constraint_eigen_cuts_on_full_matrix(
+function constraint_eigen_cuts(
     W_val::Matrix{<:Number},
     cb_cuts,
     lom::LaplacianOptModel,
 )
-    LOpt._add_eigen_cut_lazy(W_val, cb_cuts, lom, collect(1:lom.data["num_nodes"]))
-    return
-end
-
-function constraint_eigen_cuts_on_2minors(
-    W_val::Matrix{<:Number},
-    cb_cuts,
-    lom::LaplacianOptModel,
-)
-    if lom.data["num_nodes"] >= 3
-        for i in 1:(lom.data["num_nodes"]-1)
-            for j in (i+1):lom.data["num_nodes"]
-                LOpt._add_eigen_cut_lazy(W_val, cb_cuts, lom, [i, j])
-            end
-        end
-    end
-    return
-end
-
-function constraint_eigen_cuts_on_3minors(
-    W_val::Matrix{<:Number},
-    cb_cuts,
-    lom::LaplacianOptModel,
-)
-    if lom.data["num_nodes"] >= 4
-        for i in 1:(lom.data["num_nodes"]-2)
-            for j in (i+1):lom.data["num_nodes"]
-                for k in (j+1):lom.data["num_nodes"]
-                    LOpt._add_eigen_cut_lazy(W_val, cb_cuts, lom, [i, j, k])
-                end
+    if (size(lom.options.eigen_cuts_sizes)[1] > 0) && (minimum(lom.options.eigen_cuts_sizes) >= 2)
+        for cut_size in unique(lom.options.eigen_cuts_sizes)
+            for i in lom.minor_idx_dict[cut_size]
+                LOpt._add_eigen_cut_lazy(W_val, cb_cuts, lom, collect(i))
             end
         end
     end

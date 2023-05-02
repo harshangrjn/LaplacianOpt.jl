@@ -7,8 +7,7 @@
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => true,
-        :eigen_cuts_2minors => false,
+        :eigen_cuts_sizes => [num_nodes],
         :projected_eigen_cuts => false,
         :topology_flow_cuts => true,
         :solution_type => "optimal",
@@ -57,6 +56,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
+        :eigen_cuts_sizes => [],
         :formulation_type => "max_span_tree",
         :topology_flow_cuts => false,
         :topology_multi_commodity => true,
@@ -87,6 +87,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
+        :eigen_cuts_sizes => [],
         :formulation_type => "max_span_tree",
         :topology_flow_cuts => true,
         :topology_multi_commodity => false,
@@ -131,6 +132,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
+        :eigen_cuts_sizes => [],
         :formulation_type => "max_span_tree",
         :topology_flow_cuts => true,
         :solution_type => "optimal",
@@ -166,8 +168,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => false,
-        :eigen_cuts_2minors => false,
+        :eigen_cuts_sizes => [],
         :projected_eigen_cuts => false,
         :soc_linearized_cuts => true,
         :topology_flow_cuts => true,
@@ -189,9 +190,8 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => true,
+        :eigen_cuts_sizes => [num_nodes],
         :projected_eigen_cuts => false,
-        :eigen_cuts_2minors => false,
         :soc_linearized_cuts => true,
         :topology_flow_cuts => true,
         :solution_type => "optimal",
@@ -215,9 +215,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => true,
-        :eigen_cuts_2minors => true,
-        :eigen_cuts_3minors => true,
+        :eigen_cuts_sizes => [2,3,num_nodes],
         :projected_eigen_cuts => false,
         :topology_multi_commodity => true,
         :topology_flow_cuts => false,
@@ -261,9 +259,8 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => true,
+        :eigen_cuts_sizes => [2, data_dict["num_nodes"]],
         :soc_linearized_cuts => true,
-        :eigen_cuts_2minors => true,
         :projected_eigen_cuts => false,
         :topology_flow_cuts => false,
         :solution_type => "optimal",
@@ -325,7 +322,7 @@ end
     )
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => true,
+        :eigen_cuts_sizes => [2, data_dict["num_nodes"]],
         :projected_eigen_cuts => false,
         :solution_type => "optimal",
         :time_limit => test_time_limit(),
@@ -352,9 +349,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => false,
-        :eigen_cuts_2minors => false,
-        :eigen_cuts_3minors => true,
+        :eigen_cuts_sizes => [3],
         :topology_flow_cuts => false,
         :projected_eigen_cuts => true,
         :solution_type => "optimal",
@@ -389,7 +384,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => true,
+        :eigen_cuts_sizes => [2,num_nodes],
         :projected_eigen_cuts => true,
         :topology_flow_cuts => true,
         :cheeger_cuts => true,
@@ -417,7 +412,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_full => true,
+        :eigen_cuts_sizes => [2, num_nodes],
         :projected_eigen_cuts => false,
         :topology_flow_cuts => true,
         :sdp_relaxation => true,

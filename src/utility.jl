@@ -289,3 +289,46 @@ function get_unique_cycles(
 
     return collect(cycles_set)[unique(i -> sort.(cycles_set)[i], 1:length(cycles_set))]
 end
+
+"""
+    get_minor_idx(num_nodes::Int64, size::Int64)
+
+Given the number of nodes (size of the square matrix) and the 
+preferred size of principal sub-matrices (`<= num_nodes`), this function 
+outputs all the indices of correspondingly sized sub-matrices.  
+"""
+function get_minor_idx(num_nodes::Int64, 
+    size::Int64
+)
+    minor_idx = Vector{Tuple{Int64, Vararg{Int64}}}()
+
+    for i=1:num_nodes
+        push!(minor_idx, (i,))
+    end
+
+    if size >= 2 
+        for _ = 1:(size-1)
+            global minor_idx_tmp = Vector{Tuple{Int64, Vararg{Int64}}}()
+            for k = 1:length(minor_idx)
+                idx_k = minor_idx[k]
+                if idx_k[end] <= (num_nodes-1)
+                    for ii in collect((idx_k[end]+1):num_nodes)
+                        push!(minor_idx_tmp, Tuple(push!(collect(idx_k), ii)))
+                    end
+                end
+            end
+            minor_idx = deepcopy(minor_idx_tmp)
+        end
+    end
+    
+    return minor_idx_tmp
+end
+
+function _PMinorIdx(N::Int64, sizes::Vector{Int64})
+    minor_idx_dict = Dict{Int64, Vector{Tuple{Int64, Vararg{Int64}}}}()
+    for k in sizes 
+        minor_idx_dict[k] = LOpt.get_minor_idx(N, k)
+    end
+
+    return minor_idx_dict
+end

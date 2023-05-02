@@ -1,6 +1,13 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.5.0
+- Generalized eigen cuts to handle any size of non-negative minors (`2x2`-`NxN`)
+- Dropped support for `constraint_eigen_cuts_on_2minors` and `constraint_eigen_cuts_on_3minors`
+- Added more dense-graph instances in `src/examples` folder (60 nodes)
+- Added `src/examples/solutions` which conntains optimal/best-known solutions for all the dense-graph instances
+- Updated docs and unit tests to reflect above changes
+
 ### v0.4.1
 - Added more dense-graph instances, including the 9, 25 and 40 nodes instances in `src/examples` folder. 
 - Added reference to the paper https://arxiv.org/abs/2304.08571
