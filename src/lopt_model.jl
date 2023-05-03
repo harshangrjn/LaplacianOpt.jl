@@ -2,7 +2,7 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
     lom = LOpt.LaplacianOptModel(data)
 
     # Default eigen-cuts sizes (for exact soltution of MISDP, include `num_nodes` here)
-    LOpt.set_option(lom, :eigen_cuts_sizes, [2, lom.data["num_nodes"]])
+    LOpt.set_option(lom, :eigen_cuts_sizes, [lom.data["num_nodes"], 2])
 
     # Update defaults to user-defined options
     if options !== nothing
@@ -16,7 +16,8 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
     if lom.options.formulation_type == "max_λ2"
         if lom.options.solution_type == "optimal"
             # Populate PMinor indices
-            lom.minor_idx_dict = LOpt._PMinorIdx(lom.data["num_nodes"], lom.options.eigen_cuts_sizes)
+            lom.minor_idx_dict =
+                LOpt._PMinorIdx(lom.data["num_nodes"], lom.options.eigen_cuts_sizes)
 
             LOpt.variable_LOModel(lom)
             LOpt.constraint_LOModel(lom; optimizer = optimizer)
@@ -170,8 +171,10 @@ function set_option(lom::LaplacianOptModel, s::Symbol, val)
 end
 
 function lazycallback_status(lom::LaplacianOptModel)
-    if (size(lom.options.eigen_cuts_sizes)[1] > 0 && 
-        minimum(lom.options.eigen_cuts_sizes) >= 2) ||
+    if (
+           size(lom.options.eigen_cuts_sizes)[1] > 0 &&
+           minimum(lom.options.eigen_cuts_sizes) >= 2
+       ) ||
        lom.options.topology_flow_cuts ||
        lom.options.soc_linearized_cuts ||
        lom.options.cheeger_cuts ||
@@ -184,10 +187,11 @@ end
 
 function _logging_info(lom::LaplacianOptModel)
     if lom.options.solution_type == "optimal"
-
-        if (size(lom.options.eigen_cuts_sizes)[1] > 0 && 
-            minimum(lom.options.eigen_cuts_sizes) >= 2 && 
-            maximum(lom.options.eigen_cuts_sizes) <= lom.data["num_nodes"])
+        if (
+            size(lom.options.eigen_cuts_sizes)[1] > 0 &&
+            minimum(lom.options.eigen_cuts_sizes) >= 2 &&
+            maximum(lom.options.eigen_cuts_sizes) <= lom.data["num_nodes"]
+        )
             for k in lom.options.eigen_cuts_sizes
                 Memento.info(_LOGGER, "Applying eigen cuts ($(k)x$(k) matrix)")
             end

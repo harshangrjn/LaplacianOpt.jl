@@ -22,10 +22,7 @@ function get_data(params::Dict{String,Any})
 
     data_dict = LOpt._pre_process_data(data_dict)
 
-    Memento.info(
-        _LOGGER,
-        "Number of nodes in the graph: $(data_dict["num_nodes"])",
-    )
+    Memento.info(_LOGGER, "Number of nodes in the graph: $(data_dict["num_nodes"])")
 
     if "augment_budget" in keys(params)
         if params["augment_budget"] <= data_dict["num_edges_to_augment"]

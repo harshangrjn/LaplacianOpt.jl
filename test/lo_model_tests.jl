@@ -215,7 +215,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_sizes => [2,3,num_nodes],
+        :eigen_cuts_sizes => [2, 3, num_nodes],
         :projected_eigen_cuts => false,
         :topology_multi_commodity => true,
         :topology_flow_cuts => false,
@@ -384,7 +384,7 @@ end
         Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
     model_options = Dict{Symbol,Any}(
-        :eigen_cuts_sizes => [2,num_nodes],
+        :eigen_cuts_sizes => [2, num_nodes],
         :projected_eigen_cuts => true,
         :topology_flow_cuts => true,
         :cheeger_cuts => true,

@@ -95,7 +95,7 @@ mutable struct LaplacianOptModel
     model::JuMP.Model
     variables::Dict{Symbol,Any}
     options::LaplacianOptModelOptions
-    minor_idx_dict::Dict{Int64, Vector{Tuple{Int64, Vararg{Int64}}}}
+    minor_idx_dict::Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}
     result::Dict{String,Any}
 
     "Contructor for struct `LaplacianOptModel`"
@@ -104,7 +104,7 @@ mutable struct LaplacianOptModel
         model = JuMP.Model()
         variables = Dict{Symbol,Any}()
         options = LOpt.get_default_options()
-        minor_idx_dict = Dict{Int64, Vector{Tuple{Int64, Vararg{Int64}}}}()
+        minor_idx_dict = Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}()
         result = Dict{String,Any}("cheeger_cuts_separation_time" => 0)
         lom = new(data, model, variables, options, minor_idx_dict, result)
 
