@@ -1,0 +1,2 @@
+# Solutions
+This folder contains optimal/best-found solutions and corresponding network topologies for all instances in the [instances](https://github.com/harshangrjn/LaplacianOpt.jl/tree/master/examples/instances) folder.
