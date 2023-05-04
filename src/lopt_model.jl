@@ -1,6 +1,9 @@
 function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = nothing)
     lom = LOpt.LaplacianOptModel(data)
 
+    # Default eigen-cuts sizes (for exact soltution of MISDP, include `num_nodes` here)
+    LOpt.set_option(lom, :eigen_cuts_sizes, [lom.data["num_nodes"], 2])
+
     # Update defaults to user-defined options
     if options !== nothing
         for i in keys(options)
@@ -12,6 +15,10 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
 
     if lom.options.formulation_type == "max_λ2"
         if lom.options.solution_type == "optimal"
+            # Populate PMinor indices
+            lom.minor_idx_dict =
+                LOpt._PMinorIdx(lom.data["num_nodes"], lom.options.eigen_cuts_sizes)
+
             LOpt.variable_LOModel(lom)
             LOpt.constraint_LOModel(lom; optimizer = optimizer)
             LOpt.objective_LOModel(lom)
@@ -164,11 +171,12 @@ function set_option(lom::LaplacianOptModel, s::Symbol, val)
 end
 
 function lazycallback_status(lom::LaplacianOptModel)
-    if lom.options.eigen_cuts_full ||
+    if (
+           size(lom.options.eigen_cuts_sizes)[1] > 0 &&
+           minimum(lom.options.eigen_cuts_sizes) >= 2
+       ) ||
        lom.options.topology_flow_cuts ||
        lom.options.soc_linearized_cuts ||
-       lom.options.eigen_cuts_2minors ||
-       lom.options.eigen_cuts_3minors ||
        lom.options.cheeger_cuts ||
        lom.options.sdp_relaxation
         return true
@@ -179,14 +187,18 @@ end
 
 function _logging_info(lom::LaplacianOptModel)
     if lom.options.solution_type == "optimal"
-        lom.options.eigen_cuts_full &&
-            Memento.info(_LOGGER, "Applying eigen cuts (NxN matrix)")
+        if (
+            size(lom.options.eigen_cuts_sizes)[1] > 0 &&
+            minimum(lom.options.eigen_cuts_sizes) >= 2 &&
+            maximum(lom.options.eigen_cuts_sizes) <= lom.data["num_nodes"]
+        )
+            for k in lom.options.eigen_cuts_sizes
+                Memento.info(_LOGGER, "Applying eigen cuts ($(k)x$(k) matrix)")
+            end
+        end
+
         lom.options.soc_linearized_cuts &&
             Memento.info(_LOGGER, "Applying linearized SOC cuts (2x2 minors)")
-        lom.options.eigen_cuts_2minors &&
-            Memento.info(_LOGGER, "Applying eigen cuts (2x2 minors)")
-        lom.options.eigen_cuts_3minors &&
-            Memento.info(_LOGGER, "Applying eigen cuts (3x3 minors)")
         lom.options.cheeger_cuts &&
             Memento.info(_LOGGER, "Applying Cheeger inequality-based cuts")
         lom.options.sdp_relaxation &&

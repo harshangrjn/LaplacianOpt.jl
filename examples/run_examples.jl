@@ -57,8 +57,7 @@ params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_
 
 # For more model options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
 model_options = Dict{Symbol,Any}(
-    :eigen_cuts_full => true,
-    :eigen_cuts_2minors => true,
+    :eigen_cuts_sizes => [2, num_nodes],
     :topology_flow_cuts => true,
     :solution_type => "optimal",
 )

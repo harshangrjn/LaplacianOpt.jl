@@ -2,16 +2,15 @@ export LaplacianOptModel
 
 """
     LaplacianOptModelOptions
-The composite mutable struct, `LaplacianOptModelOptions`, holds various optimization model options for enhancements 
-with defualt options set to the values provided by `get_default_options` function.
+The composite mutable struct, `LaplacianOptModelOptions`, holds various optimization 
+model options for enhancements with defualt options set to the values provided by 
+`get_default_options` function.
 """
 mutable struct LaplacianOptModelOptions
     solution_type::String
     formulation_type::String
 
-    eigen_cuts_full::Bool
-    eigen_cuts_2minors::Bool
-    eigen_cuts_3minors::Bool
+    eigen_cuts_sizes::Vector{Int64}
     projected_eigen_cuts::Bool
     soc_linearized_cuts::Bool
     topology_multi_commodity::Bool
@@ -41,9 +40,7 @@ function get_default_options()
     solution_type = "optimal" # optimal, heuristic
     formulation_type = "max_λ2"  # max_λ2, max_span_tree
 
-    eigen_cuts_full = true   # true, false     
-    eigen_cuts_2minors = true   # true, false
-    eigen_cuts_3minors = false  # true, false
+    eigen_cuts_sizes = [] #vector of integer values from 1 up to num_nodes
     projected_eigen_cuts = true  # true, false
     soc_linearized_cuts = false  # true, false
     topology_multi_commodity = false  # true, false
@@ -67,9 +64,7 @@ function get_default_options()
     return LaplacianOptModelOptions(
         solution_type,
         formulation_type,
-        eigen_cuts_full,
-        eigen_cuts_2minors,
-        eigen_cuts_3minors,
+        eigen_cuts_sizes,
         projected_eigen_cuts,
         soc_linearized_cuts,
         topology_multi_commodity,
@@ -100,6 +95,7 @@ mutable struct LaplacianOptModel
     model::JuMP.Model
     variables::Dict{Symbol,Any}
     options::LaplacianOptModelOptions
+    minor_idx_dict::Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}
     result::Dict{String,Any}
 
     "Contructor for struct `LaplacianOptModel`"
@@ -108,8 +104,9 @@ mutable struct LaplacianOptModel
         model = JuMP.Model()
         variables = Dict{Symbol,Any}()
         options = LOpt.get_default_options()
+        minor_idx_dict = Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}()
         result = Dict{String,Any}("cheeger_cuts_separation_time" => 0)
-        lom = new(data, model, variables, options, result)
+        lom = new(data, model, variables, options, minor_idx_dict, result)
 
         return lom
     end
@@ -118,8 +115,8 @@ end
 """
     GraphData
 
-The composite mutable struct, `GraphData`, holds matrices of adjacency matrix, laplacian matrix,
-fiedler vector and algebraic connectivity.
+The composite mutable struct, `GraphData`, holds matrices of adjacency matrix, 
+laplacian matrix, fiedler vector and algebraic connectivity.
 """
 mutable struct GraphData
     adjacency::Array{<:Number}
