@@ -24,7 +24,7 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
             LOpt.objective_LOModel(lom)
 
         elseif lom.options.solution_type == "heuristic"
-            LOpt.heuristic_kopt(lom.data, lom.options.kopt_parameter)
+            LOpt.heuristic_kopt(lom.data, lom.options.kopt_parameter, lom.options.num_of_central_nodes_verifier)
         end
     elseif lom.options.formulation_type == "max_span_tree"
         if lom.options.solution_type in ["optimal", "heuristic"]
