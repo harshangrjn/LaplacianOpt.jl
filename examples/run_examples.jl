@@ -1,7 +1,7 @@
 import LaplacianOpt as LOpt
 using JuMP
 using CPLEX
-# using Gurobi
+using Gurobi
 # using GLPK
 
 include("optimizer.jl")
@@ -10,7 +10,7 @@ include("optimizer.jl")
 #            MIP solver            #
 # (Cplex 22.1 performs the best)   #
 #----------------------------------#
-lopt_optimizer = get_cplex()
+lopt_optimizer = get_gurobi()
 
 #-------------------------------------#
 #      User-defined input graphs      #
@@ -45,7 +45,7 @@ end
 #      User-defined params      #
 #-------------------------------#
 num_nodes = 8
-instance = 1
+instance = 5
 data_dict, augment_budget = data_I(num_nodes, instance)
 
 params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
@@ -57,10 +57,11 @@ params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_
 
 # For more model options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
 model_options = Dict{Symbol,Any}(
-    :eigen_cuts_sizes => [2, num_nodes],
+    :eigen_cuts_sizes => [num_nodes],
     :topology_flow_cuts => true,
     :solution_type => "heuristic",
     :kopt_parameter => 3,
+    :num_of_central_nodes_verifier => 5,
 )
 
 result = LOpt.run_LOpt(
