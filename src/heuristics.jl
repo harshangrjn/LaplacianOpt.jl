@@ -4,7 +4,7 @@ using Graphs
 using LinearAlgebra
 
 
-function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_of_central_nodes_verifier::Int)
+function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_central_nodes_verifier::Int)
     num_nodes = data["num_nodes"]
     adjacency_augment_graph = data["adjacency_augment_graph"]
     adjacency_base_graph = data["adjacency_base_graph"]
@@ -35,9 +35,9 @@ function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_of_cent
             #@show priority_central_nodes_list
 
             # To keep track of adjacency matrix of highest algebraic connectivity and it's algebraic connectivity
-            adjacency_graph_list = Vector{Tuple{Any,Any}}(undef, num_of_central_nodes_verifier)
+            adjacency_graph_list = Vector{Tuple{Any,Any}}(undef, num_central_nodes_verifier)
 
-            Threads.@threads for index in 1:num_of_central_nodes_verifier
+            Threads.@threads for index in 1:num_central_nodes_verifier
                 # Builds a spanning tree
                 adjacency_graph_list[index] = build_span_tree(
                     num_nodes, 

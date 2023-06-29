@@ -59,9 +59,9 @@ params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_
 model_options = Dict{Symbol,Any}(
     :eigen_cuts_sizes => [num_nodes],
     :topology_flow_cuts => true,
-    :solution_type => "heuristic",
+    :solution_type => "optimal",
     :kopt_parameter => 3,
-    :num_of_central_nodes_verifier => 5,
+    :num_central_nodes_verifier => 5,
 )
 
 result = LOpt.run_LOpt(
