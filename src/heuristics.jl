@@ -37,7 +37,9 @@ function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_central
             # To keep track of adjacency matrix of highest algebraic connectivity and it's algebraic connectivity
             adjacency_graph_list = Vector{Tuple{Any,Any}}(undef, num_central_nodes_verifier)
 
-            Threads.@threads for index in 1:num_central_nodes_verifier
+            #JULIA_NUM_THREADS=auto #Uncomment this line for multi threading (Requires atleast Julia 1.7)
+            #Threads.@threads for index in 1:num_central_nodes_verifier #Uncomment this line for multi threading
+            for index in 1:num_central_nodes_verifier #Comment this line for multithreading
                 # Builds a spanning tree
                 adjacency_graph_list[index] = build_span_tree(
                     num_nodes, 
