@@ -9,7 +9,6 @@ function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_central
     adjacency_augment_graph = data["adjacency_augment_graph"]
     adjacency_base_graph = data["adjacency_base_graph"]
     num_edges_existing = data["num_edges_existing"]
-    num_edges_to_augment = data["num_edges_to_augment"]
     augment_budget = data["augment_budget"]
     is_base_graph_connected = data["is_base_graph_connected"]
 
@@ -17,7 +16,7 @@ function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_central
     edge_augment_list = collect(edges(SimpleGraph(adjacency_augment_graph)))
 
     # Making list of tuples of edges and edge weights
-    edge_edgeweight_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list),)
+    edge_edgeweight_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
 
     for (index, edge) in enumerate(edge_augment_list)
         edge_edgeweight_list[index] = (edge, adjacency_augment_graph[src(edge), dst(edge)])
@@ -37,9 +36,9 @@ function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_central
             # To keep track of adjacency matrix of highest algebraic connectivity and it's algebraic connectivity
             adjacency_graph_list = Vector{Tuple{Any,Any}}(undef, num_central_nodes_verifier)
 
-            #JULIA_NUM_THREADS=auto #Uncomment this line for multi threading (Requires atleast Julia 1.7)
-            #Threads.@threads for index in 1:num_central_nodes_verifier #Uncomment this line for multi threading
-            for index in 1:num_central_nodes_verifier #Comment this line for multithreading
+            #JULIA_NUM_THREADS=auto #uncomment this line for multi threading (Requires atleast Julia 1.7)
+            #Threads.@threads for index in 1:num_central_nodes_verifier #uncomment this line for multi threading
+            for index in 1:num_central_nodes_verifier #comment this line for multi threading
                 # Builds a spanning tree
                 adjacency_graph_list[index] = build_span_tree(
                     num_nodes, 
@@ -56,14 +55,47 @@ function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_central
                 )
             end
 
-            adjacency_graph_ac_tuple_star = adjacency_graph_list[sortperm(adjacency_graph_list, by = x -> x[2], rev = true)[1]]
-            @show adjacency_graph_ac_tuple_star
+            adjacency_graph_star, algebraic_connectivity_star = adjacency_graph_list[sortperm(adjacency_graph_list, by = x -> x[2], rev = true)[1]]
+            @show adjacency_graph_star, algebraic_connectivity_star
 
         elseif augment_budget >= num_nodes 
             print("Under construction")
         end
     else
-        print("Under construction")
+        if (num_edges_existing == num_nodes - 1) && (is_base_graph_connected)
+            # Pose-graph SLAM code goes here
+
+            # Fiedler vector of base graph
+            fiedler_vector_base_graph = fiedler_vector(adjacency_base_graph)
+
+            # Making list of tuples of edges and fiedler weights (w_ij * (v_i - v_j)^2)
+            edge_fiedlerweight_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
+
+            for (index, edge) in enumerate(edge_augment_list)
+                edge_fiedlerweight_list[index] = (edge, adjacency_augment_graph[src(edge), dst(edge)] * (fiedler_vector_base_graph[src(edge)] - fiedler_vector_base_graph[dst(edge)])^2)
+            end
+
+            # Sorting the list of tuples in descending order of fiedler weights
+            sorted_edge_fiedlerweight_list = sort(edge_fiedlerweight_list, by = x -> x[2], rev = true)
+
+            # Base graph
+            G = SimpleGraph(adjacency_base_graph)
+
+            # Adding edges based on fiedler weights to construct initial graph with required edges
+            for i = 1:augment_budget
+                add_edge!(G, src(sorted_edge_fiedlerweight_list[i][1]), dst(sorted_edge_fiedlerweight_list[i][1]))
+            end
+
+            adjacency_graph_star, algebraic_connectivity_star = refinement_tree(
+                G,
+                adjacency_base_graph,
+                adjacency_augment_graph,
+                sorted_edge_fiedlerweight_list,
+                kopt_parameter,
+            )
+            
+            @show adjacency_graph_star, algebraic_connectivity_star
+        end
     end
 
     return
@@ -320,4 +352,64 @@ function refinement_span_tree(
         updated_adjacency_graph_ac_tuple = update(G, adjacency_augment_graph, adjacency_graph_ac_tuple)
     end
     return updated_adjacency_graph_ac_tuple
+end
+
+function refinement_tree(
+    G, 
+    adjacency_base_graph,
+    adjacency_augment_graph,
+    sorted_edge_fiedlerweight_list, 
+    kopt_parameter,
+    )
+
+    if kopt_parameter == 1
+        for i in eachindex(sorted_edge_fiedlerweight_list)
+            if !(has_edge(G, src(sorted_edge_fiedlerweight_list[i][1]), dst(sorted_edge_fiedlerweight_list[i][1])))
+                add_edge!(G, src(sorted_edge_fiedlerweight_list[i][1]), dst(sorted_edge_fiedlerweight_list[i][1]))
+                algebraic_connectivity_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef, augment_budget + 1)
+                ite = 1
+                for edge in edges(G)
+                    if adjacency_base_graph[src(edge), dst(edge)] == 0
+                        rem_edge!(G, src(edge), dst(edge))
+                        algebraic_connectivity_list[ite] = (edge, algebraic_connectivity(adjacency_whole_graph(adjacency_augment_graph,adjacency_base_graph) .* Matrix(adjacency_matrix(G))))
+                        ite += 1
+                        add_edge!(G, src(edge), dst(edge))
+                    end
+                end
+                rem_edge!(G, src(sort(algebraic_connectivity_list, by=x -> x[2], rev=true)[1][1]), dst(sort(g, by=x -> x[2], rev=true)[1][1]))
+            end
+        end
+
+    elseif kopt_parameter == 2
+        combinations = edge_combinations(length(sorted_edge_fiedlerweight_list), kopt_parameter)
+        for i in eachindex(combinations)
+            if !(has_edge(G, src(sorted_edge_fiedlerweight_list[combinations[i][1]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][1]][1])))  && 
+            !(has_edge(G, src(sorted_edge_fiedlerweight_list[combinations[i][2]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][2]][1])))
+                add_edge!(G, src(sorted_edge_fiedlerweight_list[combinations[i][1]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][1]][1]))
+                add_edge!(G, src(sorted_edge_fiedlerweight_list[combinations[i][2]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][2]][1]))
+                algebraic_connectivity_list = Vector{Tuple{Tuple{Graphs.SimpleGraphs.SimpleEdge,Graphs.SimpleGraphs.SimpleEdge},Float64}}(undef, length(combinations(1:n1+2, 2)))
+                ite = 1
+                edge_list = collect(edges(G))
+                for j in eachindex(length(edge_list))
+                    for k in j+1:length(edge_list)
+                        if (adjacency_base_graph[src(edge_list[j]), dst(edge_list[j])] == 0) && (adjacency_base_graph[src(edge_list[k]), dst(edge_list[k])] == 0)
+                            rem_edge!(G, src(edge_list[j]), dst(edge_list[j]))
+                            rem_edge!(G, src(edge_list[k]), dst(edge_list[k]))
+                            algebraic_connectivity_list[ite] = ((edge_list[j], edge_list[k]), algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G))))
+                            ite += 1
+                            add_edge!(G, src(edge_list[j]), dst(edge_list[j]))
+                            add_edge!(G, src(edge_list[k]), dst(edge_list[k]))
+                        end
+                    end
+                end
+                rem_edge!(G, src(sort(algebraic_connectivity_list, by=x -> x[2], rev=true)[1][1][1]), dst(sort(algebraic_connectivity_list, by=x -> x[2], rev=true)[1][1][1]))
+                rem_edge!(G, src(sort(algebraic_connectivity_list, by=x -> x[2], rev=true)[1][1][2]), dst(sort(algebraic_connectivity_list, by=x -> x[2], rev=true)[1][1][2]))
+            end
+        end
+
+    elseif kopt_parameter == 3
+        combinations = edge_combinations(length(sorted_edge_edgeweight_list), kopt_parameter)
+    end
+
+    return Matrix(adjacency_matrix(G)), algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G)))
 end

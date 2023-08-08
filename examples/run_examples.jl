@@ -59,8 +59,8 @@ params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_
 model_options = Dict{Symbol,Any}(
     :eigen_cuts_sizes => [num_nodes],
     :topology_flow_cuts => true,
-    :solution_type => "optimal",
-    :kopt_parameter => 3,
+    :solution_type => "heuristic",
+    :kopt_parameter => 2,
     :num_central_nodes_verifier => 5,
 )
 
