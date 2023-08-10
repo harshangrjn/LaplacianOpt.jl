@@ -44,8 +44,8 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-num_nodes = 10
-instance = 4
+num_nodes = 5
+instance = 1
 data_dict, augment_budget = data_I(num_nodes, instance)
 
 params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
@@ -60,7 +60,7 @@ model_options = Dict{Symbol,Any}(
     :eigen_cuts_sizes => [num_nodes],
     :topology_flow_cuts => true,
     :solution_type => "heuristic",
-    :kopt_parameter => 3,
+    :kopt_parameter => 1,
     :num_central_nodes_verifier => 5,
 )
 

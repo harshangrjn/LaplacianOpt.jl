@@ -162,9 +162,11 @@ violated eigen value w.r.t positive semi-definiteness of the input matrix.
 """
 function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
     W_eigvals = LA.eigvals(W)
-
+    @show W_eigvals
     if typeof(W_eigvals) != Vector{Float64}
-        Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
+        if !(isapprox(imag(W_eigvals), zeros(size(W_eigvals)[1]), atol = 1E-6))
+            Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
+        end
     end
 
     if LA.eigmin(W) <= -tol
@@ -432,22 +434,35 @@ function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
     return combinations
 end
 
+"""
+    add_multiple_edges!(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},edge_set::Vector{Tuple{Int64,Int64}},)
+
+Returns updated graph by adding edges.
+"""
+
 function add_multiple_edges!(
     G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
-    edge_list::Vector{Tuple{Int64,Int64}},
+    edge_set::Vector{Tuple{Int64,Int64}},
 )
-    for i in 1:length(edge_list)
-        add_edge!(G, edge_list[i][1], edge_list[i][2])
+    for i in 1:length(edge_set)
+        add_edge!(G, edge_set[i][1], edge_set[i][2])
     end
     return G
 end
 
+"""
+    rem_multiple_edges!(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},edge_set::Vector{Tuple{Int64,Int64}},)
+
+Returns updated graph by removing edges.
+"""
+
+
 function rem_multiple_edges!(
     G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
-    edge_list::Vector{Tuple{Int64,Int64}},
+    edge_set::Vector{Tuple{Int64,Int64}},
 )
-    for i in 1:length(edge_list)
-        rem_edge!(G, edge_list[i][1], edge_list[i][2])
+    for i in 1:length(edge_set)
+        rem_edge!(G, edge_set[i][1], edge_set[i][2])
     end
     return G
 end

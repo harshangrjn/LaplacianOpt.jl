@@ -11,6 +11,10 @@ function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_central
     augment_budget = data["augment_budget"]
     is_base_graph_connected = data["is_base_graph_connected"]
 
+    # Initializing the heuristic solutions
+    adjacency_graph_star = Matrix{Float64}(zeros(num_nodes, num_nodes))
+    algebraic_connectivity_star = 0
+
     # Making list of all possible edges to augment
     edge_augment_list = collect(edges(SimpleGraph(adjacency_augment_graph)))
 
@@ -34,9 +38,9 @@ function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_central
             # To keep track of adjacency matrix of highest algebraic connectivity and it's algebraic connectivity
             adjacency_graph_list = Vector{Tuple{Any,Any}}(undef, num_central_nodes_verifier)
 
-            JULIA_NUM_THREADS=auto #uncomment this line for multi threading (Requires atleast Julia 1.7)
-            Threads.@threads for index in 1:num_central_nodes_verifier #uncomment this line for multi threading
-            # for index in 1:num_central_nodes_verifier #comment this line for multi threading
+            #JULIA_NUM_THREADS=auto #uncomment this line for multi threading (Requires atleast Julia 1.7)
+            #Threads.@threads for index in 1:num_central_nodes_verifier #uncomment this line for multi threading
+            for index in 1:num_central_nodes_verifier #comment this line for multi threading
                 # Builds a spanning tree
                 adjacency_graph_list[index] = build_span_tree(
                     num_nodes, 
@@ -227,19 +231,19 @@ function refinement_span_tree(
                 if is_cyclic(G)
                     cycle_basis_current = cycle_basis(G)[1]
                     algebraic_connectivity_tracker = 0.0
-                    vertices_tracker = (undef, undef)
+                    vertices_tracker = [(undef, undef)]
                     for j = 1:(length(cycle_basis_current)-1)
                         for k = (j+1):length(cycle_basis_current)
                             if rem_edge!(G, cycle_basis_current[j], cycle_basis_current[k])
                                 if algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G))) > algebraic_connectivity_tracker
                                     algebraic_connectivity_tracker = algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G)))
-                                    vertices_tracker = (cycle_basis_current[j], cycle_basis_current[k])
+                                    vertices_tracker = [(cycle_basis_current[j], cycle_basis_current[k])]
                                 end
                                 add_edge!(G, cycle_basis_current[j], cycle_basis_current[k])
                             end
                         end
                     end
-                    rem_edge!(G, vertices_tracker[1], vertices_tracker[2])
+                    rem_edge!(G, vertices_tracker[1][1], vertices_tracker[1][2])
                 end
             end
         end
@@ -260,7 +264,7 @@ function refinement_span_tree(
                 if is_cyclic(G)
                     cycle_basis_current = cycle_basis(G)
                     algebraic_connectivity_tracker = 0.0
-                    vertices_tracker = ((undef, undef), (undef, undef))
+                    vertices_tracker = [(undef, undef), (undef, undef)]
                     for j in 1:(length(cycle_basis_current[1])-1)
                         for k in (j+1):length(cycle_basis_current[1])
                             for l in 1:(length(cycle_basis_current[2])-1)
@@ -270,7 +274,7 @@ function refinement_span_tree(
                                             G = rem_multiple_edges!(G, [(cycle_basis_current[1][j], cycle_basis_current[1][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m])])
                                             if algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G))) > algebraic_connectivity_tracker
                                                 algebraic_connectivity_tracker = algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G)))
-                                                vertices_tracker = ((cycle_basis_current[1][j], cycle_basis_current[1][k]), (cycle_basis_current[2][l], cycle_basis_current[2][m]))
+                                                vertices_tracker = [(cycle_basis_current[1][j], cycle_basis_current[1][k]), (cycle_basis_current[2][l], cycle_basis_current[2][m])]
                                             end
                                             G = add_multiple_edges!(G, [(cycle_basis_current[1][j], cycle_basis_current[1][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m])])
                                         end
@@ -279,7 +283,7 @@ function refinement_span_tree(
                             end
                         end
                     end
-                    G = rem_multiple_edges!(G, [(vertices_tracker[1][1], vertices_tracker[1][2]),(vertices_tracker[2][1], vertices_tracker[2][2])]) 
+                    G = rem_multiple_edges!(G, vertices_tracker)
                 end
             end
         end
@@ -302,7 +306,7 @@ function refinement_span_tree(
                 if is_cyclic(G)
                     cycle_basis_current = cycle_basis(G)
                     algebraic_connectivity_tracker = 0.0
-                    vertices_tracker = ((undef, undef), (undef, undef), (undef, undef))
+                    vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]
                     for j in 1:(length(cycle_basis_current[1])-1)
                         for k in (j+1):length(cycle_basis_current[1])
                             for l in 1:(length(cycle_basis_current[2])-1)
@@ -316,7 +320,7 @@ function refinement_span_tree(
                                                     G = rem_multiple_edges!(G, [(cycle_basis_current[1][j], cycle_basis_current[1][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[3][p], cycle_basis_current[3][q])])
                                                     if algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G))) > algebraic_connectivity_tracker
                                                         algebraic_connectivity_tracker = algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G)))
-                                                        vertices_tracker = ((cycle_basis_current[1][j], cycle_basis_current[1][k]), (cycle_basis_current[2][l], cycle_basis_current[2][m]), (cycle_basis_current[3][p], cycle_basis_current[3][q]))
+                                                        vertices_tracker = [(cycle_basis_current[1][j], cycle_basis_current[1][k]), (cycle_basis_current[2][l], cycle_basis_current[2][m]), (cycle_basis_current[3][p], cycle_basis_current[3][q])]
                                                     end
                                                     G = add_multiple_edges!(G, [(cycle_basis_current[1][j], cycle_basis_current[1][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[3][p], cycle_basis_current[3][q])])
                                                 end
@@ -327,7 +331,7 @@ function refinement_span_tree(
                             end
                         end
                     end
-                    G = rem_multiple_edges!(G, [(vertices_tracker[1][1], vertices_tracker[1][2]),(vertices_tracker[2][1], vertices_tracker[2][2]),(vertices_tracker[3][1], vertices_tracker[3][2])])
+                    G = rem_multiple_edges!(G, vertices_tracker)
                 end
             end
         end
@@ -377,21 +381,9 @@ function refinement_tree(
             !(has_edge(G, src(sorted_edge_fiedlerweight_list[combinations[i][2]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][2]][1])))
                 G = add_multiple_edges!(G, [(src(sorted_edge_fiedlerweight_list[combinations[i][1]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][1]][1])),(src(sorted_edge_fiedlerweight_list[combinations[i][2]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][2]][1]))])
                 algebraic_connectivity_tracker = 0.0
-                vertices_tracker = ((undef, undef),(undef, undef))
-                edge_list = collect(edges(G))
-                for j in eachindex(length(edge_list)-1)
-                    for k in j+1:length(edge_list)
-                        if (adjacency_base_graph[src(edge_list[j]), dst(edge_list[j])] == 0) && (adjacency_base_graph[src(edge_list[k]), dst(edge_list[k])] == 0)
-                            G = rem_multiple_edges!(G, [(src(edge_list[j]), dst(edge_list[j])),(src(edge_list[k]), dst(edge_list[k]))])
-                            if  algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G))) > algebraic_connectivity_tracker
-                                algebraic_connectivity_tracker =  algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G)))
-                                vertices_tracker = (edge_list[j], edge_list[k])
-                            end
-                            G = add_multiple_edges!(G, [(src(edge_list[j]), dst(edge_list[j])),(src(edge_list[k]), dst(edge_list[k]))])
-                        end
-                    end
-                end
-                G = rem_multiple_edges!(G, [(src(vertices_tracker[1]), dst(vertices_tracker[1])), (src(vertices_tracker[2]), dst(vertices_tracker[2]))])
+                vertices_tracker = [(undef, undef),(undef, undef)]
+                algebraic_connectivity_tracker, vertices_tracker = vertices_tracker_two_edges!(G, 0, algebraic_connectivity_tracker,vertices_tracker)
+                G = rem_multiple_edges!(G, vertices_tracker)
             end
         end
 
@@ -408,24 +400,13 @@ function refinement_tree(
             !(has_edge(G, src(sorted_edge_fiedlerweight_list[combinations[i][3]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][3]][1]))) 
                 G = add_multiple_edges!(G, [(src(sorted_edge_fiedlerweight_list[combinations[i][1]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][1]][1])),(src(sorted_edge_fiedlerweight_list[combinations[i][2]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][2]][1])), (src(sorted_edge_fiedlerweight_list[combinations[i][3]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][3]][1]))]) 
                 algebraic_connectivity_tracker = 0.0
-                vertices_tracker = ((undef, undef), (undef, undef), (undef, undef))
-                edge_list = collect(edges(G))
-                
-                for j in eachindex(length(edge_list)-2)
-                    for k in j+1:(length(edge_list)-1)
-                        for l in k+1:length(edge_list)
-                            if (adjacency_base_graph[src(edge_list[j]), dst(edge_list[j])] == 0) && (adjacency_base_graph[src(edge_list[k]), dst(edge_list[k])] == 0) && (adjacency_base_graph[src(edge_list[l]), dst(edge_list[l])] == 0)
-                                G = rem_multiple_edges!(G, [(src(edge_list[j]), dst(edge_list[j])),(src(edge_list[k]), dst(edge_list[k])), (src(edge_list[l]), dst(edge_list[l]))])
-                                if  algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G))) > algebraic_connectivity_tracker
-                                    algebraic_connectivity_tracker =  algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G)))
-                                    vertices_tracker = (edge_list[j], edge_list[k])
-                                end
-                                G = add_multiple_edges!(G, [(src(edge_list[j]), dst(edge_list[j])),(src(edge_list[k]), dst(edge_list[k])), (src(edge_list[l]), dst(edge_list[l]))])
-                            end
-                        end
+                vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]
+                for j in eachindex(length(collect(edges(G))) - 2)
+                    if (adjacency_base_graph[src(edge_list[j]), dst(edge_list[j])] == 0)
+                        algebraic_connectivity_tracker, vertices_tracker = vertices_tracker_two_edges!(G, j, algebraic_connectivity_tracker,vertices_tracker)
                     end
                 end
-                G = rem_multiple_edges!(G, [(src(vertices_tracker[1]), dst(vertices_tracker[1])), (src(vertices_tracker[2]), dst(vertices_tracker[2])), (src(vertices_tracker[3]), dst(vertices_tracker[3]))])
+                G = rem_multiple_edges!(G, vertices_tracker)
             end
         end
     end
@@ -433,20 +414,32 @@ function refinement_tree(
     return Matrix(adjacency_matrix(G)), algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G)))
 end
 
-function graph_two_vertex_tracker(G, edge_list)
-
+function vertices_tracker_two_edges!(
+    G, 
+    j, # Index for third edge if kopt_parameter is 3
+    algebraic_connectivity_tracker, 
+    vertices_tracker
+    )
+    edge_list = collect(edges(G))
     for k in j+1:(length(edge_list)-1)
         for l in k+1:length(edge_list)
-            if (adjacency_base_graph[src(edge_list[j]), dst(edge_list[j])] == 0) && (adjacency_base_graph[src(edge_list[k]), dst(edge_list[k])] == 0) && (adjacency_base_graph[src(edge_list[l]), dst(edge_list[l])] == 0)
-                G = rem_multiple_edges!(G, [(src(edge_list[j]), dst(edge_list[j])),(src(edge_list[k]), dst(edge_list[k])), (src(edge_list[l]), dst(edge_list[l]))])
+            edges_to_check = []
+            if j == 0
+                edges_to_check = [(src(edge_list[k]), dst(edge_list[k])), (src(edge_list[l]), dst(edge_list[l]))]
+            else
+                edges_to_check = [(src(edge_list[j]), dst(edge_list[j])),(src(edge_list[k]), dst(edge_list[k])), (src(edge_list[l]), dst(edge_list[l]))]
+            end
+            if (adjacency_base_graph[src(edge_list[k]), dst(edge_list[k])] == 0) && (adjacency_base_graph[src(edge_list[l]), dst(edge_list[l])] == 0)
+                G = rem_multiple_edges!(G, edges_to_check)
                 if  algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G))) > algebraic_connectivity_tracker
                     algebraic_connectivity_tracker =  algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G)))
-                    vertices_tracker = (edge_list[j], edge_list[k])
+                    vertices_tracker = edges_to_check
                 end
-                G = add_multiple_edges!(G, [(src(edge_list[j]), dst(edge_list[j])),(src(edge_list[k]), dst(edge_list[k])), (src(edge_list[l]), dst(edge_list[l]))])
+                G = add_multiple_edges!(G, edges_to_check)
             end
         end
     end
     
     return algebraic_connectivity_tracker, vertices_tracker
 end
+
