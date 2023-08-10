@@ -352,14 +352,14 @@ end
 
 
 """
-    weighted_adj_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, adjacency_augment_graph::Array{<:Number}, size::Int64)
+    weighted_adjacency_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, adjacency_augment_graph::Array{<:Number}, size::Int64)
 
 Returns a weighted adjacency matrix for 
 the connected part of  graph.  
 """
 
 
-function weighted_adj_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, adjacency_augment_graph::Array{<:Number}, size::Int64)
+function weighted_adjacency_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, adjacency_augment_graph::Array{<:Number}, size::Int64)
     weighted_adj_matrix_size = Matrix{Float64}(undef, size, size)
 
     #collecting vertices connected in graph
@@ -377,17 +377,16 @@ function weighted_adj_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, adjac
         end
     end
 
-    #@show weighted_adj_matrix_size
     return weighted_adj_matrix_size
 end
 
 """
-    update(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},adjacency_augment_graph::Array{<:Number},adjacency_graph_ac_tuple::Tuple{Array,Float};tol = 1E-6,)
+    update_kopt_adjacency!(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},adjacency_augment_graph::Array{<:Number},adjacency_graph_ac_tuple::Tuple{Array,Float};tol = 1E-6,)
 
-Returns an updated adjacency_graph_ac_tuple after the kopt refiniement.  
+Returns an updated adjacency_graph_ac_tuple after the kopt refinement.  
 """
 
-function update(
+function update_kopt_adjacency!(
     G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
     adjacency_augment_graph::Array{<:Number},
     adjacency_graph_ac_tuple::Tuple{Array,Float64};
@@ -431,4 +430,24 @@ function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
         end
     end
     return combinations
+end
+
+function add_multiple_edges!(
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    edge_list::Vector{Tuple{Int64,Int64}},
+)
+    for i in 1:length(edge_list)
+        add_edge!(G, edge_list[i][1], edge_list[i][2])
+    end
+    return G
+end
+
+function rem_multiple_edges!(
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    edge_list::Vector{Tuple{Int64,Int64}},
+)
+    for i in 1:length(edge_list)
+        rem_edge!(G, edge_list[i][1], edge_list[i][2])
+    end
+    return G
 end
