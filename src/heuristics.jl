@@ -106,7 +106,6 @@ function heuristic_kopt(data::Dict{String,Any}, kopt_parameter::Int, num_central
     return
 end
 
-
 function build_span_tree(
     num_nodes,
     adjacency_augment_graph,
@@ -265,24 +264,7 @@ function refinement_span_tree(
                     cycle_basis_current = cycle_basis(G)
                     algebraic_connectivity_tracker = 0.0
                     vertices_tracker = [(undef, undef), (undef, undef)]
-                    for j in 1:(length(cycle_basis_current[1])-1)
-                        for k in (j+1):length(cycle_basis_current[1])
-                            for l in 1:(length(cycle_basis_current[2])-1)
-                                for m in (l+1):length(cycle_basis_current[2])
-                                    if (cycle_basis_current[1][j], cycle_basis_current[1][k]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m])
-                                        if adjacency_matrix(G)[cycle_basis_current[1][j], cycle_basis_current[1][k]] == 1 && adjacency_matrix(G)[cycle_basis_current[2][l], cycle_basis_current[2][m]] == 1
-                                            G = rem_multiple_edges!(G, [(cycle_basis_current[1][j], cycle_basis_current[1][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m])])
-                                            if algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G))) > algebraic_connectivity_tracker
-                                                algebraic_connectivity_tracker = algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G)))
-                                                vertices_tracker = [(cycle_basis_current[1][j], cycle_basis_current[1][k]), (cycle_basis_current[2][l], cycle_basis_current[2][m])]
-                                            end
-                                            G = add_multiple_edges!(G, [(cycle_basis_current[1][j], cycle_basis_current[1][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m])])
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
+                    algebraic_connectivity_tracker, vertices_tracker = vertices_tracker_span_update_two_edges!(G, adjacency_augment_graph, 0, 0, algebraic_connectivity_tracker, vertices_tracker)
                     G = rem_multiple_edges!(G, vertices_tracker)
                 end
             end
@@ -297,37 +279,18 @@ function refinement_span_tree(
         else
             num_swaps = num_kopt_swaps_upperbound
         end
-
         for i in 1:num_swaps
             if adjacency_matrix(G)[src(sorted_edge_edgeweight_list[combinations[i][1]][1]), dst(sorted_edge_edgeweight_list[combinations[i][1]][1])] == 0 &&  
             adjacency_matrix(G)[src(sorted_edge_edgeweight_list[combinations[i][2]][1]), dst(sorted_edge_edgeweight_list[combinations[i][2]][1])] == 0 &&  
             adjacency_matrix(G)[src(sorted_edge_edgeweight_list[combinations[i][3]][1]), dst(sorted_edge_edgeweight_list[combinations[i][3]][1])] == 0
                 G = add_multiple_edges!(G, [(src(sorted_edge_edgeweight_list[combinations[i][1]][1]), dst(sorted_edge_edgeweight_list[combinations[i][1]][1])),(src(sorted_edge_edgeweight_list[combinations[i][2]][1]), dst(sorted_edge_edgeweight_list[combinations[i][2]][1])),(src(sorted_edge_edgeweight_list[combinations[i][3]][1]), dst(sorted_edge_edgeweight_list[combinations[i][3]][1]))])
                 if is_cyclic(G)
-                    cycle_basis_current = cycle_basis(G)
                     algebraic_connectivity_tracker = 0.0
                     vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]
-                    for j in 1:(length(cycle_basis_current[1])-1)
-                        for k in (j+1):length(cycle_basis_current[1])
-                            for l in 1:(length(cycle_basis_current[2])-1)
-                                for m in (l+1):length(cycle_basis_current[2])
-                                    for p in 1:(length(cycle_basis_current[3])-1)
-                                        for q in (p+1):length(cycle_basis_current[3])
-                                            if (cycle_basis_current[1][j], cycle_basis_current[1][k]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m]) && 
-                                            (cycle_basis_current[1][j], cycle_basis_current[1][k]) !== (cycle_basis_current[3][p], cycle_basis_current[3][q]) && 
-                                            (cycle_basis_current[3][p], cycle_basis_current[3][q]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m])
-                                                if adjacency_matrix(G)[cycle_basis_current[1][j], cycle_basis_current[1][k]] == 1 && adjacency_matrix(G)[cycle_basis_current[2][l], cycle_basis_current[2][m]] == 1 && adjacency_matrix(G)[cycle_basis_current[3][p], cycle_basis_current[3][q]] == 1
-                                                    G = rem_multiple_edges!(G, [(cycle_basis_current[1][j], cycle_basis_current[1][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[3][p], cycle_basis_current[3][q])])
-                                                    if algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G))) > algebraic_connectivity_tracker
-                                                        algebraic_connectivity_tracker = algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G)))
-                                                        vertices_tracker = [(cycle_basis_current[1][j], cycle_basis_current[1][k]), (cycle_basis_current[2][l], cycle_basis_current[2][m]), (cycle_basis_current[3][p], cycle_basis_current[3][q])]
-                                                    end
-                                                    G = add_multiple_edges!(G, [(cycle_basis_current[1][j], cycle_basis_current[1][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[3][p], cycle_basis_current[3][q])])
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
+                    for j in 1:(length(cycle_basis(G)[3])-1)
+                        for k in (j+1):length(cycle_basis(G)[3])
+                            if adjacency_matrix(G)[cycle_basis(G)[3][j], cycle_basis(G)[3][k]] == 1
+                                algebraic_connectivity_tracker, vertices_tracker = vertices_tracker_span_update_two_edges!(G, adjacency_augment_graph, j, k, algebraic_connectivity_tracker, vertices_tracker)
                             end
                         end
                     end
@@ -338,6 +301,46 @@ function refinement_span_tree(
         updated_adjacency_graph_ac_tuple = update_kopt_adjacency!(G, adjacency_augment_graph, adjacency_graph_ac_tuple)
     end
     return updated_adjacency_graph_ac_tuple
+end
+
+function vertices_tracker_span_update_two_edges!(
+    G,
+    adjacency_augment_graph,
+    j, # Index for third edge src if kopt_parameter is 3
+    k, # Index for third edge dst if kopt_parameter is 3
+    algebraic_connectivity_tracker,
+    vertices_tracker,
+    )
+    cycle_basis_current = cycle_basis(G)
+    for l in 1:(length(cycle_basis_current[2])-1)
+        for m in (l+1):length(cycle_basis_current[2])
+            for p in 1:(length(cycle_basis_current[1])-1)
+                for q in (p+1):length(cycle_basis_current[1])
+                    cycle_basis_to_check = []
+                    if j == 0 && k == 0
+                        cycle_basis_to_check = [(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[1][p], cycle_basis_current[1][q])]
+                        cycle_basis_condition = (cycle_basis_current[1][p], cycle_basis_current[1][q]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m])
+                    else
+                        cycle_basis_to_check = [(cycle_basis_current[3][j], cycle_basis_current[3][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[1][p], cycle_basis_current[1][q])]
+                        cycle_basis_condition = (cycle_basis_current[3][j], cycle_basis_current[3][k]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m]) &&
+                            (cycle_basis_current[3][j], cycle_basis_current[3][k]) !== (cycle_basis_current[1][p], cycle_basis_current[1][q]) && 
+                            (cycle_basis_current[1][p], cycle_basis_current[1][q]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m])
+                    end
+                    if cycle_basis_condition
+                        if  adjacency_matrix(G)[cycle_basis_current[2][l], cycle_basis_current[2][m]] == 1 && adjacency_matrix(G)[cycle_basis_current[1][p], cycle_basis_current[1][q]] == 1
+                            G = rem_multiple_edges!(G, cycle_basis_to_check)
+                            if algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G))) > algebraic_connectivity_tracker
+                                algebraic_connectivity_tracker = algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G)))
+                                vertices_tracker = cycle_basis_to_check
+                            end
+                            G = add_multiple_edges!(G, cycle_basis_to_check)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return algebraic_connectivity_tracker, vertices_tracker
 end
 
 function refinement_tree(
@@ -382,13 +385,13 @@ function refinement_tree(
                 G = add_multiple_edges!(G, [(src(sorted_edge_fiedlerweight_list[combinations[i][1]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][1]][1])),(src(sorted_edge_fiedlerweight_list[combinations[i][2]][1]), dst(sorted_edge_fiedlerweight_list[combinations[i][2]][1]))])
                 algebraic_connectivity_tracker = 0.0
                 vertices_tracker = [(undef, undef),(undef, undef)]
-                algebraic_connectivity_tracker, vertices_tracker = vertices_tracker_two_edges!(G, 0, algebraic_connectivity_tracker,vertices_tracker)
+                algebraic_connectivity_tracker, vertices_tracker = vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, 0, algebraic_connectivity_tracker,vertices_tracker)
                 G = rem_multiple_edges!(G, vertices_tracker)
             end
         end
 
     elseif kopt_parameter == 3
-        combinations = edge_combinations(length(sorted_edge_edgeweight_list), kopt_parameter)
+        combinations = edge_combinations(length(sorted_edge_fiedlerweight_list), kopt_parameter)
         if length(combinations) <= num_kopt_swaps_upperbound
             num_swaps = length(combinations)
         else
@@ -403,7 +406,7 @@ function refinement_tree(
                 vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]
                 for j in eachindex(length(collect(edges(G))) - 2)
                     if (adjacency_base_graph[src(edge_list[j]), dst(edge_list[j])] == 0)
-                        algebraic_connectivity_tracker, vertices_tracker = vertices_tracker_two_edges!(G, j, algebraic_connectivity_tracker,vertices_tracker)
+                        algebraic_connectivity_tracker, vertices_tracker = vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, j, algebraic_connectivity_tracker,vertices_tracker)
                     end
                 end
                 G = rem_multiple_edges!(G, vertices_tracker)
@@ -414,8 +417,10 @@ function refinement_tree(
     return Matrix(adjacency_matrix(G)), algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(adjacency_matrix(G)))
 end
 
-function vertices_tracker_two_edges!(
+function vertices_tracker_update_two_edges!(
     G, 
+    adjacency_base_graph,
+    adjacency_augment_graph,
     j, # Index for third edge if kopt_parameter is 3
     algebraic_connectivity_tracker, 
     vertices_tracker

@@ -162,7 +162,7 @@ violated eigen value w.r.t positive semi-definiteness of the input matrix.
 """
 function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
     W_eigvals = LA.eigvals(W)
-    @show W_eigvals
+
     if typeof(W_eigvals) != Vector{Float64}
         if !(isapprox(imag(W_eigvals), zeros(size(W_eigvals)[1]), atol = 1E-6))
             Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")

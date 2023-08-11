@@ -24,7 +24,7 @@ function data_I(num_nodes::Int, instance::Int)
     file_path =
         joinpath(@__DIR__, "instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json")
     data_dict = LOpt.parse_file(file_path)
-    augment_budget = (num_nodes - 1) # spanning tree constraint
+    augment_budget = 1 #(num_nodes - 1) # spanning tree constraint
     return data_dict, augment_budget
 end
 
@@ -45,7 +45,7 @@ end
 #      User-defined params      #
 #-------------------------------#
 num_nodes = 5
-instance = 1
+instance = 11
 data_dict, augment_budget = data_I(num_nodes, instance)
 
 params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
@@ -60,8 +60,8 @@ model_options = Dict{Symbol,Any}(
     :eigen_cuts_sizes => [num_nodes],
     :topology_flow_cuts => true,
     :solution_type => "heuristic",
-    :kopt_parameter => 1,
-    :num_central_nodes_verifier => 5,
+    :kopt_parameter => 3,
+    :num_central_nodes_verifier => 3,
 )
 
 result = LOpt.run_LOpt(
