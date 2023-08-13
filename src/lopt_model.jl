@@ -24,10 +24,10 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
             LOpt.objective_LOModel(lom)
 
         elseif lom.options.solution_type == "heuristic"
-            LOpt.heuristic_kopt(lom.data, lom.options.kopt_parameter, lom.options.num_central_nodes_verifier, lom.options.num_kopt_swaps_upperbound)
+            LOpt.heuristic_kopt(lom)
         end
     elseif lom.options.formulation_type == "max_span_tree"
-        if lom.options.solution_type in ["optimal", "heuristic"]
+        if lom.options.solution_type in ["optimal"]
             LOpt.variable_MaxSpanTree_model(lom)
             LOpt.constraint_MaxSpanTree_model(lom)
             LOpt.objective_MaxSpanTree_model(lom)

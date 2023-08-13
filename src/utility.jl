@@ -366,15 +366,15 @@ function weighted_adjacency_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
 
     #collecting vertices connected in graph
     vertices_from_edges = Int[]
-    for edge in edges(G)
-        push!(vertices_from_edges, src(edge))
-        push!(vertices_from_edges, dst(edge))
+    for edge in Graphs.edges(G)
+        push!(vertices_from_edges, Graphs.src(edge))
+        push!(vertices_from_edges, Graphs.dst(edge))
     end
     vertices_from_edges = unique(vertices_from_edges)
 
     for i in 1:size
         for j in i:size
-            weighted_adj_matrix_size[i, j] = (adjacency_augment_graph.*adjacency_matrix(G))[vertices_from_edges[i],vertices_from_edges[j]]
+            weighted_adj_matrix_size[i, j] = (adjacency_augment_graph.*Graphs.adjacency_matrix(G))[vertices_from_edges[i],vertices_from_edges[j]]
             weighted_adj_matrix_size[j, i] = weighted_adj_matrix_size[i, j]
         end
     end
@@ -394,8 +394,8 @@ function update_kopt_adjacency!(
     adjacency_graph_ac_tuple::Tuple{Array,Float64};
     tol = 1E-6,
 )
-    if algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G))) - adjacency_graph_ac_tuple[2] >= tol
-        return Matrix(adjacency_matrix(G)), algebraic_connectivity(adjacency_augment_graph .* Matrix(adjacency_matrix(G)))
+    if algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G))) - adjacency_graph_ac_tuple[2] >= tol
+        return Matrix(Graphs.adjacency_matrix(G)), algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)))
     else
         return adjacency_graph_ac_tuple
     end
@@ -404,7 +404,7 @@ end
 """
     edge_combinations(n::Int64, k::Int64)
 
-Returns all combinations possible for given n and k.
+Returns all combinations possible for given `n` and `k`.
 """
 
 function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
@@ -445,24 +445,24 @@ function add_multiple_edges!(
     edge_set::Vector{Tuple{Int64,Int64}},
 )
     for i in 1:length(edge_set)
-        add_edge!(G, edge_set[i][1], edge_set[i][2])
+        Graphs.add_edge!(G, edge_set[i][1], edge_set[i][2])
     end
     return G
 end
 
 """
-    rem_multiple_edges!(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},edge_set::Vector{Tuple{Int64,Int64}},)
+    remove_multiple_edges!(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},edge_set::Vector{Tuple{Int64,Int64}},)
 
 Returns updated graph by removing edges.
 """
 
 
-function rem_multiple_edges!(
+function remove_multiple_edges!(
     G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
     edge_set::Vector{Tuple{Int64,Int64}},
 )
     for i in 1:length(edge_set)
-        rem_edge!(G, edge_set[i][1], edge_set[i][2])
+        Graphs.rem_edge!(G, edge_set[i][1], edge_set[i][2])
     end
     return G
 end
