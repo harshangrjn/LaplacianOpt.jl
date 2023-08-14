@@ -178,14 +178,14 @@ function build_span_tree(
         # Adding edge
         Graphs.add_edge!(G, ac_tracker[1][1], ac_tracker[1][2])
         
-        if (ac_tracker[1][1] ==  central_node) && issubset(ac_tracker[1][2], uncon_set)
+        if (ac_tracker[1][1] == central_node) && issubset(ac_tracker[1][2], uncon_set)
             # Adding node to directly connected set
             push!(dir_con_set, ac_tracker[1][2])
 
             # Removing node from unconnected nodes set
             deleteat!(uncon_set, uncon_set .== ac_tracker[1][2]) 
 
-        elseif (ac_tracker[1][2] ==  central_node) && issubset(ac_tracker[1][1], uncon_set)
+        elseif (ac_tracker[1][2] == central_node) && issubset(ac_tracker[1][1], uncon_set)
             # Adding node to directly connected set
             push!(dir_con_set, ac_tracker[1][1])
 
@@ -264,7 +264,7 @@ function refinement_span_tree(
                     cycle_basis_current = Graphs.cycle_basis(G)
                     ac_tracker = 0.0
                     vertices_tracker = [(undef, undef), (undef, undef)]
-                    ac_tracker, vertices_tracker = LOpt.vertices_tracker_span_update_two_edges!(G, adjacency_augment_graph, 0, 0, ac_tracker, vertices_tracker)
+                    ac_tracker, vertices_tracker = LOpt._vertices_tracker_two_edges!(G, adjacency_augment_graph, 0, 0, ac_tracker, vertices_tracker)
                     G = LOpt.remove_multiple_edges!(G, vertices_tracker)
                 end
             end
@@ -290,7 +290,7 @@ function refinement_span_tree(
                     for j in 1:(length(Graphs.cycle_basis(G)[3])-1)
                         for k in (j+1):length(Graphs.cycle_basis(G)[3])
                             if Graphs.adjacency_matrix(G)[Graphs.cycle_basis(G)[3][j], Graphs.cycle_basis(G)[3][k]] == 1
-                                ac_tracker, vertices_tracker = LOpt.vertices_tracker_span_update_two_edges!(G, adjacency_augment_graph, j, k, ac_tracker, vertices_tracker)
+                                ac_tracker, vertices_tracker = LOpt._vertices_tracker_two_edges!(G, adjacency_augment_graph, j, k, ac_tracker, vertices_tracker)
                             end
                         end
                     end
@@ -301,46 +301,6 @@ function refinement_span_tree(
         updated_adjacency_graph_ac_tuple = LOpt.update_kopt_adjacency!(G, adjacency_augment_graph, adjacency_graph_ac_tuple)
     end
     return updated_adjacency_graph_ac_tuple
-end
-
-function vertices_tracker_span_update_two_edges!(
-    G,
-    adjacency_augment_graph,
-    j, # Index for third edge src if kopt_parameter is 3
-    k, # Index for third edge dst if kopt_parameter is 3
-    ac_tracker,
-    vertices_tracker,
-    )
-    cycle_basis_current = Graphs.cycle_basis(G)
-    for l in 1:(length(cycle_basis_current[2])-1)
-        for m in (l+1):length(cycle_basis_current[2])
-            for p in 1:(length(cycle_basis_current[1])-1)
-                for q in (p+1):length(cycle_basis_current[1])
-                    cycle_basis_to_check = []
-                    if j == 0 && k == 0
-                        cycle_basis_to_check = [(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[1][p], cycle_basis_current[1][q])]
-                        cycle_basis_condition = (cycle_basis_current[1][p], cycle_basis_current[1][q]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m])
-                    else
-                        cycle_basis_to_check = [(cycle_basis_current[3][j], cycle_basis_current[3][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[1][p], cycle_basis_current[1][q])]
-                        cycle_basis_condition = (cycle_basis_current[3][j], cycle_basis_current[3][k]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m]) &&
-                            (cycle_basis_current[3][j], cycle_basis_current[3][k]) !== (cycle_basis_current[1][p], cycle_basis_current[1][q]) && 
-                            (cycle_basis_current[1][p], cycle_basis_current[1][q]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m])
-                    end
-                    if cycle_basis_condition
-                        if  Graphs.adjacency_matrix(G)[cycle_basis_current[2][l], cycle_basis_current[2][m]] == 1 && Graphs.adjacency_matrix(G)[cycle_basis_current[1][p], cycle_basis_current[1][q]] == 1
-                            G = LOpt.remove_multiple_edges!(G, cycle_basis_to_check)
-                            if LOpt.algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G))) > ac_tracker
-                                ac_tracker = LOpt.algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)))
-                                vertices_tracker = cycle_basis_to_check
-                            end
-                            G = LOpt.add_multiple_edges!(G, cycle_basis_to_check)
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return ac_tracker, vertices_tracker
 end
 
 function refinement_tree(
@@ -385,7 +345,7 @@ function refinement_tree(
                 G = LOpt.add_multiple_edges!(G, [(Graphs.src(sorted_edges_fiedler_wt[combinations[i][1]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][1]][1])),(Graphs.src(sorted_edges_fiedler_wt[combinations[i][2]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][2]][1]))])
                 ac_tracker = 0.0
                 vertices_tracker = [(undef, undef),(undef, undef)]
-                ac_tracker, vertices_tracker = vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, 0, ac_tracker,vertices_tracker)
+                ac_tracker, vertices_tracker = _vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, 0, ac_tracker,vertices_tracker)
                 G = LOpt.remove_multiple_edges!(G, vertices_tracker)
             end
         end
@@ -406,18 +366,21 @@ function refinement_tree(
                 vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]
                 for j in eachindex(length(collect(Graphs.edges(G))) - 2)
                     if (adjacency_base_graph[Graphs.src(edge_list[j]), Graphs.dst(edge_list[j])] == 0)
-                        ac_tracker, vertices_tracker = vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, j, ac_tracker,vertices_tracker)
+                        ac_tracker, vertices_tracker = LOpt._vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, j, ac_tracker,vertices_tracker)
                     end
                 end
                 G = LOpt.remove_multiple_edges!(G, vertices_tracker)
             end
         end
+
+    else
+        Memento.eror(_LOGGER, "kopt_parameter > 3 is currently not supported.")
     end
 
     return Matrix(Graphs.adjacency_matrix(G)), LOpt.algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(Graphs.adjacency_matrix(G)))
 end
 
-function vertices_tracker_update_two_edges!(
+function _vertices_tracker_update_two_edges!(
     G, 
     adjacency_base_graph,
     adjacency_augment_graph,
@@ -448,3 +411,42 @@ function vertices_tracker_update_two_edges!(
     return ac_tracker, vertices_tracker
 end
 
+function _vertices_tracker_two_edges!(
+    G,
+    adjacency_augment_graph,
+    j, # Index for third edge src if kopt_parameter is 3
+    k, # Index for third edge dst if kopt_parameter is 3
+    ac_tracker,
+    vertices_tracker,
+    )
+    cycle_basis_current = Graphs.cycle_basis(G)
+    for l in 1:(length(cycle_basis_current[2])-1)
+        for m in (l+1):length(cycle_basis_current[2])
+            for p in 1:(length(cycle_basis_current[1])-1)
+                for q in (p+1):length(cycle_basis_current[1])
+                    cycle_basis_to_check = []
+                    if j == 0 && k == 0
+                        cycle_basis_to_check = [(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[1][p], cycle_basis_current[1][q])]
+                        cycle_basis_condition = (cycle_basis_current[1][p], cycle_basis_current[1][q]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m])
+                    else
+                        cycle_basis_to_check = [(cycle_basis_current[3][j], cycle_basis_current[3][k]),(cycle_basis_current[2][l], cycle_basis_current[2][m]),(cycle_basis_current[1][p], cycle_basis_current[1][q])]
+                        cycle_basis_condition = (cycle_basis_current[3][j], cycle_basis_current[3][k]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m]) &&
+                            (cycle_basis_current[3][j], cycle_basis_current[3][k]) !== (cycle_basis_current[1][p], cycle_basis_current[1][q]) && 
+                            (cycle_basis_current[1][p], cycle_basis_current[1][q]) !== (cycle_basis_current[2][l], cycle_basis_current[2][m])
+                    end
+                    if cycle_basis_condition
+                        if  Graphs.adjacency_matrix(G)[cycle_basis_current[2][l], cycle_basis_current[2][m]] == 1 && Graphs.adjacency_matrix(G)[cycle_basis_current[1][p], cycle_basis_current[1][q]] == 1
+                            G = LOpt.remove_multiple_edges!(G, cycle_basis_to_check)
+                            if LOpt.algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G))) > ac_tracker
+                                ac_tracker = LOpt.algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)))
+                                vertices_tracker = cycle_basis_to_check
+                            end
+                            G = LOpt.add_multiple_edges!(G, cycle_basis_to_check)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return ac_tracker, vertices_tracker
+end
