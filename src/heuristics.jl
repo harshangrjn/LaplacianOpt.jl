@@ -1,115 +1,119 @@
 # Heuristics to maximize algebraic connectivity of weighted graphs
 
-function heuristic_kopt(lom::LaplacianOptModel)
+function heuristic_kopt(lom::LaplacianOptModel, optimizer = nothing)
+    adjacency_star = []
+    ac_star = []
 
-    kopt_parameter = lom.options.kopt_parameter
-    num_central_nodes_kopt = lom.options.num_central_nodes_kopt
-    num_swaps_bound_kopt = lom.options.num_swaps_bound_kopt
+    if (lom.data["num_edges_existing"] == 0) && (lom.data["augment_budget"] == (lom.data["num_nodes"] - 1))
+        _, heuristic_time, solve_bytes_alloc, sec_in_gc = @timed adjacency_star, ac_star = LOpt.heuristic_spanning_tree(lom)
+    elseif (lom.data["num_edges_existing"] > 0) && (lom.data["is_base_graph_connected"])
+        _, heuristic_time, solve_bytes_alloc, sec_in_gc = @timed adjacency_star, ac_star = LOpt.heuristic_base_graph_connected(lom)
+    else
+        Memento.error(_LOGGER, "Heuristic for this option is not yet supported.")
+    end
+
+    #  Implement the bridge to results here
+    result_dict = LOpt.build_LOModel_heuristic_result(lom, heuristic_time, adjacency_star, ac_star)
+
+    return merge(lom.result, result_dict)
+end
+
+function heuristic_spanning_tree(lom::LaplacianOptModel)
 
     num_nodes = lom.data["num_nodes"]
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
-    adjacency_base_graph = lom.data["adjacency_base_graph"]
-    is_base_graph_connected = lom.data["is_base_graph_connected"]
-
-    # Initializing the heuristic solutions
-    adjacency_star = Matrix{Float64}(zeros(num_nodes, num_nodes))
-    ac_star = 0
+    num_central_nodes_kopt = lom.options.num_central_nodes_kopt
 
     # Making list of all possible edges to augment
     edge_augment_list = collect(Graphs.edges(Graphs.SimpleGraph(adjacency_augment_graph)))
 
     # Making list of tuples of edges and edge weights
-    edge_edgeweight_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
-    sorted_edges_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
+    edge_wt_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
+    edge_wt_sorted = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
 
     for (index, edge) in enumerate(edge_augment_list)
-        edge_edgeweight_list[index] = (edge, adjacency_augment_graph[Graphs.src(edge), Graphs.dst(edge)])
+        edge_wt_list[index] = (edge, adjacency_augment_graph[Graphs.src(edge), Graphs.dst(edge)])
     end
 
     # Sorting the list of tuples in descending order of edge weights
-    sorted_edges_wt = sort(edge_edgeweight_list, by = x -> x[2], rev = true)
+    edge_wt_sorted = sort(edge_wt_list, by = x -> x[2], rev = true)
 
-    if lom.data["num_edges_existing"] == 0
-        if lom.data["augment_budget"]  == (num_nodes - 1) #spanning tree
+     # Priority central nodes based on sum of edge weights
+     priority_central_nodes_list = LOpt.priority_central_nodes(adjacency_augment_graph, num_nodes) 
 
-            # Priority central nodes based on sum of edge weights
-            priority_central_nodes_list = LOpt.priority_central_nodes(adjacency_augment_graph, num_nodes) 
+     # To keep track of adjacency matrix of highest algebraic connectivity and it's algebraic connectivity
+     adjacency_graph_list = Vector{Tuple{Any,Any}}(undef, num_central_nodes_kopt)
 
-            # To keep track of adjacency matrix of highest algebraic connectivity and it's algebraic connectivity
-            adjacency_graph_list = Vector{Tuple{Any,Any}}(undef, num_central_nodes_kopt)
+     #JULIA_NUM_THREADS=auto #uncomment this line for multi threading (Requires atleast Julia 1.7)
+     #Threads.@threads for index in 1:num_central_nodes_kopt #uncomment this line for multi threading
+     for index in 1:num_central_nodes_kopt #comment this line for multi threading
+         # Builds a spanning tree
+         adjacency_graph_list[index] = LOpt.build_span_tree(
+             num_nodes, 
+             adjacency_augment_graph, 
+             edge_wt_sorted, 
+             priority_central_nodes_list[index], 
+         )
 
-            #JULIA_NUM_THREADS=auto #uncomment this line for multi threading (Requires atleast Julia 1.7)
-            #Threads.@threads for index in 1:num_central_nodes_kopt #uncomment this line for multi threading
-            for index in 1:num_central_nodes_kopt #comment this line for multi threading
-                # Builds a spanning tree
-                adjacency_graph_list[index] = LOpt.build_span_tree(
-                    num_nodes, 
-                    adjacency_augment_graph, 
-                    sorted_edges_wt, 
-                    priority_central_nodes_list[index], 
-                )
+         adjacency_graph_list[index] = LOpt.refinement_span_tree(
+             adjacency_augment_graph,
+             edge_wt_sorted,
+             adjacency_graph_list[index],
+             lom.options.kopt_parameter,
+             lom.options.num_swaps_bound_kopt,
+         )
+     end
 
-                adjacency_graph_list[index] = LOpt.refinement_span_tree(
-                    adjacency_augment_graph,
-                    sorted_edges_wt,
-                    adjacency_graph_list[index],
-                    kopt_parameter,
-                    num_swaps_bound_kopt,
-                )
-            end
+     adjacency_star, ac_star = adjacency_graph_list[sortperm(adjacency_graph_list, by = x -> x[2], rev = true)[1]]
 
-            adjacency_star, ac_star = adjacency_graph_list[sortperm(adjacency_graph_list, by = x -> x[2], rev = true)[1]]
+    return adjacency_star, ac_star
+end
 
-        elseif lom.data["augment_budget"] >= num_nodes 
-            print("Under construction")
-        end
-    else
-        if is_base_graph_connected
+function heuristic_base_graph_connected(lom::LaplacianOptModel)
 
-            # Fiedler vector of base graph
-            fiedler_vector_base_graph = LOpt.fiedler_vector(adjacency_base_graph)
+    adjacency_augment_graph = lom.data["adjacency_augment_graph"]
+    adjacency_base_graph = lom.data["adjacency_base_graph"]
 
-            # Making list of tuples of edges and fiedler weights (w_ij * (v_i - v_j)^2)
-            edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
-            sorted_edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
+    # Fiedler vector of base graph
+    fiedler_vector_base_graph = LOpt.fiedler_vector(adjacency_base_graph)
 
-            for (index, edge) in enumerate(edge_augment_list)
-                edges_fiedler_wt[index] = (edge, adjacency_augment_graph[Graphs.src(edge), Graphs.dst(edge)] * (fiedler_vector_base_graph[Graphs.src(edge)] - fiedler_vector_base_graph[Graphs.dst(edge)])^2)
-            end
+    # Making list of tuples of edges and fiedler weights (w_ij * (v_i - v_j)^2)
+    edge_augment_list = collect(Graphs.edges(Graphs.SimpleGraph(adjacency_augment_graph)))
+    edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
+    sorted_edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,length(edge_augment_list))
 
-            # Sorting the list of tuples in descending order of fiedler weights
-            sorted_edges_fiedler_wt = sort(edges_fiedler_wt, by = x -> x[2], rev = true)
-
-            # Base graph
-            G = Graphs.SimpleGraph(adjacency_base_graph)
-
-            # Adding edges based on fiedler weights to construct initial graph with required edges
-            for i = 1:lom.data["augment_budget"]
-                Graphs.add_edge!(G, Graphs.src(sorted_edges_fiedler_wt[i][1]), Graphs.dst(sorted_edges_fiedler_wt[i][1]))
-            end
-
-            adjacency_star, ac_star = LOpt.refinement_tree(
-                G,
-                adjacency_base_graph,
-                adjacency_augment_graph,
-                sorted_edges_fiedler_wt,
-                kopt_parameter,
-                num_swaps_bound_kopt,
-            )
-
-        elseif !(is_base_graph_connected)
-            print("Under construction")
-        end
+    for (index, edge) in enumerate(edge_augment_list)
+        edges_fiedler_wt[index] = (edge, adjacency_augment_graph[Graphs.src(edge), Graphs.dst(edge)] * (fiedler_vector_base_graph[Graphs.src(edge)] - fiedler_vector_base_graph[Graphs.dst(edge)])^2)
     end
-    #  Implement the bridge to results here
-    @show adjacency_star, ac_star
-    return
+
+    # Sorting the list of tuples in descending order of fiedler weights
+    sorted_edges_fiedler_wt = sort(edges_fiedler_wt, by = x -> x[2], rev = true)
+
+    # Base graph
+    G = Graphs.SimpleGraph(adjacency_base_graph)
+
+    # Adding edges based on fiedler weights to construct initial graph with required edges
+    for i = 1:lom.data["augment_budget"]
+        Graphs.add_edge!(G, Graphs.src(sorted_edges_fiedler_wt[i][1]), Graphs.dst(sorted_edges_fiedler_wt[i][1]))
+    end
+
+    adjacency_star, ac_star = LOpt.refinement_tree(
+        G,
+        adjacency_base_graph,
+        adjacency_augment_graph,
+        sorted_edges_fiedler_wt,
+        lom.options.kopt_parameter,
+        lom.options.num_swaps_bound_kopt,
+    )
+
+    @show adjacency_star
+    return adjacency_star, ac_star
 end
 
 function build_span_tree(
     num_nodes,
     adjacency_augment_graph,
-    sorted_edges_wt,
+    edge_wt_sorted,
     central_node,
     )
 
@@ -119,19 +123,19 @@ function build_span_tree(
     dir_con_set = Int64[] # Set contains nodes which are directly connected to central node
     sec_con_set = Int64[] # Set contains nodes which are connected to nodes in dir_con_set
 
-    for j in eachindex(sorted_edges_wt)
-        if (Graphs.src(sorted_edges_wt[j][1]) == central_node || Graphs.dst(sorted_edges_wt[j][1]) == central_node)
+    for j in eachindex(edge_wt_sorted)
+        if (Graphs.src(edge_wt_sorted[j][1]) == central_node || Graphs.dst(edge_wt_sorted[j][1]) == central_node)
             
             # First edge of the graph
-            Graphs.add_edge!(G, Graphs.src(sorted_edges_wt[j][1]), Graphs.dst(sorted_edges_wt[j][1])) 
+            Graphs.add_edge!(G, Graphs.src(edge_wt_sorted[j][1]), Graphs.dst(edge_wt_sorted[j][1])) 
 
             # Adding to directly connected set
-            Graphs.src(sorted_edges_wt[j][1]) == central_node && push!(dir_con_set, Graphs.dst(sorted_edges_wt[j][1])) 
-            Graphs.dst(sorted_edges_wt[j][1]) == central_node && push!(dir_con_set, Graphs.src(sorted_edges_wt[j][1])) 
+            Graphs.src(edge_wt_sorted[j][1]) == central_node && push!(dir_con_set, Graphs.dst(edge_wt_sorted[j][1])) 
+            Graphs.dst(edge_wt_sorted[j][1]) == central_node && push!(dir_con_set, Graphs.src(edge_wt_sorted[j][1])) 
 
             #  Removing from unconnected set
-            deleteat!(uncon_set, uncon_set .== Graphs.src(sorted_edges_wt[j][1])) 
-            deleteat!(uncon_set, uncon_set .== Graphs.dst(sorted_edges_wt[j][1]))
+            deleteat!(uncon_set, uncon_set .== Graphs.src(edge_wt_sorted[j][1])) 
+            deleteat!(uncon_set, uncon_set .== Graphs.dst(edge_wt_sorted[j][1]))
             break
         end
     end
@@ -140,35 +144,35 @@ function build_span_tree(
         ac_tracker = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef,1)
 
         for j in 1:(size(dir_con_set)[1]+1)
-            for k in eachindex(sorted_edges_wt)
+            for k in eachindex(edge_wt_sorted)
                 if j == 1
-                    if (Graphs.src(sorted_edges_wt[k][1]) == central_node) && issubset([Graphs.dst(sorted_edges_wt[k][1])], uncon_set) ||
-                    (Graphs.dst(sorted_edges_wt[k][1]) == central_node) && issubset([Graphs.src(sorted_edges_wt[k][1])], uncon_set)
+                    if (Graphs.src(edge_wt_sorted[k][1]) == central_node) && issubset([Graphs.dst(edge_wt_sorted[k][1])], uncon_set) ||
+                    (Graphs.dst(edge_wt_sorted[k][1]) == central_node) && issubset([Graphs.src(edge_wt_sorted[k][1])], uncon_set)
                         
                         # Adding edge to central node
-                        Graphs.add_edge!(G, Graphs.src(sorted_edges_wt[k][1]), Graphs.dst(sorted_edges_wt[k][1]))
+                        Graphs.add_edge!(G, Graphs.src(edge_wt_sorted[k][1]), Graphs.dst(edge_wt_sorted[k][1]))
                         
                         # Storing current algebraic connectivity
-                        ac_tracker = ((Graphs.src(sorted_edges_wt[k][1]), Graphs.dst(sorted_edges_wt[k][1])),LOpt.algebraic_connectivity((weighted_adjacency_matrix(G, adjacency_augment_graph, num_nodes - size(uncon_set)[1] + 1))))
+                        ac_tracker = ((Graphs.src(edge_wt_sorted[k][1]), Graphs.dst(edge_wt_sorted[k][1])),LOpt.algebraic_connectivity((weighted_adjacency_matrix(G, adjacency_augment_graph, num_nodes - size(uncon_set)[1] + 1))))
                         
                         # Removing the added edge
-                        Graphs.rem_edge!(G, Graphs.src(sorted_edges_wt[k][1]), Graphs.dst(sorted_edges_wt[k][1]))
+                        Graphs.rem_edge!(G, Graphs.src(edge_wt_sorted[k][1]), Graphs.dst(edge_wt_sorted[k][1]))
                         break
                     end
                 else
-                    if (Graphs.src(sorted_edges_wt[k][1]) == dir_con_set[j-1]) && issubset([Graphs.dst(sorted_edges_wt[k][1])], uncon_set) ||
-                    (Graphs.dst(sorted_edges_wt[k][1]) == dir_con_set[j-1]) && issubset([Graphs.src(sorted_edges_wt[k][1])], uncon_set)
+                    if (Graphs.src(edge_wt_sorted[k][1]) == dir_con_set[j-1]) && issubset([Graphs.dst(edge_wt_sorted[k][1])], uncon_set) ||
+                    (Graphs.dst(edge_wt_sorted[k][1]) == dir_con_set[j-1]) && issubset([Graphs.src(edge_wt_sorted[k][1])], uncon_set)
                         
                         # Adding edge to directly connected node
-                        Graphs.add_edge!(G, Graphs.src(sorted_edges_wt[k][1]), Graphs.dst(sorted_edges_wt[k][1]))
+                        Graphs.add_edge!(G, Graphs.src(edge_wt_sorted[k][1]), Graphs.dst(edge_wt_sorted[k][1]))
 
                         # Updating current algebraic connectivity
                         if LOpt.algebraic_connectivity((weighted_adjacency_matrix(G, adjacency_augment_graph, num_nodes - size(uncon_set)[1] + 1))) > ac_tracker[2]
-                            ac_tracker = ((Graphs.src(sorted_edges_wt[k][1]), Graphs.dst(sorted_edges_wt[k][1])),LOpt.algebraic_connectivity((weighted_adjacency_matrix(G, adjacency_augment_graph, num_nodes - size(uncon_set)[1] + 1))))
+                            ac_tracker = ((Graphs.src(edge_wt_sorted[k][1]), Graphs.dst(edge_wt_sorted[k][1])),LOpt.algebraic_connectivity((weighted_adjacency_matrix(G, adjacency_augment_graph, num_nodes - size(uncon_set)[1] + 1))))
                         end
 
                         # Removing the added edge
-                        Graphs.rem_edge!(G, Graphs.src(sorted_edges_wt[k][1]), Graphs.dst(sorted_edges_wt[k][1]))
+                        Graphs.rem_edge!(G, Graphs.src(edge_wt_sorted[k][1]), Graphs.dst(edge_wt_sorted[k][1]))
                         break
                     end
                 end
@@ -215,7 +219,7 @@ end
 
 function refinement_span_tree(
     adjacency_augment_graph,
-    sorted_edges_wt,
+    edge_wt_sorted,
     adjacency_graph_ac_tuple,
     kopt_parameter,
     num_swaps_bound_kopt,
@@ -225,8 +229,8 @@ function refinement_span_tree(
     # Refinement of Algebraic connectivity
     if kopt_parameter == 1
         cycle_basis_current = Vector{Int64}
-        for i in eachindex(sorted_edges_wt)
-            if Graphs.add_edge!(G, Graphs.src(sorted_edges_wt[i][1]), Graphs.dst(sorted_edges_wt[i][1]))
+        for i in eachindex(edge_wt_sorted)
+            if Graphs.add_edge!(G, Graphs.src(edge_wt_sorted[i][1]), Graphs.dst(edge_wt_sorted[i][1]))
                 if Graphs.is_cyclic(G)
                     cycle_basis_current = Graphs.cycle_basis(G)[1]
                     ac_tracker = 0.0
@@ -249,7 +253,7 @@ function refinement_span_tree(
         updated_adjacency_graph_ac_tuple = LOpt.update_kopt_adjacency!(G, adjacency_augment_graph, adjacency_graph_ac_tuple)
 
     elseif kopt_parameter == 2
-        combinations = LOpt.edge_combinations(length(sorted_edges_wt), kopt_parameter)
+        combinations = LOpt.edge_combinations(length(edge_wt_sorted), kopt_parameter)
         cycle_basis_current = Vector{Int64}
         if length(combinations) <= num_swaps_bound_kopt
             num_swaps = length(combinations)
@@ -257,9 +261,9 @@ function refinement_span_tree(
             num_swaps = num_swaps_bound_kopt
         end
         for i in 1:num_swaps
-            if Graphs.adjacency_matrix(G)[Graphs.src(sorted_edges_wt[combinations[i][1]][1]), Graphs.dst(sorted_edges_wt[combinations[i][1]][1])] == 0 && 
-            Graphs.adjacency_matrix(G)[Graphs.src(sorted_edges_wt[combinations[i][2]][1]), Graphs.dst(sorted_edges_wt[combinations[i][2]][1])] == 0
-                G = LOpt.add_multiple_edges!(G, [(Graphs.src(sorted_edges_wt[combinations[i][1]][1]), Graphs.dst(sorted_edges_wt[combinations[i][1]][1])),(Graphs.src(sorted_edges_wt[combinations[i][2]][1]), Graphs.dst(sorted_edges_wt[combinations[i][2]][1]))])
+            if Graphs.adjacency_matrix(G)[Graphs.src(edge_wt_sorted[combinations[i][1]][1]), Graphs.dst(edge_wt_sorted[combinations[i][1]][1])] == 0 && 
+            Graphs.adjacency_matrix(G)[Graphs.src(edge_wt_sorted[combinations[i][2]][1]), Graphs.dst(edge_wt_sorted[combinations[i][2]][1])] == 0
+                G = LOpt.add_multiple_edges!(G, [(Graphs.src(edge_wt_sorted[combinations[i][1]][1]), Graphs.dst(edge_wt_sorted[combinations[i][1]][1])),(Graphs.src(edge_wt_sorted[combinations[i][2]][1]), Graphs.dst(edge_wt_sorted[combinations[i][2]][1]))])
                 if Graphs.is_cyclic(G)
                     cycle_basis_current = Graphs.cycle_basis(G)
                     ac_tracker = 0.0
@@ -272,7 +276,7 @@ function refinement_span_tree(
         updated_adjacency_graph_ac_tuple = LOpt.update_kopt_adjacency!(G, adjacency_augment_graph, adjacency_graph_ac_tuple)
         
     elseif kopt_parameter == 3
-        combinations = LOpt.edge_combinations(length(sorted_edges_wt), kopt_parameter)
+        combinations = LOpt.edge_combinations(length(edge_wt_sorted), kopt_parameter)
         cycle_basis_current = Vector{Int64}
         if length(combinations) <= num_swaps_bound_kopt
             num_swaps = length(combinations)
@@ -280,10 +284,10 @@ function refinement_span_tree(
             num_swaps = num_swaps_bound_kopt
         end
         for i in 1:num_swaps
-            if Graphs.adjacency_matrix(G)[Graphs.src(sorted_edges_wt[combinations[i][1]][1]), Graphs.dst(sorted_edges_wt[combinations[i][1]][1])] == 0 &&  
-            Graphs.adjacency_matrix(G)[Graphs.src(sorted_edges_wt[combinations[i][2]][1]), Graphs.dst(sorted_edges_wt[combinations[i][2]][1])] == 0 &&  
-            Graphs.adjacency_matrix(G)[Graphs.src(sorted_edges_wt[combinations[i][3]][1]), Graphs.dst(sorted_edges_wt[combinations[i][3]][1])] == 0
-                G = LOpt.add_multiple_edges!(G, [(Graphs.src(sorted_edges_wt[combinations[i][1]][1]), Graphs.dst(sorted_edges_wt[combinations[i][1]][1])),(Graphs.src(sorted_edges_wt[combinations[i][2]][1]), Graphs.dst(sorted_edges_wt[combinations[i][2]][1])),(Graphs.src(sorted_edges_wt[combinations[i][3]][1]), Graphs.dst(sorted_edges_wt[combinations[i][3]][1]))])
+            if Graphs.adjacency_matrix(G)[Graphs.src(edge_wt_sorted[combinations[i][1]][1]), Graphs.dst(edge_wt_sorted[combinations[i][1]][1])] == 0 &&  
+            Graphs.adjacency_matrix(G)[Graphs.src(edge_wt_sorted[combinations[i][2]][1]), Graphs.dst(edge_wt_sorted[combinations[i][2]][1])] == 0 &&  
+            Graphs.adjacency_matrix(G)[Graphs.src(edge_wt_sorted[combinations[i][3]][1]), Graphs.dst(edge_wt_sorted[combinations[i][3]][1])] == 0
+                G = LOpt.add_multiple_edges!(G, [(Graphs.src(edge_wt_sorted[combinations[i][1]][1]), Graphs.dst(edge_wt_sorted[combinations[i][1]][1])),(Graphs.src(edge_wt_sorted[combinations[i][2]][1]), Graphs.dst(edge_wt_sorted[combinations[i][2]][1])),(Graphs.src(edge_wt_sorted[combinations[i][3]][1]), Graphs.dst(edge_wt_sorted[combinations[i][3]][1]))])
                 if Graphs.is_cyclic(G)
                     ac_tracker = 0.0
                     vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]

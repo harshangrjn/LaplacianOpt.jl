@@ -103,16 +103,12 @@ function optimality_certificate_MISDP(lom::LaplacianOptModel, result::Dict{Strin
     end
 end
 
-function build_LOModel_heuristic_result(lom::LaplacianOptModel, solve_time::Number)
-
-    solution = Dict{String,Any}()
+function build_LOModel_heuristic_result(lom::LaplacianOptModel, heuristic_time::Number, adjacency_star, ac_star)
 
     result = Dict{String,Any}(
-        "optimizer" => JuMP.solver_name(lom.model),
-        # "objective" => LOpt.get_objective_value(lom.model),
-        "solve_time" => solve_time,
-        "solution" => solution,
-        "solution_type" => lom.options.solution_type,
+        "heuristic_objective" => ac_star,
+        "heuristic_solve_time" => heuristic_time,
+        "heuristic_solution" => adjacency_star,
         "adjacency_base_graph" => lom.data["adjacency_base_graph"],
         "adjacency_augment_graph" => lom.data["adjacency_augment_graph"],
     )

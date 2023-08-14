@@ -46,7 +46,8 @@ end
 #-------------------------------#
 num_nodes = 5
 instance = 1
-data_dict, augment_budget = data_I(num_nodes, instance)
+# data_dict, augment_budget = data_I(num_nodes, instance)
+data_dict, augment_budget = data_II()
 
 params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
@@ -61,7 +62,7 @@ model_options = Dict{Symbol,Any}(
     :topology_flow_cuts => true,
     :solution_type => "heuristic",
     :kopt_parameter => 3,
-    :num_central_nodes_kopt => 3,
+    :num_central_nodes_kopt => 5,
 )
 
 result = LOpt.run_LOpt(

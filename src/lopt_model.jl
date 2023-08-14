@@ -14,7 +14,10 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
     LOpt._logging_info(lom)
 
     if lom.options.formulation_type == "max_λ2"
-        if lom.options.solution_type == "optimal"
+        if lom.options.solution_type == "heuristic"
+            return lom
+
+        elseif lom.options.solution_type == "optimal"
             # Populate PMinor indices
             lom.minor_idx_dict =
                 LOpt._PMinorIdx(lom.data["num_nodes"], lom.options.eigen_cuts_sizes)
@@ -22,9 +25,7 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
             LOpt.variable_LOModel(lom)
             LOpt.constraint_LOModel(lom; optimizer = optimizer)
             LOpt.objective_LOModel(lom)
-
-        elseif lom.options.solution_type == "heuristic"
-            LOpt.heuristic_kopt(lom)
+            
         end
     elseif lom.options.formulation_type == "max_span_tree"
         if lom.options.solution_type in ["optimal"]
@@ -123,7 +124,11 @@ function run_LOpt(
 )
     data = LOpt.get_data(params)
     model_lopt = LOpt.build_LOModel(data, optimizer = lom_optimizer, options = options)
-    result_lopt = LOpt.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
+    if (:solution_type in keys(options)) && (options[:solution_type] == "heuristic")
+        result_lopt = LOpt.heuristic_kopt(model_lopt)
+    else
+        result_lopt = LOpt.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
+    end
 
     if visualize_solution
         LOpt.visualize_solution(
