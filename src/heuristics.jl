@@ -106,7 +106,6 @@ function heuristic_base_graph_connected(lom::LaplacianOptModel)
         lom.options.num_swaps_bound_kopt,
     )
 
-    @show adjacency_star
     return adjacency_star, ac_star
 end
 
