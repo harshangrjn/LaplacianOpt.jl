@@ -1,7 +1,6 @@
 # Heuristics to maximize algebraic connectivity of weighted graphs
 
 function heuristic_kopt(lom::LaplacianOptModel, optimizer = nothing)
-    @show lom.data["augment_budget"]
     adjacency_star = []
     ac_star = []
 
@@ -71,7 +70,7 @@ function heuristic_spanning_tree(lom::LaplacianOptModel)
 end
 
 function heuristic_base_graph_connected(lom::LaplacianOptModel)
-    @show lom.data["augment_budget"]
+
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
     adjacency_base_graph = lom.data["adjacency_base_graph"]
 
@@ -99,7 +98,6 @@ function heuristic_base_graph_connected(lom::LaplacianOptModel)
     end
 
     if lom.data["augment_budget"] > 0
-        @show lom.data["augment_budget"]
         adjacency_star, ac_star = LOpt.refinement_tree(
             G,
             adjacency_base_graph,
@@ -107,6 +105,7 @@ function heuristic_base_graph_connected(lom::LaplacianOptModel)
             sorted_edges_fiedler_wt,
             lom.options.kopt_parameter,
             lom.options.num_swaps_bound_kopt,
+            lom.data["augment_budget"]
         )
     else
         adjacency_star, ac_star = Matrix(Graphs.adjacency_matrix(G)), LOpt.algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(Graphs.adjacency_matrix(G)))
@@ -319,8 +318,9 @@ function refinement_tree(
     sorted_edges_fiedler_wt, 
     kopt_parameter,
     num_swaps_bound_kopt,
+    augment_budget
     )
-    
+
     if kopt_parameter == 1
         if length(sorted_edges_fiedler_wt) <= num_swaps_bound_kopt
             num_swaps = length(sorted_edges_fiedler_wt)
@@ -332,7 +332,7 @@ function refinement_tree(
         end
 
     elseif kopt_parameter == 2
-        if lom.data["augment_budget"] >= 2
+        if augment_budget >= 2
             combinations = LOpt.edge_combinations(length(sorted_edges_fiedler_wt), kopt_parameter)
             if length(combinations) <= num_swaps_bound_kopt
                 num_swaps = length(combinations)
@@ -346,7 +346,7 @@ function refinement_tree(
             Memento.eror(_LOGGER, "Augment budget should be greater than one.")
         end
     elseif kopt_parameter == 3
-        if lom.data["augment_budget"] >= 3
+        if augment_budget >= 3
             combinations = LOpt.edge_combinations(length(sorted_edges_fiedler_wt), kopt_parameter)
             if length(combinations) <= num_swaps_bound_kopt
                 num_swaps = length(combinations)
@@ -357,7 +357,7 @@ function refinement_tree(
                 G = refinement_tree_3opt!(G, adjacency_base_graph, adjacency_augment_graph, sorted_edges_fiedler_wt[combinations[i][1]][1], sorted_edges_fiedler_wt[combinations[i][2]][1],sorted_edges_fiedler_wt[combinations[i][3]][1])
             end
         else
-            Memento.eror(_LOGGER, "Augment budget should be greater than two.")
+            Memento.error(_LOGGER, "Augment budget should be greater than two.")
         end
     else
         Memento.eror(_LOGGER, "kopt_parameter > 3 is currently not supported.")

@@ -61,7 +61,7 @@ model_options = Dict{Symbol,Any}(
     :eigen_cuts_sizes => [num_nodes,2,3,4],
     :topology_flow_cuts => true,
     :solution_type => "heuristic",
-    :kopt_parameter => 3,
+    :kopt_parameter => 2,
     :num_central_nodes_kopt => 5,
 )
 
