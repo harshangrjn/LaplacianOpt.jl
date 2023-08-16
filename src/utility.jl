@@ -123,7 +123,7 @@ function algebraic_connectivity(adjacency_matrix::Array{<:Number})
     L_mat = LOpt.laplacian_matrix(adjacency_matrix)
 
     ac = sort(LA.eigvals(L_mat))[2]
-
+    @show ac
     return ac
 end
 
