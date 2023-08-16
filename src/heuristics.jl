@@ -1,6 +1,7 @@
 # Heuristics to maximize algebraic connectivity of weighted graphs
 
 function heuristic_kopt(lom::LaplacianOptModel, optimizer = nothing)
+    @show lom.data["augment_budget"]
     adjacency_star = []
     ac_star = []
 
@@ -70,7 +71,7 @@ function heuristic_spanning_tree(lom::LaplacianOptModel)
 end
 
 function heuristic_base_graph_connected(lom::LaplacianOptModel)
-
+    @show lom.data["augment_budget"]
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
     adjacency_base_graph = lom.data["adjacency_base_graph"]
 
@@ -98,6 +99,7 @@ function heuristic_base_graph_connected(lom::LaplacianOptModel)
     end
 
     if lom.data["augment_budget"] > 0
+        @show lom.data["augment_budget"]
         adjacency_star, ac_star = LOpt.refinement_tree(
             G,
             adjacency_base_graph,
@@ -318,7 +320,7 @@ function refinement_tree(
     kopt_parameter,
     num_swaps_bound_kopt,
     )
-
+    
     if kopt_parameter == 1
         if length(sorted_edges_fiedler_wt) <= num_swaps_bound_kopt
             num_swaps = length(sorted_edges_fiedler_wt)
