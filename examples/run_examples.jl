@@ -44,9 +44,9 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-num_nodes = 5
-instance = 1
-# data_dict, augment_budget = data_I(num_nodes, instance)
+num_nodes = 10
+instance = 4
+#data_dict, augment_budget = data_I(num_nodes, instance)
 data_dict, augment_budget = data_II()
 
 params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
@@ -58,10 +58,10 @@ params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_
 
 # For more model options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
 model_options = Dict{Symbol,Any}(
-    :eigen_cuts_sizes => [num_nodes],
+    :eigen_cuts_sizes => [num_nodes,2,3,4],
     :topology_flow_cuts => true,
     :solution_type => "heuristic",
-    :kopt_parameter => 3,
+    :kopt_parameter => 1,
     :num_central_nodes_kopt => 5,
 )
 

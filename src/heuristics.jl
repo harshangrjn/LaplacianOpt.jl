@@ -97,15 +97,19 @@ function heuristic_base_graph_connected(lom::LaplacianOptModel)
         Graphs.add_edge!(G, Graphs.src(sorted_edges_fiedler_wt[i][1]), Graphs.dst(sorted_edges_fiedler_wt[i][1]))
     end
 
-    adjacency_star, ac_star = LOpt.refinement_tree(
-        G,
-        adjacency_base_graph,
-        adjacency_augment_graph,
-        sorted_edges_fiedler_wt,
-        lom.options.kopt_parameter,
-        lom.options.num_swaps_bound_kopt,
-    )
-
+    if lom.data["augment_budget"] > 0
+        adjacency_star, ac_star = LOpt.refinement_tree(
+            G,
+            adjacency_base_graph,
+            adjacency_augment_graph,
+            sorted_edges_fiedler_wt,
+            lom.options.kopt_parameter,
+            lom.options.num_swaps_bound_kopt,
+        )
+    else
+        adjacency_star, ac_star = Matrix(Graphs.adjacency_matrix(G)), LOpt.algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(Graphs.adjacency_matrix(G)))
+    end
+    
     return adjacency_star, ac_star
 end
 
@@ -267,7 +271,7 @@ function refinement_span_tree(
                     cycle_basis_current = Graphs.cycle_basis(G)
                     ac_tracker = 0.0
                     vertices_tracker = [(undef, undef), (undef, undef)]
-                    ac_tracker, vertices_tracker = LOpt._vertices_tracker_two_edges!(G, adjacency_augment_graph, 0, 0, ac_tracker, vertices_tracker)
+                    ac_tracker, vertices_tracker = LOpt._vertices_tracker_update_span_two_edges!(G, adjacency_augment_graph, 0, 0, ac_tracker, vertices_tracker)
                     G = LOpt.remove_multiple_edges!(G, vertices_tracker)
                 end
             end
@@ -293,7 +297,7 @@ function refinement_span_tree(
                     for j in 1:(length(Graphs.cycle_basis(G)[3])-1)
                         for k in (j+1):length(Graphs.cycle_basis(G)[3])
                             if Graphs.adjacency_matrix(G)[Graphs.cycle_basis(G)[3][j], Graphs.cycle_basis(G)[3][k]] == 1
-                                ac_tracker, vertices_tracker = LOpt._vertices_tracker_two_edges!(G, adjacency_augment_graph, j, k, ac_tracker, vertices_tracker)
+                                ac_tracker, vertices_tracker = LOpt._vertices_tracker_update_span_two_edges!(G, adjacency_augment_graph, j, k, ac_tracker, vertices_tracker)
                             end
                         end
                     end
@@ -316,70 +320,46 @@ function refinement_tree(
     )
 
     if kopt_parameter == 1
-        for i in eachindex(sorted_edges_fiedler_wt)
-            if !(Graphs.has_edge(G, Graphs.src(sorted_edges_fiedler_wt[i][1]), Graphs.dst(sorted_edges_fiedler_wt[i][1])))
-                Graphs.add_edge!(G, Graphs.src(sorted_edges_fiedler_wt[i][1]), Graphs.dst(sorted_edges_fiedler_wt[i][1]))
-                ac_tracker = 0.0
-                vertices_tracker = (undef, undef)
-                for edge in Graphs.edges(G)
-                    if adjacency_base_graph[Graphs.src(edge), Graphs.dst(edge)] == 0
-                        Graphs.rem_edge!(G, Graphs.src(edge), Graphs.dst(edge))
-                        if  LOpt.algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(Graphs.adjacency_matrix(G))) > ac_tracker
-                            ac_tracker =  LOpt.algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(Graphs.adjacency_matrix(G)))
-                            vertices_tracker = edge
-                        end
-                        Graphs.add_edge!(G, Graphs.src(edge), Graphs.dst(edge))
-                    end
-                end
-                Graphs.rem_edge!(G, vertices_tracker)
-            end
+        if length(sorted_edges_fiedler_wt) <= num_swaps_bound_kopt
+            num_swaps = length(sorted_edges_fiedler_wt)
+        else
+            num_swaps = num_swaps_bound_kopt
+        end
+        for i in 1:num_swaps
+            G = refinement_tree_1opt!(G, adjacency_base_graph, adjacency_augment_graph, sorted_edges_fiedler_wt[i][1])
         end
 
     elseif kopt_parameter == 2
-        combinations = LOpt.edge_combinations(length(sorted_edges_fiedler_wt), kopt_parameter)
-        if length(combinations) <= num_swaps_bound_kopt
-            num_swaps = length(combinations)
-        else
-            num_swaps = num_swaps_bound_kopt
-        end
-        for i in 1:num_swaps
-            if !(Graphs.has_edge(G, Graphs.src(sorted_edges_fiedler_wt[combinations[i][1]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][1]][1])))  && 
-            !(Graphs.has_edge(G, Graphs.src(sorted_edges_fiedler_wt[combinations[i][2]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][2]][1])))
-                G = LOpt.add_multiple_edges!(G, [(Graphs.src(sorted_edges_fiedler_wt[combinations[i][1]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][1]][1])),(Graphs.src(sorted_edges_fiedler_wt[combinations[i][2]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][2]][1]))])
-                ac_tracker = 0.0
-                vertices_tracker = [(undef, undef),(undef, undef)]
-                ac_tracker, vertices_tracker = _vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, 0, ac_tracker,vertices_tracker)
-                G = LOpt.remove_multiple_edges!(G, vertices_tracker)
+        if lom.data["augment_budget"] >= 2
+            combinations = LOpt.edge_combinations(length(sorted_edges_fiedler_wt), kopt_parameter)
+            if length(combinations) <= num_swaps_bound_kopt
+                num_swaps = length(combinations)
+            else
+                num_swaps = num_swaps_bound_kopt
             end
+            for i in 1:num_swaps
+                G = refinement_tree_2opt!(G, adjacency_base_graph, adjacency_augment_graph, sorted_edges_fiedler_wt[combinations[i][1]][1], sorted_edges_fiedler_wt[combinations[i][2]][1])
+            end
+        else
+            Memento.eror(_LOGGER, "Augment budget should be greater than one.")
         end
-
     elseif kopt_parameter == 3
-        combinations = LOpt.edge_combinations(length(sorted_edges_fiedler_wt), kopt_parameter)
-        if length(combinations) <= num_swaps_bound_kopt
-            num_swaps = length(combinations)
-        else
-            num_swaps = num_swaps_bound_kopt
-        end
-        for i in 1:num_swaps
-            if !(Graphs.has_edge(G, Graphs.src(sorted_edges_fiedler_wt[combinations[i][1]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][1]][1])))  && 
-            !(Graphs.has_edge(G, Graphs.src(sorted_edges_fiedler_wt[combinations[i][2]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][2]][1]))) &&
-            !(Graphs.has_edge(G, Graphs.src(sorted_edges_fiedler_wt[combinations[i][3]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][3]][1]))) 
-                G = LOpt.add_multiple_edges!(G, [(Graphs.src(sorted_edges_fiedler_wt[combinations[i][1]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][1]][1])),(Graphs.src(sorted_edges_fiedler_wt[combinations[i][2]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][2]][1])), (Graphs.src(sorted_edges_fiedler_wt[combinations[i][3]][1]), Graphs.dst(sorted_edges_fiedler_wt[combinations[i][3]][1]))]) 
-                ac_tracker = 0.0
-                vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]
-                for j in eachindex(length(collect(Graphs.edges(G))) - 2)
-                    if (adjacency_base_graph[Graphs.src(edge_list[j]), Graphs.dst(edge_list[j])] == 0)
-                        ac_tracker, vertices_tracker = LOpt._vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, j, ac_tracker,vertices_tracker)
-                    end
-                end
-                G = LOpt.remove_multiple_edges!(G, vertices_tracker)
+        if lom.data["augment_budget"] >= 3
+            combinations = LOpt.edge_combinations(length(sorted_edges_fiedler_wt), kopt_parameter)
+            if length(combinations) <= num_swaps_bound_kopt
+                num_swaps = length(combinations)
+            else
+                num_swaps = num_swaps_bound_kopt
             end
+            for i in 1:num_swaps
+                G = refinement_tree_3opt!(G, adjacency_base_graph, adjacency_augment_graph, sorted_edges_fiedler_wt[combinations[i][1]][1], sorted_edges_fiedler_wt[combinations[i][2]][1],sorted_edges_fiedler_wt[combinations[i][3]][1])
+            end
+        else
+            Memento.eror(_LOGGER, "Augment budget should be greater than two.")
         end
-
     else
         Memento.eror(_LOGGER, "kopt_parameter > 3 is currently not supported.")
     end
-
     return Matrix(Graphs.adjacency_matrix(G)), LOpt.algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(Graphs.adjacency_matrix(G)))
 end
 
@@ -414,7 +394,7 @@ function _vertices_tracker_update_two_edges!(
     return ac_tracker, vertices_tracker
 end
 
-function _vertices_tracker_two_edges!(
+function _vertices_tracker_update_span_two_edges!(
     G,
     adjacency_augment_graph,
     j, # Index for third edge src if kopt_parameter is 3
@@ -452,4 +432,87 @@ function _vertices_tracker_two_edges!(
         end
     end
     return ac_tracker, vertices_tracker
+end
+
+function refinement_tree_1opt!(
+    G, 
+    adjacency_base_graph,
+    adjacency_augment_graph, 
+    edge_to_check
+    )
+    if !(Graphs.has_edge(G, Graphs.src(edge_to_check), Graphs.dst(edge_to_check)))
+        Graphs.add_edge!(G, Graphs.src(edge_to_check), Graphs.dst(edge_to_check))
+        ac_tracker = 0.0
+        vertices_tracker = (undef, undef)
+        for edge in Graphs.edges(G)
+            if adjacency_base_graph[Graphs.src(edge), Graphs.dst(edge)] == 0
+                Graphs.rem_edge!(G, Graphs.src(edge), Graphs.dst(edge))
+                if  LOpt.algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(Graphs.adjacency_matrix(G))) > ac_tracker
+                    ac_tracker =  LOpt.algebraic_connectivity((adjacency_augment_graph + adjacency_base_graph) .* Matrix(Graphs.adjacency_matrix(G)))
+                    vertices_tracker = edge
+                end
+                Graphs.add_edge!(G, Graphs.src(edge), Graphs.dst(edge))
+            end
+        end
+        Graphs.rem_edge!(G, vertices_tracker)
+    end
+    return G
+end
+
+function refinement_tree_2opt!(
+    G, 
+    adjacency_base_graph,
+    adjacency_augment_graph, 
+    edge_to_check_1,
+    edge_to_check_2
+    )
+    if !(Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1))) && !(Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)))
+        G = LOpt.add_multiple_edges!(G, [(Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1)),(Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2))])
+        ac_tracker = 0.0
+        vertices_tracker = [(undef, undef),(undef, undef)]
+        ac_tracker, vertices_tracker = _vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, 0, ac_tracker,vertices_tracker)
+        G = LOpt.remove_multiple_edges!(G, vertices_tracker)
+    elseif !(Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1)))  && (Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)))
+        G = refinement_tree_1opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_1)
+    elseif !(Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)))  && (Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1)))
+        G = refinement_tree_1opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_2)
+    end
+    return G
+end
+
+function refinement_tree_3opt!(
+    G,
+    adjacency_base_graph,
+    adjacency_augment_graph,
+    edge_to_check_1,
+    edge_to_check_2,
+    edge_to_check_3,
+    )
+    con1 = !(Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1)))
+    con2 = !(Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)))
+    con3 = !(Graphs.has_edge(G, Graphs.src(edge_to_check_3), Graphs.dst(edge_to_check_3)))
+    if con1 && con2 && con3 
+        G = LOpt.add_multiple_edges!(G, [(Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1)),(Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)),(Graphs.src(edge_to_check_3), Graphs.dst(edge_to_check_3))])
+        ac_tracker = 0.0
+        vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]
+        for j in eachindex(length(collect(Graphs.edges(G))) - 2)
+            if (adjacency_base_graph[Graphs.src(edge_list[j]), Graphs.dst(edge_list[j])] == 0)
+                ac_tracker, vertices_tracker = LOpt._vertices_tracker_update_two_edges!(G, adjacency_base_graph, adjacency_augment_graph, j, ac_tracker,vertices_tracker)
+            end
+        end
+        G = LOpt.remove_multiple_edges!(G, vertices_tracker)
+    elseif con1 && con2 && !(con3)
+        G = refinement_tree_2opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_1, edge_to_check_2)
+    elseif con1 && !(con2) && con3
+        G = refinement_tree_2opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_1, edge_to_check_3)
+    elseif !(con1) && con2 && con3
+        G = refinement_tree_2opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_2, edge_to_check_3)
+    elseif con1 && !(con2) && !(con3)
+        G = refinement_tree_1opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_1)
+    elseif !(con1) && con2 && !(con3)
+        G = refinement_tree_1opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_2)
+    elseif !(con1) && !(con2) && con3
+        G = refinement_tree_1opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_3)
+    end
+    return G
 end
