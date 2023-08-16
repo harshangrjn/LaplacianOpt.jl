@@ -9,7 +9,7 @@
     model_options = Dict{Symbol,Any}(
             :solution_type => "heuristic", 
             :kopt_parameter => 1,
-            :num_central_nodes_verifier => 5,
+            :num_central_nodes_kopt => 5,
             :time_limit => test_time_limit()
     )
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -43,7 +43,7 @@ end
     model_options = Dict{Symbol,Any}(
         :solution_type => "heuristic",
         :kopt_parameter => 2,
-        :num_central_nodes_verifier => 5,
+        :num_central_nodes_kopt => 5,
         :time_limit => test_time_limit(),
     )
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -78,7 +78,7 @@ end
     model_options = Dict{Symbol,Any}(
         :solution_type => "heuristic",
         :kopt_parameter => 3,
-        :num_central_nodes_verifier => 5,
+        :num_central_nodes_kopt => 5,
         :time_limit => test_time_limit(),
     )
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -106,7 +106,7 @@ end
     model_options = Dict{Symbol,Any}(
         :solution_type => "heuristic",
         :kopt_parameter => 1,
-        :num_central_nodes_verifier => 3,
+        :num_central_nodes_kopt => 3,
         :time_limit => test_time_limit(),
     )
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -142,7 +142,7 @@ end
     model_options = Dict{Symbol,Any}(
         :solution_type => "heuristic",
         :kopt_parameter => 2,
-        :num_central_nodes_verifier => 3,
+        :num_central_nodes_kopt => 3,
         :time_limit => test_time_limit(),
     )
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
@@ -178,7 +178,7 @@ end
     model_options = Dict{Symbol,Any}(
         :solution_type => "heuristic",
         :kopt_parameter => 3,
-        :num_central_nodes_verifier => 3,
+        :num_central_nodes_kopt => 3,
         :time_limit => test_time_limit(),
     )
     result = LaplacianOpt.run_LOpt(params, glpk_optimizer; options = model_options)
