@@ -25,7 +25,6 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
             LOpt.variable_LOModel(lom)
             LOpt.constraint_LOModel(lom; optimizer = optimizer)
             LOpt.objective_LOModel(lom)
-            
         end
     elseif lom.options.formulation_type == "max_span_tree"
         if lom.options.solution_type in ["optimal"]
@@ -179,11 +178,11 @@ function lazycallback_status(lom::LaplacianOptModel)
     if (
         size(lom.options.eigen_cuts_sizes)[1] > 0 &&
         minimum(lom.options.eigen_cuts_sizes) >= 2
-       ) ||
-       lom.options.topology_flow_cuts ||
-       lom.options.soc_linearized_cuts ||
-       lom.options.cheeger_cuts ||
-       lom.options.sdp_relaxation
+    ) ||
+    lom.options.topology_flow_cuts ||
+    lom.options.soc_linearized_cuts ||
+    lom.options.cheeger_cuts ||
+    lom.options.sdp_relaxation
         return true
     else
         return false

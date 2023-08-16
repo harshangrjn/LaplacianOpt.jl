@@ -123,7 +123,7 @@ function algebraic_connectivity(adjacency_matrix::Array{<:Number})
     L_mat = LOpt.laplacian_matrix(adjacency_matrix)
 
     ac = sort(LA.eigvals(L_mat))[2]
-    @show ac
+
     return ac
 end
 
@@ -333,7 +333,6 @@ function _PMinorIdx(N::Int64, sizes::Vector{Int64})
     return minor_idx_dict
 end
 
-
 """
     priority_central_nodes(adjacency_augment_graph::Array{<:Number}, num_nodes::Int64) 
 
@@ -341,7 +340,10 @@ Returns a vector of order of central nodes as
 an input to construct the graph. 
 """
 
-function priority_central_nodes(adjacency_augment_graph::Array{<:Number}, num_nodes::Int64)
+function priority_central_nodes(
+    adjacency_augment_graph::Array{<:Number},
+    num_nodes::Int64,
+)
     edge_weights_sum_list = Vector{Float64}(undef, num_nodes)
     central_nodes_list = Vector{Int64}(undef, num_nodes)
 
@@ -352,7 +354,6 @@ function priority_central_nodes(adjacency_augment_graph::Array{<:Number}, num_no
     return central_nodes_list
 end
 
-
 """
     weighted_adjacency_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, adjacency_augment_graph::Array{<:Number}, size::Int64)
 
@@ -360,8 +361,11 @@ Returns a weighted adjacency matrix for
 the connected part of  graph.  
 """
 
-
-function weighted_adjacency_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, adjacency_augment_graph::Array{<:Number}, size::Int64)
+function weighted_adjacency_matrix(
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    adjacency_augment_graph::Array{<:Number},
+    size::Int64,
+)
     weighted_adj_matrix_size = Matrix{Float64}(undef, size, size)
 
     #collecting vertices connected in graph
@@ -374,7 +378,11 @@ function weighted_adjacency_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
 
     for i in 1:size
         for j in i:size
-            weighted_adj_matrix_size[i, j] = (adjacency_augment_graph.*Graphs.adjacency_matrix(G))[vertices_from_edges[i],vertices_from_edges[j]]
+            weighted_adj_matrix_size[i, j] =
+                (adjacency_augment_graph.*Graphs.adjacency_matrix(G))[
+                    vertices_from_edges[i],
+                    vertices_from_edges[j],
+                ]
             weighted_adj_matrix_size[j, i] = weighted_adj_matrix_size[i, j]
         end
     end
@@ -394,8 +402,13 @@ function update_kopt_adjacency!(
     adjacency_graph_ac_tuple::Tuple{Array,Float64};
     tol = 1E-6,
 )
-    if algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G))) - adjacency_graph_ac_tuple[2] >= tol
-        return Matrix(Graphs.adjacency_matrix(G)), algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)))
+    if algebraic_connectivity(
+        adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)),
+    ) - adjacency_graph_ac_tuple[2] >= tol
+        return Matrix(Graphs.adjacency_matrix(G)),
+        algebraic_connectivity(
+            adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)),
+        )
     else
         return adjacency_graph_ac_tuple
     end
@@ -419,14 +432,14 @@ function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
     if kopt_parameter == 2
         for i in 1:num_edges-1
             for j in i+1:num_edges
-                push!(combinations, (i,j))
+                push!(combinations, (i, j))
             end
         end
     elseif kopt_parameter == 3
         for i in 1:num_edges-2
             for j in i+1:num_edges-1
                 for l in j+1:num_edges
-                    push!(combinations, (i,j,l))
+                    push!(combinations, (i, j, l))
                 end
             end
         end
@@ -455,7 +468,6 @@ end
 
 Returns updated graph by removing edges.
 """
-
 
 function remove_multiple_edges!(
     G::Graphs.SimpleGraphs.SimpleGraph{<:Number},

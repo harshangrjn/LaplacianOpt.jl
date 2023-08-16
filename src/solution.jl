@@ -88,7 +88,7 @@ a boolean if the integer solution satisfies the optimality certificate for the M
 """
 function optimality_certificate_MISDP(lom::LaplacianOptModel, result::Dict{String,Any})
     if ("z_var" in keys(result["solution"])) &&
-       !(lom.options.formulation_type == "max_span_tree")
+        !(lom.options.formulation_type == "max_span_tree")
         adjacency_full_graph = lom.data["adjacency_augment_graph"]
         (lom.data["num_edges_existing"] > 0) &&
             (adjacency_full_graph += lom.data["adjacency_base_graph"])
