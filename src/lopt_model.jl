@@ -25,6 +25,7 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
             LOpt.variable_LOModel(lom)
             LOpt.constraint_LOModel(lom; optimizer = optimizer)
             LOpt.objective_LOModel(lom)
+            
         end
     elseif lom.options.formulation_type == "max_span_tree"
         if lom.options.solution_type in ["optimal"]

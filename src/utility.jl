@@ -377,11 +377,7 @@ function weighted_adjacency_matrix(
 
     for i in 1:size
         for j in i:size
-            weighted_adj_matrix_size[i, j] =
-                (adjacency_augment_graph.*Graphs.adjacency_matrix(G))[
-                    vertices_from_edges[i],
-                    vertices_from_edges[j],
-                ]
+            weighted_adj_matrix_size[i, j] = (adjacency_augment_graph.*Graphs.adjacency_matrix(G))[vertices_from_edges[i],vertices_from_edges[j]]
             weighted_adj_matrix_size[j, i] = weighted_adj_matrix_size[i, j]
         end
     end
@@ -401,13 +397,8 @@ function update_kopt_adjacency!(
     adjacency_graph_ac_tuple::Tuple{Array,Float64};
     tol = 1E-6,
 )
-    if algebraic_connectivity(
-        adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)),
-    ) - adjacency_graph_ac_tuple[2] >= tol
-        return Matrix(Graphs.adjacency_matrix(G)),
-        algebraic_connectivity(
-            adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)),
-        )
+    if algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G))) - adjacency_graph_ac_tuple[2] >= tol
+        return Matrix(Graphs.adjacency_matrix(G)), algebraic_connectivity(adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)))
     else
         return adjacency_graph_ac_tuple
     end
