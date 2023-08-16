@@ -45,8 +45,9 @@ end
 #      User-defined params      #
 #-------------------------------#
 num_nodes = 5
-instance = 11
-data_dict, augment_budget = data_I(num_nodes, instance)
+instance = 1
+#data_dict, augment_budget = data_I(num_nodes, instance)
+data_dict, augment_budget = data_II()
 
 params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
