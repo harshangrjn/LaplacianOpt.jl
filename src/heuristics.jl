@@ -3,7 +3,7 @@
 function heuristic_kopt(lom::LaplacianOptModel, optimizer = nothing)
     adjacency_star = []
     ac_star = []
-
+    
     if (lom.data["num_edges_existing"] == 0) &&
        (lom.data["augment_budget"] == (lom.data["num_nodes"] - 1))
         _, heuristic_time, solve_bytes_alloc, sec_in_gc =
@@ -151,7 +151,7 @@ function build_span_tree(
     adjacency_augment_graph::Matrix{<:Number},
     edge_wt_sorted::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,<:Number}},
     central_node::Int64,
-)
+    )
     G = Graphs.SimpleGraph(zeros(num_nodes, num_nodes)) # Starting graph
     uncon_set = Int64[] # Set contains all unconnected nodes
     uncon_set = collect(1:num_nodes)
@@ -316,7 +316,7 @@ function refinement_span_tree(
     adjacency_graph_ac_tuple::Tuple{Matrix{<:Number},<:Number},
     kopt_parameter::Int64,
     num_swaps_bound_kopt::Int64,
-)
+    )
     G = Graphs.SimpleGraph(adjacency_graph_ac_tuple[1])
     # Refinement of Algebraic connectivity
     if kopt_parameter == 1
@@ -500,7 +500,7 @@ function refinement_tree(
     kopt_parameter::Int64,
     num_swaps_bound_kopt::Int64,
     augment_budget::Int64,
-)
+    )
     if kopt_parameter == 1
         if length(sorted_edges_fiedler_wt) <= num_swaps_bound_kopt
             num_swaps = length(sorted_edges_fiedler_wt)
@@ -576,7 +576,7 @@ function _vertices_tracker_update_two_edges!(
     j_idx::Int64, # Index for third edge if kopt_parameter is 3
     ac_tracker::Number,
     vertices_tracker,
-)
+    )
     edge_list = collect(Graphs.edges(G))
     for k in j_idx+1:(length(edge_list)-1)
         for l in k+1:length(edge_list)
@@ -619,7 +619,6 @@ function _vertices_tracker_update_two_edges!(
             end
         end
     end
-
     return ac_tracker, vertices_tracker
 end
 
@@ -630,7 +629,7 @@ function _vertices_tracker_update_span_two_edges!(
     k_idx::Int64, # Index for third edge dst if kopt_parameter is 3
     ac_tracker::Number,
     vertices_tracker,
-)
+    )
     cycle_basis_current = Graphs.cycle_basis(G)
     for l in 1:(length(cycle_basis_current[2])-1)
         for m in (l+1):length(cycle_basis_current[2])
@@ -703,7 +702,7 @@ function refinement_tree_1opt!(
     adjacency_base_graph::Matrix{<:Number},
     adjacency_augment_graph::Matrix{<:Number},
     edge_to_check::Graphs.SimpleGraphs.SimpleEdge{<:Number},
-)
+    )
     if !(Graphs.has_edge(G, Graphs.src(edge_to_check), Graphs.dst(edge_to_check)))
         Graphs.add_edge!(G, Graphs.src(edge_to_check), Graphs.dst(edge_to_check))
         ac_tracker = 0.0
@@ -735,7 +734,7 @@ function refinement_tree_2opt!(
     adjacency_augment_graph::Matrix{<:Number},
     edge_to_check_1::Graphs.SimpleGraphs.SimpleEdge{<:Number},
     edge_to_check_2::Graphs.SimpleGraphs.SimpleEdge{<:Number},
-)
+    )
     if !(Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1))) &&
        !(Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)))
         G = LOpt.add_multiple_edges!(
@@ -789,7 +788,7 @@ function refinement_tree_3opt!(
     edge_to_check_1::Graphs.SimpleGraphs.SimpleEdge{<:Number},
     edge_to_check_2::Graphs.SimpleGraphs.SimpleEdge{<:Number},
     edge_to_check_3::Graphs.SimpleGraphs.SimpleEdge{<:Number},
-)
+    )
     con1 = !(Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1)))
     con2 = !(Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)))
     con3 = !(Graphs.has_edge(G, Graphs.src(edge_to_check_3), Graphs.dst(edge_to_check_3)))
@@ -804,11 +803,11 @@ function refinement_tree_3opt!(
         )
         ac_tracker = 0.0
         vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]
-        for j in eachindex(length(collect(Graphs.edges(G))) - 2)
+        for j in 1:(length(collect(Graphs.edges(G))) - 2)
             if (
                 adjacency_base_graph[
-                    Graphs.src(edge_list[j]),
-                    Graphs.dst(edge_list[j]),
+                    Graphs.src(collect(Graphs.edges(G))[j]),
+                    Graphs.dst(collect(Graphs.edges(G))[j]),
                 ] == 0
             )
                 ac_tracker, vertices_tracker = LOpt._vertices_tracker_update_two_edges!(
