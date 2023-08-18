@@ -21,6 +21,13 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
         )
     end
 
+    if JuMP.primal_status(lom.model) != MOI.FEASIBLE_POINT
+        Memento.error(
+            _LOGGER,
+            "Non-feasible primal status. Graph solution may not be exact",
+        )
+    end
+
     result = Dict{String,Any}(
         "optimizer" => JuMP.solver_name(lom.model),
         "termination_status" => JuMP.termination_status(lom.model),
@@ -88,7 +95,7 @@ a boolean if the integer solution satisfies the optimality certificate for the M
 """
 function optimality_certificate_MISDP(lom::LaplacianOptModel, result::Dict{String,Any})
     if ("z_var" in keys(result["solution"])) &&
-        !(lom.options.formulation_type == "max_span_tree")
+       !(lom.options.formulation_type == "max_span_tree")
         adjacency_full_graph = lom.data["adjacency_augment_graph"]
         (lom.data["num_edges_existing"] > 0) &&
             (adjacency_full_graph += lom.data["adjacency_base_graph"])
@@ -103,12 +110,17 @@ function optimality_certificate_MISDP(lom::LaplacianOptModel, result::Dict{Strin
     end
 end
 
-function build_LOModel_heuristic_result(lom::LaplacianOptModel, heuristic_time::Number, adjacency_star, ac_star)
-
+function build_LOModel_heuristic_result(
+    lom::LaplacianOptModel,
+    heuristic_time::Number,
+    heuristic_solution,
+    heuristic_objective::Number,
+)
     result = Dict{String,Any}(
-        "heuristic_objective" => ac_star,
+        "heuristic_objective" => heuristic_objective,
         "heuristic_solve_time" => heuristic_time,
-        "heuristic_solution" => adjacency_star,
+        "heuristic_solution" => heuristic_solution,
+        "solution_type" => lom.options.solution_type,
         "adjacency_base_graph" => lom.data["adjacency_base_graph"],
         "adjacency_augment_graph" => lom.data["adjacency_augment_graph"],
     )

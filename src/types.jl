@@ -55,7 +55,7 @@ function get_default_options()
 
     kopt_parameter = 2      # 1 <= Integer value <= 3
     num_central_nodes_kopt = 5 # 1 <= Integer value <= size of instance
-    num_swaps_bound_kopt = 1E6  # Integer value  
+    num_swaps_bound_kopt = 1E4  # Integer value  
     best_lower_bound = 0      # Best known feasible solution's objective
     best_incumbent = nothing
 

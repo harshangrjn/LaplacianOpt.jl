@@ -5,7 +5,7 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
     LOpt.set_option(lom, :eigen_cuts_sizes, [lom.data["num_nodes"], 2])
 
     # Update defaults to user-defined options
-    if options !== nothing
+    if !isnothing(options)
         for i in keys(options)
             LOpt.set_option(lom, i, options[i])
         end
@@ -25,7 +25,6 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
             LOpt.variable_LOModel(lom)
             LOpt.constraint_LOModel(lom; optimizer = optimizer)
             LOpt.objective_LOModel(lom)
-            
         end
     elseif lom.options.formulation_type == "max_span_tree"
         if lom.options.solution_type in ["optimal"]
@@ -89,7 +88,7 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer = nothing)
     end
 
     if JuMP.mode(lom.model) != JuMP.DIRECT &&
-        lom.model.moi_backend.state == MOI.Utilities.NO_OPTIMIZER
+       lom.model.moi_backend.state == MOI.Utilities.NO_OPTIMIZER
         Memento.error(
             _LOGGER,
             "No optimizer specified in `optimize_LOModel!` or the given JuMP model.",
@@ -124,9 +123,10 @@ function run_LOpt(
 )
     data = LOpt.get_data(params)
     model_lopt = LOpt.build_LOModel(data, optimizer = lom_optimizer, options = options)
-    if (:solution_type in keys(options)) && (options[:solution_type] == "heuristic")
+
+    if model_lopt.options.solution_type == "heuristic"
         result_lopt = LOpt.heuristic_kopt(model_lopt)
-    else
+    elseif model_lopt.options.solution_type == "optimal"
         result_lopt = LOpt.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
     end
 
@@ -177,13 +177,13 @@ end
 
 function lazycallback_status(lom::LaplacianOptModel)
     if (
-        size(lom.options.eigen_cuts_sizes)[1] > 0 &&
-        minimum(lom.options.eigen_cuts_sizes) >= 2
-    ) ||
-    lom.options.topology_flow_cuts ||
-    lom.options.soc_linearized_cuts ||
-    lom.options.cheeger_cuts ||
-    lom.options.sdp_relaxation
+           size(lom.options.eigen_cuts_sizes)[1] > 0 &&
+           minimum(lom.options.eigen_cuts_sizes) >= 2
+       ) ||
+       lom.options.topology_flow_cuts ||
+       lom.options.soc_linearized_cuts ||
+       lom.options.cheeger_cuts ||
+       lom.options.sdp_relaxation
         return true
     else
         return false
