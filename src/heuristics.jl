@@ -1,9 +1,6 @@
 # Heuristics to maximize algebraic connectivity of weighted graphs
 
-function heuristic_kopt(
-    lom::LaplacianOptModel, 
-    optimizer = nothing
-)
+function heuristic_kopt(lom::LaplacianOptModel, optimizer = nothing)
     adjacency_star = []
     ac_star = []
 
@@ -25,9 +22,7 @@ function heuristic_kopt(
     return merge(lom.result, result_dict)
 end
 
-function heuristic_spanning_tree(
-    lom::LaplacianOptModel
-)
+function heuristic_spanning_tree(lom::LaplacianOptModel)
     num_nodes = lom.data["num_nodes"]
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
     num_central_nodes_kopt = lom.options.num_central_nodes_kopt
@@ -36,11 +31,11 @@ function heuristic_spanning_tree(
     edge_augment_list = collect(Graphs.edges(Graphs.SimpleGraph(adjacency_augment_graph)))
 
     # Making list of tuples of edges and edge weights
-    edge_wt_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(
+    edge_wt_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,<:Number}}(
         undef,
         length(edge_augment_list),
     )
-    edge_wt_sorted = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(
+    edge_wt_sorted = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,<:Number}}(
         undef,
         length(edge_augment_list),
     )
@@ -58,7 +53,8 @@ function heuristic_spanning_tree(
         LOpt.priority_central_nodes(adjacency_augment_graph, num_nodes)
 
     # To keep track of adjacency matrix of highest algebraic connectivity and it's algebraic connectivity
-    adjacency_graph_list = Vector{Tuple{Matrix{<:Number}, <:Number}}(undef, num_central_nodes_kopt)
+    adjacency_graph_list =
+        Vector{Tuple{Matrix{<:Number},<:Number}}(undef, num_central_nodes_kopt)
 
     #JULIA_NUM_THREADS=auto #uncomment this line for multi threading (Requires atleast Julia 1.7)
     #Threads.@threads for index in 1:num_central_nodes_kopt #uncomment this line for multi threading
@@ -85,9 +81,7 @@ function heuristic_spanning_tree(
     return adjacency_star, ac_star
 end
 
-function heuristic_base_graph_connected(
-    lom::LaplacianOptModel
-)
+function heuristic_base_graph_connected(lom::LaplacianOptModel)
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
     adjacency_base_graph = lom.data["adjacency_base_graph"]
 
@@ -96,11 +90,11 @@ function heuristic_base_graph_connected(
 
     # Making list of tuples of edges and fiedler weights (w_ij * (v_i - v_j)^2)
     edge_augment_list = collect(Graphs.edges(Graphs.SimpleGraph(adjacency_augment_graph)))
-    edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(
+    edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,<:Number}}(
         undef,
         length(edge_augment_list),
     )
-    sorted_edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(
+    sorted_edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,<:Number}}(
         undef,
         length(edge_augment_list),
     )
@@ -153,10 +147,10 @@ function heuristic_base_graph_connected(
 end
 
 function build_span_tree(
-    num_nodes::Int64, 
-    adjacency_augment_graph::Matrix{<:Number}, 
-    edge_wt_sorted::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}, 
-    central_node::Int64
+    num_nodes::Int64,
+    adjacency_augment_graph::Matrix{<:Number},
+    edge_wt_sorted::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,<:Number}},
+    central_node::Int64,
 )
     G = Graphs.SimpleGraph(zeros(num_nodes, num_nodes)) # Starting graph
     uncon_set = Int64[] # Set contains all unconnected nodes
@@ -191,7 +185,7 @@ function build_span_tree(
     end
 
     while !Graphs.is_connected(G) # Connecting nodes until a spanning tree is formed
-        ac_tracker = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(undef, 1)
+        ac_tracker = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,<:Number}}(undef, 1)
 
         for j in 1:(size(dir_con_set)[1]+1)
             for k in eachindex(edge_wt_sorted)
@@ -318,8 +312,8 @@ end
 
 function refinement_span_tree(
     adjacency_augment_graph::Matrix{<:Number},
-    edge_wt_sorted::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}},
-    adjacency_graph_ac_tuple::Tuple{Matrix{<:Number}, <:Number},
+    edge_wt_sorted::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,<:Number}},
+    adjacency_graph_ac_tuple::Tuple{Matrix{<:Number},<:Number},
     kopt_parameter::Int64,
     num_swaps_bound_kopt::Int64,
 )
@@ -502,7 +496,7 @@ function refinement_tree(
     G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
     adjacency_base_graph::Matrix{<:Number},
     adjacency_augment_graph::Matrix{<:Number},
-    sorted_edges_fiedler_wt::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}},
+    sorted_edges_fiedler_wt::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,<:Number}},
     kopt_parameter::Int64,
     num_swaps_bound_kopt::Int64,
     augment_budget::Int64,
@@ -653,14 +647,23 @@ function _vertices_tracker_update_span_two_edges!(
                             (cycle_basis_current[2][l], cycle_basis_current[2][m])
                     else
                         cycle_basis_to_check = [
-                            (cycle_basis_current[3][j_idx], cycle_basis_current[3][k_idx]),
+                            (
+                                cycle_basis_current[3][j_idx],
+                                cycle_basis_current[3][k_idx],
+                            ),
                             (cycle_basis_current[2][l], cycle_basis_current[2][m]),
                             (cycle_basis_current[1][p], cycle_basis_current[1][q]),
                         ]
                         cycle_basis_condition =
-                            (cycle_basis_current[3][j_idx], cycle_basis_current[3][k_idx]) !==
+                            (
+                                cycle_basis_current[3][j_idx],
+                                cycle_basis_current[3][k_idx],
+                            ) !==
                             (cycle_basis_current[2][l], cycle_basis_current[2][m]) &&
-                            (cycle_basis_current[3][j_idx], cycle_basis_current[3][k_idx]) !==
+                            (
+                                cycle_basis_current[3][j_idx],
+                                cycle_basis_current[3][k_idx],
+                            ) !==
                             (cycle_basis_current[1][p], cycle_basis_current[1][q]) &&
                             (cycle_basis_current[1][p], cycle_basis_current[1][q]) !==
                             (cycle_basis_current[2][l], cycle_basis_current[2][m])

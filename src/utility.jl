@@ -396,7 +396,7 @@ Returns an updated adjacency_graph_ac_tuple after the kopt refinement.
 function update_kopt_adjacency!(
     G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
     adjacency_augment_graph::Array{<:Number},
-    adjacency_graph_ac_tuple::Tuple{Array, <:Number};
+    adjacency_graph_ac_tuple::Tuple{Array,<:Number};
     tol = 1E-6,
 )
     if algebraic_connectivity(
@@ -417,10 +417,7 @@ end
 Returns all combinations possible for given `n` and `k`.
 """
 
-function edge_combinations(
-    num_edges::Int64, 
-    kopt_parameter::Int64
-)
+function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
     if kopt_parameter < 2 || kopt_parameter > 3
         Memento.error(_LOGGER, "kopt_parameter must be either 2 or 3")
     elseif num_edges < kopt_parameter
