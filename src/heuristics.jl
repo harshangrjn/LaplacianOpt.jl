@@ -1,6 +1,9 @@
 # Heuristics to maximize algebraic connectivity of weighted graphs
 
-function heuristic_kopt(lom::LaplacianOptModel, optimizer = nothing)
+function heuristic_kopt(
+    lom::LaplacianOptModel, 
+    optimizer = nothing
+)
     adjacency_star = []
     ac_star = []
 
@@ -22,7 +25,9 @@ function heuristic_kopt(lom::LaplacianOptModel, optimizer = nothing)
     return merge(lom.result, result_dict)
 end
 
-function heuristic_spanning_tree(lom::LaplacianOptModel)
+function heuristic_spanning_tree(
+    lom::LaplacianOptModel
+)
     num_nodes = lom.data["num_nodes"]
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
     num_central_nodes_kopt = lom.options.num_central_nodes_kopt
@@ -31,11 +36,11 @@ function heuristic_spanning_tree(lom::LaplacianOptModel)
     edge_augment_list = collect(Graphs.edges(Graphs.SimpleGraph(adjacency_augment_graph)))
 
     # Making list of tuples of edges and edge weights
-    edge_wt_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(
+    edge_wt_list = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(
         undef,
         length(edge_augment_list),
     )
-    edge_wt_sorted = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(
+    edge_wt_sorted = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(
         undef,
         length(edge_augment_list),
     )
@@ -53,19 +58,18 @@ function heuristic_spanning_tree(lom::LaplacianOptModel)
         LOpt.priority_central_nodes(adjacency_augment_graph, num_nodes)
 
     # To keep track of adjacency matrix of highest algebraic connectivity and it's algebraic connectivity
-    adjacency_graph_list = Vector{Tuple{Any,Any}}(undef, num_central_nodes_kopt)
+    adjacency_graph_list = Vector{Tuple{Matrix{<:Number}, <:Number}}(undef, num_central_nodes_kopt)
 
     #JULIA_NUM_THREADS=auto #uncomment this line for multi threading (Requires atleast Julia 1.7)
     #Threads.@threads for index in 1:num_central_nodes_kopt #uncomment this line for multi threading
     for index in 1:num_central_nodes_kopt #comment this line for multi threading
-        # Builds a spanning tree
+        # Build a spanning tree
         adjacency_graph_list[index] = LOpt.build_span_tree(
             num_nodes,
             adjacency_augment_graph,
             edge_wt_sorted,
             priority_central_nodes_list[index],
         )
-
         adjacency_graph_list[index] = LOpt.refinement_span_tree(
             adjacency_augment_graph,
             edge_wt_sorted,
@@ -81,7 +85,9 @@ function heuristic_spanning_tree(lom::LaplacianOptModel)
     return adjacency_star, ac_star
 end
 
-function heuristic_base_graph_connected(lom::LaplacianOptModel)
+function heuristic_base_graph_connected(
+    lom::LaplacianOptModel
+)
     adjacency_augment_graph = lom.data["adjacency_augment_graph"]
     adjacency_base_graph = lom.data["adjacency_base_graph"]
 
@@ -90,11 +96,11 @@ function heuristic_base_graph_connected(lom::LaplacianOptModel)
 
     # Making list of tuples of edges and fiedler weights (w_ij * (v_i - v_j)^2)
     edge_augment_list = collect(Graphs.edges(Graphs.SimpleGraph(adjacency_augment_graph)))
-    edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(
+    edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(
         undef,
         length(edge_augment_list),
     )
-    sorted_edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(
+    sorted_edges_fiedler_wt = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(
         undef,
         length(edge_augment_list),
     )
@@ -146,7 +152,12 @@ function heuristic_base_graph_connected(lom::LaplacianOptModel)
     return adjacency_star, ac_star
 end
 
-function build_span_tree(num_nodes, adjacency_augment_graph, edge_wt_sorted, central_node)
+function build_span_tree(
+    num_nodes::Int64, 
+    adjacency_augment_graph::Matrix{<:Number}, 
+    edge_wt_sorted::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}, 
+    central_node::Int64
+)
     G = Graphs.SimpleGraph(zeros(num_nodes, num_nodes)) # Starting graph
     uncon_set = Int64[] # Set contains all unconnected nodes
     uncon_set = collect(1:num_nodes)
@@ -180,7 +191,7 @@ function build_span_tree(num_nodes, adjacency_augment_graph, edge_wt_sorted, cen
     end
 
     while !Graphs.is_connected(G) # Connecting nodes until a spanning tree is formed
-        ac_tracker = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge,Float64}}(undef, 1)
+        ac_tracker = Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}}(undef, 1)
 
         for j in 1:(size(dir_con_set)[1]+1)
             for k in eachindex(edge_wt_sorted)
@@ -306,11 +317,11 @@ function build_span_tree(num_nodes, adjacency_augment_graph, edge_wt_sorted, cen
 end
 
 function refinement_span_tree(
-    adjacency_augment_graph,
-    edge_wt_sorted,
-    adjacency_graph_ac_tuple,
-    kopt_parameter,
-    num_swaps_bound_kopt,
+    adjacency_augment_graph::Matrix{<:Number},
+    edge_wt_sorted::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}},
+    adjacency_graph_ac_tuple::Tuple{Matrix{<:Number}, <:Number},
+    kopt_parameter::Int64,
+    num_swaps_bound_kopt::Int64,
 )
     G = Graphs.SimpleGraph(adjacency_graph_ac_tuple[1])
     # Refinement of Algebraic connectivity
@@ -488,13 +499,13 @@ function refinement_span_tree(
 end
 
 function refinement_tree(
-    G,
-    adjacency_base_graph,
-    adjacency_augment_graph,
-    sorted_edges_fiedler_wt,
-    kopt_parameter,
-    num_swaps_bound_kopt,
-    augment_budget,
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    adjacency_base_graph::Matrix{<:Number},
+    adjacency_augment_graph::Matrix{<:Number},
+    sorted_edges_fiedler_wt::Vector{Tuple{Graphs.SimpleGraphs.SimpleEdge, <:Number}},
+    kopt_parameter::Int64,
+    num_swaps_bound_kopt::Int64,
+    augment_budget::Int64,
 )
     if kopt_parameter == 1
         if length(sorted_edges_fiedler_wt) <= num_swaps_bound_kopt
@@ -565,25 +576,25 @@ function refinement_tree(
 end
 
 function _vertices_tracker_update_two_edges!(
-    G,
-    adjacency_base_graph,
-    adjacency_augment_graph,
-    j, # Index for third edge if kopt_parameter is 3
-    ac_tracker,
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    adjacency_base_graph::Matrix{<:Number},
+    adjacency_augment_graph::Matrix{<:Number},
+    j_idx::Int64, # Index for third edge if kopt_parameter is 3
+    ac_tracker::Number,
     vertices_tracker,
 )
     edge_list = collect(Graphs.edges(G))
-    for k in j+1:(length(edge_list)-1)
+    for k in j_idx+1:(length(edge_list)-1)
         for l in k+1:length(edge_list)
             edges_to_check = []
-            if j == 0
+            if j_idx == 0
                 edges_to_check = [
                     (Graphs.src(edge_list[k]), Graphs.dst(edge_list[k])),
                     (Graphs.src(edge_list[l]), Graphs.dst(edge_list[l])),
                 ]
             else
                 edges_to_check = [
-                    (Graphs.src(edge_list[j]), Graphs.dst(edge_list[j])),
+                    (Graphs.src(edge_list[j_idx]), Graphs.dst(edge_list[j_idx])),
                     (Graphs.src(edge_list[k]), Graphs.dst(edge_list[k])),
                     (Graphs.src(edge_list[l]), Graphs.dst(edge_list[l])),
                 ]
@@ -619,11 +630,11 @@ function _vertices_tracker_update_two_edges!(
 end
 
 function _vertices_tracker_update_span_two_edges!(
-    G,
-    adjacency_augment_graph,
-    j, # Index for third edge src if kopt_parameter is 3
-    k, # Index for third edge dst if kopt_parameter is 3
-    ac_tracker,
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    adjacency_augment_graph::Matrix{<:Number},
+    j_idx::Int64, # Index for third edge src if kopt_parameter is 3
+    k_idx::Int64, # Index for third edge dst if kopt_parameter is 3
+    ac_tracker::Number,
     vertices_tracker,
 )
     cycle_basis_current = Graphs.cycle_basis(G)
@@ -632,7 +643,7 @@ function _vertices_tracker_update_span_two_edges!(
             for p in 1:(length(cycle_basis_current[1])-1)
                 for q in (p+1):length(cycle_basis_current[1])
                     cycle_basis_to_check = []
-                    if j == 0 && k == 0
+                    if j_idx == 0 && k_idx == 0
                         cycle_basis_to_check = [
                             (cycle_basis_current[2][l], cycle_basis_current[2][m]),
                             (cycle_basis_current[1][p], cycle_basis_current[1][q]),
@@ -642,14 +653,14 @@ function _vertices_tracker_update_span_two_edges!(
                             (cycle_basis_current[2][l], cycle_basis_current[2][m])
                     else
                         cycle_basis_to_check = [
-                            (cycle_basis_current[3][j], cycle_basis_current[3][k]),
+                            (cycle_basis_current[3][j_idx], cycle_basis_current[3][k_idx]),
                             (cycle_basis_current[2][l], cycle_basis_current[2][m]),
                             (cycle_basis_current[1][p], cycle_basis_current[1][q]),
                         ]
                         cycle_basis_condition =
-                            (cycle_basis_current[3][j], cycle_basis_current[3][k]) !==
+                            (cycle_basis_current[3][j_idx], cycle_basis_current[3][k_idx]) !==
                             (cycle_basis_current[2][l], cycle_basis_current[2][m]) &&
-                            (cycle_basis_current[3][j], cycle_basis_current[3][k]) !==
+                            (cycle_basis_current[3][j_idx], cycle_basis_current[3][k_idx]) !==
                             (cycle_basis_current[1][p], cycle_basis_current[1][q]) &&
                             (cycle_basis_current[1][p], cycle_basis_current[1][q]) !==
                             (cycle_basis_current[2][l], cycle_basis_current[2][m])
@@ -685,10 +696,10 @@ function _vertices_tracker_update_span_two_edges!(
 end
 
 function refinement_tree_1opt!(
-    G,
-    adjacency_base_graph,
-    adjacency_augment_graph,
-    edge_to_check,
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    adjacency_base_graph::Matrix{<:Number},
+    adjacency_augment_graph::Matrix{<:Number},
+    edge_to_check::Graphs.SimpleGraphs.SimpleEdge{<:Number},
 )
     if !(Graphs.has_edge(G, Graphs.src(edge_to_check), Graphs.dst(edge_to_check)))
         Graphs.add_edge!(G, Graphs.src(edge_to_check), Graphs.dst(edge_to_check))
@@ -716,11 +727,11 @@ function refinement_tree_1opt!(
 end
 
 function refinement_tree_2opt!(
-    G,
-    adjacency_base_graph,
-    adjacency_augment_graph,
-    edge_to_check_1,
-    edge_to_check_2,
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    adjacency_base_graph::Matrix{<:Number},
+    adjacency_augment_graph::Matrix{<:Number},
+    edge_to_check_1::Graphs.SimpleGraphs.SimpleEdge{<:Number},
+    edge_to_check_2::Graphs.SimpleGraphs.SimpleEdge{<:Number},
 )
     if !(Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1))) &&
        !(Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)))
@@ -769,12 +780,12 @@ function refinement_tree_2opt!(
 end
 
 function refinement_tree_3opt!(
-    G,
-    adjacency_base_graph,
-    adjacency_augment_graph,
-    edge_to_check_1,
-    edge_to_check_2,
-    edge_to_check_3,
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    adjacency_base_graph::Matrix{<:Number},
+    adjacency_augment_graph::Matrix{<:Number},
+    edge_to_check_1::Graphs.SimpleGraphs.SimpleEdge{<:Number},
+    edge_to_check_2::Graphs.SimpleGraphs.SimpleEdge{<:Number},
+    edge_to_check_3::Graphs.SimpleGraphs.SimpleEdge{<:Number},
 )
     con1 = !(Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1)))
     con2 = !(Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)))
