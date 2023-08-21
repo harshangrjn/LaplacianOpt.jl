@@ -41,9 +41,13 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
         "adjacency_augment_graph" => lom.data["adjacency_augment_graph"],
     )
 
-    status = LOpt.optimality_certificate_MISDP(lom, result)
-    if status in [true, false]
-        result["optimality_certificate_MISDP"] = status
+    if lom.options.formulation_type == "max_λ2"
+        status = LOpt.optimality_certificate_MISDP(lom, result)
+        if status in [true, false]
+            result["optimality_certificate_MISDP"] = status
+            (status == false) &&
+                (Memento.warn(_LOGGER, "Optimality certificate for MISDP failed!!!"))
+        end
     end
 
     return result

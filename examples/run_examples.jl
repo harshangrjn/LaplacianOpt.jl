@@ -57,12 +57,9 @@ params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_
 
 # For more model options, check https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/src/types.jl
 model_options = Dict{Symbol,Any}(
-    :eigen_cuts_sizes => [num_nodes, 2],
+    :eigen_cuts_sizes => [data_dict["num_nodes"], 2],
     :topology_flow_cuts => true,
     :solution_type => "optimal",
-    :kopt_parameter => 2,
-    :num_central_nodes_kopt => 5,
-    :num_swaps_bound_kopt => 1E4,
 )
 
 result = LOpt.run_LOpt(

@@ -48,6 +48,9 @@ results = LOpt.run_LOpt(params, lopt_optimizer)
 !!! tip
     Run times of [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl)'s mathematical optimization models are significantly faster using [Gurobi](https://www.gurobi.com) as the underlying mixed-integer programming (MIP) solver. Note that this solver's individual-usage license is available [free](https://www.gurobi.com/academia/academic-program-and-licenses/) for academic purposes. 
 
+!!! tip
+    Note that [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl) tries to find the global solution of a combinatiorial optimization problem, that is known to be [NP-hard to compute](https://doi.org/10.1016/j.orl.2008.09.001) in the size of `num_nodes`. To obtain quick feasible solutions via "k-opt-based" heristics, just set `:solution_type` to `"heuristics"` and adjust the `num_swaps_bound_kopt` parameter to appropriate values, where larger value implies a better-quality feasible solution at the cost of the heuristic run time. 
+
 # Extracting results
 The run commands (for example, `run_LOpt`) in LaplacianOpt return detailed results in the form of a dictionary. This dictionary can be used for further processing of the results. For example, for the given instance of a complete graph, the algorithm's runtime and the optimal objective value (maximum algebraic connectivity) can be accessed with,
 

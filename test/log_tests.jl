@@ -46,11 +46,7 @@
     @test result_lopt["primal_status"] == MOI.FEASIBLE_POINT
 
     # Visualizing based on heuristic solution
-    model_options = Dict{Symbol,Any}(
-        :solution_type => "heuristic",
-        :kopt_parameter => 2,
-        :time_limit => test_time_limit(),
-    )
+    model_options = Dict{Symbol,Any}(:solution_type => "heuristic", :kopt_parameter => 2)
     result_heuristic = LaplacianOpt.run_LOpt(
         params,
         glpk_optimizer;

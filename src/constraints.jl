@@ -93,8 +93,8 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel; optimizer = not
                 "Callback status: unknown - solution may not be integer feasible",
             )
 
-        elseif status in
-               [MOI.CALLBACK_NODE_STATUS_INTEGER, MOI.CALLBACK_NODE_STATUS_FRACTIONAL]
+        elseif status in [MOI.CALLBACK_NODE_STATUS_INTEGER]
+            #    [MOI.CALLBACK_NODE_STATUS_INTEGER, MOI.CALLBACK_NODE_STATUS_FRACTIONAL]
             if !(lom.options.formulation_type == "max_span_tree")
                 if (
                     size(lom.options.eigen_cuts_sizes)[1] > 0 &&
