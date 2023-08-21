@@ -13,9 +13,6 @@
 
     model_options = Dict{Symbol,Any}(
         :tol_zero => 1E-4,
-        :tol_psd => 1E-3,
-        :eigen_cuts_full => true,
-        :topology_flow_cuts => true,
         :lazycuts_logging => true,
         :time_limit => test_time_limit(),
     )
