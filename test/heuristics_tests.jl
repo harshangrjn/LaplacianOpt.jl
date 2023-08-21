@@ -203,10 +203,14 @@ end
 end
 
 @testset "Heuristic test: zero augment budget" begin
-    num_nodes = 4
-    adjacency_base_graph = [0 2 0 0; 2 0 3 0; 0 3 0 4; 0 0 4 0]
-    adjacency_augment_graph = [0 0 4 8; 0 0 0 7; 4 0 0 0; 8 7 0 0]
-    augment_budget = 0
+    function data_II()
+        data_dict = Dict{String,Any}()
+        data_dict["num_nodes"] = 4
+        data_dict["adjacency_base_graph"] = [0 2 0 0; 2 0 3 0; 0 3 0 4; 0 0 4 0]
+        data_dict["adjacency_augment_graph"] = [0 0 4 8; 0 0 0 7; 4 0 0 0; 8 7 0 0]
+        augment_budget = 0
+        return data_dict, augment_budget
+    end
     data_dict, augment_budget = data_II()
 
     params =
@@ -230,10 +234,14 @@ end
 end
 
 @testset "Heuristic test: refinement_tree_1opt_2opt!" begin
-    num_nodes = 4
-    adjacency_base_graph = [0 2 0 0; 2 0 3 0; 0 3 0 4; 0 0 4 0]
-    adjacency_augment_graph = [0 0 4 8; 0 0 0 7; 4 0 0 0; 8 7 0 0]
-    augment_budget = 2
+    function data_II()
+        data_dict = Dict{String,Any}()
+        data_dict["num_nodes"] = 4
+        data_dict["adjacency_base_graph"] = [0 2 0 0; 2 0 3 0; 0 3 0 4; 0 0 4 0]
+        data_dict["adjacency_augment_graph"] = [0 0 4 8; 0 0 0 7; 4 0 0 0; 8 7 0 0]
+        augment_budget = 2
+        return data_dict, augment_budget
+    end
     data_dict, augment_budget = data_II()
 
     params =
@@ -261,10 +269,16 @@ end
 end
 
 @testset "Heuristic test: refinement_tree_2opt_3opt!" begin
-    num_nodes = 5
-    adjacency_base_graph = [0 2 0 0 0; 2 0 3 0 0; 0 3 0 4 0; 0 0 4 0 5; 0 0 0 5 0]
-    adjacency_augment_graph = [0 0 4 8 10; 0 0 0 7 9; 4 0 0 0 6; 8 7 0 0 0; 10 9 6 0 0]
-    augment_budget = 3
+    function data_II()
+        data_dict = Dict{String,Any}()
+        data_dict["num_nodes"] = 5
+        data_dict["adjacency_base_graph"] =
+            [0 2 0 0 0; 2 0 3 0 0; 0 3 0 4 0; 0 0 4 0 5; 0 0 0 5 0]
+        data_dict["adjacency_augment_graph"] =
+            [0 0 4 8 10; 0 0 0 7 9; 4 0 0 0 6; 8 7 0 0 0; 10 9 6 0 0]
+        augment_budget = 3
+        return data_dict, augment_budget
+    end
     data_dict, augment_budget = data_II()
 
     params =
