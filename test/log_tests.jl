@@ -56,7 +56,7 @@
         glpk_optimizer;
         options = model_options,
         visualize_solution = true,  # Make it true to plot the graph solution
-        visualizing_tool = "tikz",
+        visualizing_tool = "graphviz",
     )
     @test result_heuristic["solution_type"] == "heuristic"
     @test isapprox(
