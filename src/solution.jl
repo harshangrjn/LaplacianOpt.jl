@@ -46,7 +46,7 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
         if status in [true, false]
             result["optimality_certificate_MISDP"] = status
             (status == false) &&
-                (Memento.warn(_LOGGER, "Optimality certificate for MISDP failed!!!"))
+                (Memento.warn(_LOGGER, "Optimality certificate for MISDP failed!"))
         end
     end
 

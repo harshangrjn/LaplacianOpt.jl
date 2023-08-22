@@ -325,8 +325,19 @@ end
 
 function _PMinorIdx(N::Int64, sizes::Vector{Int64})
     minor_idx_dict = Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}()
-    for k in sizes
-        minor_idx_dict[k] = LOpt.get_minor_idx(N, k)
+
+    if length(sizes) > 0
+        if maximum(sizes) > N
+            Memento.warn(
+                _LOGGER,
+                "Detected maximum eigen-cut size ($(maximum(sizes))) > num_nodes",
+            )
+        end
+        for k in unique(sizes)
+            if (k >= 2) && (k <= N)
+                minor_idx_dict[k] = LOpt.get_minor_idx(N, k)
+            end
+        end
     end
 
     return minor_idx_dict

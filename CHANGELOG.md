@@ -4,7 +4,8 @@ LaplacianOpt.jl Change Log
 ### v0.6.0
 - Added mutiple heuristics to handle both spanning trees and graphs with loops 
 - Refactored `log.jl` to handle solutions from heuristics
-- Included more used options for heuristic in `model_options`
+- Included more user options for heuristic in `model_options`
+- Cleaned up populating and logging of eigen cuts
 - Updated docs and unit tests to reflect above changes
 
 ### v0.5.0

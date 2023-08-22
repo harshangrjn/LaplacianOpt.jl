@@ -11,16 +11,16 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
         end
     end
 
-    LOpt._logging_info(lom)
-
     if lom.options.formulation_type == "max_λ2"
         if lom.options.solution_type == "heuristic"
+            LOpt._logging_info(lom)
             return lom
 
         elseif lom.options.solution_type == "optimal"
             # Populate PMinor indices
             lom.minor_idx_dict =
                 LOpt._PMinorIdx(lom.data["num_nodes"], lom.options.eigen_cuts_sizes)
+            LOpt._logging_info(lom)
 
             LOpt.variable_LOModel(lom)
             LOpt.constraint_LOModel(lom; optimizer = optimizer)
@@ -192,12 +192,8 @@ end
 
 function _logging_info(lom::LaplacianOptModel)
     if lom.options.solution_type == "optimal"
-        if (
-            size(lom.options.eigen_cuts_sizes)[1] > 0 &&
-            minimum(lom.options.eigen_cuts_sizes) >= 2 &&
-            maximum(lom.options.eigen_cuts_sizes) <= lom.data["num_nodes"]
-        )
-            for k in lom.options.eigen_cuts_sizes
+        if length(keys(lom.minor_idx_dict)) > 0
+            for k in keys(lom.minor_idx_dict)
                 Memento.info(_LOGGER, "Applying eigen cuts ($(k)x$(k) matrix)")
             end
         end
@@ -217,6 +213,6 @@ function _logging_info(lom::LaplacianOptModel)
             Memento.info(_LOGGER, "Applying topology flow cuts")
         end
     elseif lom.options.solution_type == "heuristic"
-        Memento.info(_LOGGER, "Applying heuristics to obtain a lower bound")
+        Memento.info(_LOGGER, "Applying heuristics to obtain a feasible solution")
     end
 end
