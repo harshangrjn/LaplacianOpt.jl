@@ -5,36 +5,31 @@ function visualize_solution(
     plot_file_format = "pdf",
     display_edge_weights = true,
 )
-    num_edges_existing = data["num_edges_existing"]
-    adjacency_base_graph = data["adjacency_base_graph"]
-    adjacency_augment_graph = data["adjacency_augment_graph"]
+    adjacency_full_graph = data["adjacency_augment_graph"]
+    (data["num_edges_existing"] > 0) &&
+        (adjacency_full_graph += data["adjacency_base_graph"])
 
-    adjacency_full_graph = adjacency_augment_graph
-    (num_edges_existing > 0) && (adjacency_full_graph += adjacency_base_graph)
-
-    if results["primal_status"] != MOI.FEASIBLE_POINT
-        Memento.error(
-            _LOGGER,
-            "Non-feasible primal status. Graph solution may not be exact",
-        )
+    if results["solution_type"] == "optimal"
+        solution_mat = abs.(results["solution"]["z_var"])
+    elseif results["solution_type"] == "heuristic"
+        solution_mat = abs.(results["heuristic_solution"])
     end
 
-    M =
-        (isapprox.(results["solution"]["z_var"], 0, atol = 1E-5)) +
-        (isapprox.(results["solution"]["z_var"], 1, atol = 1E-5))
-
-    if sum(M) == data["num_nodes"]^2
+    if sum(
+        (isapprox.(solution_mat, 0, atol = 1E-5)) +
+        (isapprox.(solution_mat, 1, atol = 1E-5)),
+    ) == data["num_nodes"]^2
         Memento.info(_LOGGER, "Plotting the graph of integral solution")
         if visualizing_tool == "tikz"
             LOpt.plot_tikzgraph(
-                abs.(results["solution"]["z_var"]) .* adjacency_full_graph,
+                solution_mat .* adjacency_full_graph,
                 plot_file_format = plot_file_format,
                 display_edge_weights = display_edge_weights,
             )
 
         elseif visualizing_tool == "graphviz"
             LOpt.plot_graphviz(
-                abs.(results["solution"]["z_var"]) .* adjacency_full_graph,
+                solution_mat .* adjacency_full_graph,
                 display_edge_weights = display_edge_weights,
             )
         end

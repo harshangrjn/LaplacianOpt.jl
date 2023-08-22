@@ -21,6 +21,13 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
         )
     end
 
+    if JuMP.primal_status(lom.model) != MOI.FEASIBLE_POINT
+        Memento.error(
+            _LOGGER,
+            "Non-feasible primal status. Graph solution may not be exact",
+        )
+    end
+
     result = Dict{String,Any}(
         "optimizer" => JuMP.solver_name(lom.model),
         "termination_status" => JuMP.termination_status(lom.model),
@@ -34,9 +41,13 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
         "adjacency_augment_graph" => lom.data["adjacency_augment_graph"],
     )
 
-    status = LOpt.optimality_certificate_MISDP(lom, result)
-    if status in [true, false]
-        result["optimality_certificate_MISDP"] = status
+    if lom.options.formulation_type == "max_λ2"
+        status = LOpt.optimality_certificate_MISDP(lom, result)
+        if status in [true, false]
+            result["optimality_certificate_MISDP"] = status
+            (status == false) &&
+                (Memento.warn(_LOGGER, "Optimality certificate for MISDP failed!"))
+        end
     end
 
     return result
@@ -101,4 +112,22 @@ function optimality_certificate_MISDP(lom::LaplacianOptModel, result::Dict{Strin
             return false
         end
     end
+end
+
+function build_LOModel_heuristic_result(
+    lom::LaplacianOptModel,
+    heuristic_time::Number,
+    heuristic_solution,
+    heuristic_objective::Number,
+)
+    result = Dict{String,Any}(
+        "heuristic_objective" => heuristic_objective,
+        "heuristic_solve_time" => heuristic_time,
+        "heuristic_solution" => heuristic_solution,
+        "solution_type" => lom.options.solution_type,
+        "adjacency_base_graph" => lom.data["adjacency_base_graph"],
+        "adjacency_augment_graph" => lom.data["adjacency_augment_graph"],
+    )
+
+    return result
 end

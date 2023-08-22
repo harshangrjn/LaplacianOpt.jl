@@ -93,8 +93,8 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel; optimizer = not
                 "Callback status: unknown - solution may not be integer feasible",
             )
 
-        elseif status in
-               [MOI.CALLBACK_NODE_STATUS_INTEGER, MOI.CALLBACK_NODE_STATUS_FRACTIONAL]
+        elseif status in [MOI.CALLBACK_NODE_STATUS_INTEGER]
+            #    [MOI.CALLBACK_NODE_STATUS_INTEGER, MOI.CALLBACK_NODE_STATUS_FRACTIONAL]
             if !(lom.options.formulation_type == "max_span_tree")
                 if (
                     size(lom.options.eigen_cuts_sizes)[1] > 0 &&
@@ -133,9 +133,8 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel; optimizer = not
 end
 
 function constraint_eigen_cuts(W_val::Matrix{<:Number}, cb_cuts, lom::LaplacianOptModel)
-    if (size(lom.options.eigen_cuts_sizes)[1] > 0) &&
-       (minimum(lom.options.eigen_cuts_sizes) >= 2)
-        for cut_size in sort(unique(lom.options.eigen_cuts_sizes), rev = true)
+    if (length(keys(lom.minor_idx_dict)) > 0)
+        for cut_size in sort(collect(keys(lom.minor_idx_dict)), rev = true)
             for i in lom.minor_idx_dict[cut_size]
                 LOpt._add_eigen_cut_lazy(W_val, cb_cuts, lom, collect(i))
             end

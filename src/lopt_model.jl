@@ -5,29 +5,29 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
     LOpt.set_option(lom, :eigen_cuts_sizes, [lom.data["num_nodes"], 2])
 
     # Update defaults to user-defined options
-    if options !== nothing
+    if !isnothing(options)
         for i in keys(options)
             LOpt.set_option(lom, i, options[i])
         end
     end
 
-    LOpt._logging_info(lom)
-
     if lom.options.formulation_type == "max_λ2"
-        if lom.options.solution_type == "optimal"
+        if lom.options.solution_type == "heuristic"
+            LOpt._logging_info(lom)
+            return lom
+
+        elseif lom.options.solution_type == "optimal"
             # Populate PMinor indices
             lom.minor_idx_dict =
                 LOpt._PMinorIdx(lom.data["num_nodes"], lom.options.eigen_cuts_sizes)
+            LOpt._logging_info(lom)
 
             LOpt.variable_LOModel(lom)
             LOpt.constraint_LOModel(lom; optimizer = optimizer)
             LOpt.objective_LOModel(lom)
-
-        elseif lom.options.solution_type == "heuristic"
-            LOpt.heuristic_kopt(lom.data, lom.options.kopt_parameter)
         end
     elseif lom.options.formulation_type == "max_span_tree"
-        if lom.options.solution_type in ["optimal", "heuristic"]
+        if lom.options.solution_type in ["optimal"]
             LOpt.variable_MaxSpanTree_model(lom)
             LOpt.constraint_MaxSpanTree_model(lom)
             LOpt.objective_MaxSpanTree_model(lom)
@@ -123,7 +123,12 @@ function run_LOpt(
 )
     data = LOpt.get_data(params)
     model_lopt = LOpt.build_LOModel(data, optimizer = lom_optimizer, options = options)
-    result_lopt = LOpt.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
+
+    if model_lopt.options.solution_type == "heuristic"
+        result_lopt = LOpt.heuristic_kopt(model_lopt)
+    elseif model_lopt.options.solution_type == "optimal"
+        result_lopt = LOpt.optimize_LOModel!(model_lopt, optimizer = lom_optimizer)
+    end
 
     if visualize_solution
         LOpt.visualize_solution(
@@ -187,12 +192,8 @@ end
 
 function _logging_info(lom::LaplacianOptModel)
     if lom.options.solution_type == "optimal"
-        if (
-            size(lom.options.eigen_cuts_sizes)[1] > 0 &&
-            minimum(lom.options.eigen_cuts_sizes) >= 2 &&
-            maximum(lom.options.eigen_cuts_sizes) <= lom.data["num_nodes"]
-        )
-            for k in lom.options.eigen_cuts_sizes
+        if length(keys(lom.minor_idx_dict)) > 0
+            for k in keys(lom.minor_idx_dict)
                 Memento.info(_LOGGER, "Applying eigen cuts ($(k)x$(k) matrix)")
             end
         end
@@ -212,6 +213,6 @@ function _logging_info(lom::LaplacianOptModel)
             Memento.info(_LOGGER, "Applying topology flow cuts")
         end
     elseif lom.options.solution_type == "heuristic"
-        Memento.info(_LOGGER, "Applying heuristics to obtain a lower bound")
+        Memento.info(_LOGGER, "Applying heuristics to obtain a feasible solution")
     end
 end

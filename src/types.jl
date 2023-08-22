@@ -21,7 +21,9 @@ mutable struct LaplacianOptModelOptions
 
     sdp_relaxation::Bool
 
-    kopt_parameter::Int
+    kopt_parameter::Int64
+    num_central_nodes_kopt::Int64
+    num_swaps_bound_kopt::Int64
     best_lower_bound::Float64
     best_incumbent::Union{Vector{Tuple{Int64,Int64}},Nothing}
 
@@ -51,7 +53,9 @@ function get_default_options()
 
     sdp_relaxation = false  # true, false
 
-    kopt_parameter = 2      # Integer value >= 1
+    kopt_parameter = 2      # 1 <= Integer value <= 3
+    num_central_nodes_kopt = 5 # 1 <= Integer value <= size of instance
+    num_swaps_bound_kopt = 1E4  # Integer value  
     best_lower_bound = 0      # Best known feasible solution's objective
     best_incumbent = nothing
 
@@ -74,6 +78,8 @@ function get_default_options()
         cheeger_cuts_factor,
         sdp_relaxation,
         kopt_parameter,
+        num_central_nodes_kopt,
+        num_swaps_bound_kopt,
         best_lower_bound,
         best_incumbent,
         tol_zero,

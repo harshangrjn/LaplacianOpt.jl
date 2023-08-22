@@ -123,7 +123,6 @@ function algebraic_connectivity(adjacency_matrix::Array{<:Number})
     L_mat = LOpt.laplacian_matrix(adjacency_matrix)
 
     ac = sort(LA.eigvals(L_mat))[2]
-
     return ac
 end
 
@@ -164,7 +163,9 @@ function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
     W_eigvals = LA.eigvals(W)
 
     if typeof(W_eigvals) != Vector{Float64}
-        Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
+        if !(isapprox(imag(W_eigvals), zeros(size(W_eigvals)[1]), atol = 1E-6))
+            Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
+        end
     end
 
     if LA.eigmin(W) <= -tol
@@ -324,9 +325,164 @@ end
 
 function _PMinorIdx(N::Int64, sizes::Vector{Int64})
     minor_idx_dict = Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}()
-    for k in sizes
-        minor_idx_dict[k] = LOpt.get_minor_idx(N, k)
+
+    if length(sizes) > 0
+        if maximum(sizes) > N
+            Memento.warn(
+                _LOGGER,
+                "Detected maximum eigen-cut size ($(maximum(sizes))) > num_nodes",
+            )
+        end
+        for k in unique(sizes)
+            if (k >= 2) && (k <= N)
+                minor_idx_dict[k] = LOpt.get_minor_idx(N, k)
+            end
+        end
     end
 
     return minor_idx_dict
+end
+
+"""
+    priority_central_nodes(adjacency_augment_graph::Array{<:Number}, num_nodes::Int64) 
+
+Returns a vector of order of central nodes as 
+an input to construct the graph. 
+"""
+function priority_central_nodes(
+    adjacency_augment_graph::Array{<:Number},
+    num_nodes::Int64,
+)
+    edge_weights_sum_list = Vector{Float64}(undef, num_nodes)
+    central_nodes_list = Vector{Int64}(undef, num_nodes)
+
+    for i in 1:num_nodes
+        edge_weights_sum_list[i] = sum(adjacency_augment_graph[i, :])
+    end
+    central_nodes_list = sortperm(edge_weights_sum_list, rev = true)
+    return central_nodes_list
+end
+
+"""
+    weighted_adjacency_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, adjacency_augment_graph::Array{<:Number}, size::Int64)
+
+Returns a weighted adjacency matrix for 
+the connected part of  graph.  
+"""
+function weighted_adjacency_matrix(
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    adjacency_augment_graph::Array{<:Number},
+    size::Int64,
+)
+    weighted_adj_matrix_size = Matrix{Float64}(undef, size, size)
+
+    #collecting vertices connected in graph
+    vertices_from_edges = Int[]
+    for edge in Graphs.edges(G)
+        push!(vertices_from_edges, Graphs.src(edge))
+        push!(vertices_from_edges, Graphs.dst(edge))
+    end
+    vertices_from_edges = unique(vertices_from_edges)
+
+    for i in 1:size
+        for j in i:size
+            weighted_adj_matrix_size[i, j] =
+                (adjacency_augment_graph.*Graphs.adjacency_matrix(G))[
+                    vertices_from_edges[i],
+                    vertices_from_edges[j],
+                ]
+            weighted_adj_matrix_size[j, i] = weighted_adj_matrix_size[i, j]
+        end
+    end
+
+    return weighted_adj_matrix_size
+end
+
+"""
+    update_kopt_adjacency!(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},adjacency_augment_graph::Array{<:Number},adjacency_graph_ac_tuple::Tuple{Array,Float};tol = 1E-6,)
+
+Returns an updated adjacency_graph_ac_tuple after the kopt refinement.  
+"""
+
+function update_kopt_adjacency!(
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    adjacency_augment_graph::Array{<:Number},
+    adjacency_graph_ac_tuple::Tuple{Array,<:Number};
+    tol = 1E-6,
+)
+    if algebraic_connectivity(
+        adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)),
+    ) - adjacency_graph_ac_tuple[2] >= tol
+        return Matrix(Graphs.adjacency_matrix(G)),
+        algebraic_connectivity(
+            adjacency_augment_graph .* Matrix(Graphs.adjacency_matrix(G)),
+        )
+    else
+        return adjacency_graph_ac_tuple
+    end
+end
+
+"""
+    edge_combinations(n::Int64, k::Int64)
+
+Returns all combinations possible for given `n` and `k`.
+"""
+
+function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
+    if kopt_parameter < 2 || kopt_parameter > 3
+        Memento.error(_LOGGER, "kopt_parameter must be either 2 or 3")
+    elseif num_edges < kopt_parameter
+        Momento.error(_LOGGER, "num_edges must be greater than or equal to k")
+    end
+
+    combinations = []
+
+    if kopt_parameter == 2
+        for i in 1:num_edges-1
+            for j in i+1:num_edges
+                push!(combinations, (i, j))
+            end
+        end
+    elseif kopt_parameter == 3
+        for i in 1:num_edges-2
+            for j in i+1:num_edges-1
+                for l in j+1:num_edges
+                    push!(combinations, (i, j, l))
+                end
+            end
+        end
+    end
+    return combinations
+end
+
+"""
+    add_multiple_edges!(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},edge_set::Vector{Tuple{Int64,Int64}},)
+
+Returns updated graph by adding edges.
+"""
+
+function add_multiple_edges!(
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    edge_set::Vector{Tuple{Int64,Int64}},
+)
+    for i in 1:length(edge_set)
+        Graphs.add_edge!(G, edge_set[i][1], edge_set[i][2])
+    end
+    return G
+end
+
+"""
+    remove_multiple_edges!(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},edge_set::Vector{Tuple{Int64,Int64}},)
+
+Returns updated graph by removing edges.
+"""
+
+function remove_multiple_edges!(
+    G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
+    edge_set::Vector{Tuple{Int64,Int64}},
+)
+    for i in 1:length(edge_set)
+        Graphs.rem_edge!(G, edge_set[i][1], edge_set[i][2])
+    end
+    return G
 end

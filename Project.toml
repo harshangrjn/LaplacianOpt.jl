@@ -1,7 +1,7 @@
 name = "LaplacianOpt"
 uuid = "bb20392f-64fb-4001-92e8-14b3aedd5a9e"
 authors = ["Harsha Nagarajan"]
-version = "0.5.0"
+version = "0.6.0"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
@@ -11,9 +11,9 @@ JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 Memento = "f28f55f0-a522-5efc-85c2-fe41dfb9b2d9"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 TikzGraphs = "b4f28e30-c73f-5eaf-a395-8a9db949a742"
 TikzPictures = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
-Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [compat]
 DataStructures = "~0.17, ~0.18"
