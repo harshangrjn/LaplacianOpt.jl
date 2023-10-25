@@ -1,7 +1,14 @@
 <h1 align="center" margin=0px>
-  <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_light.png#gh-light-mode-only" width=75%>
+  <!-- <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_light.png#gh-light-mode-only" width=75%>
   <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_dark.png#gh-dark-mode-only"   width=75%>
-  <br>
+  <br> -->
+  <a href="https://github.com#gh-light-mode-only">
+  <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_light.png#gh-light-mode-only">
+  </a>
+  <a href="https://github.com#gh-dark-mode-only">
+    <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_dark.png#gh-dark-mode-only">
+  </a>
+    <br>
   A Julia Package for Maximizing Algebraic Connectivity of Graphs
 </h1>
 
