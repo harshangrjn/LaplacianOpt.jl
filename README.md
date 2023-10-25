@@ -3,10 +3,10 @@
   <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_dark.png#gh-dark-mode-only"   width=75%>
   <br> -->
   <a href="https://github.com#gh-light-mode-only">
-  <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_light.png#gh-light-mode-only">
+  <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_light.png#gh-light-mode-only" width=75%>
   </a>
   <a href="https://github.com#gh-dark-mode-only">
-    <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_dark.png#gh-dark-mode-only">
+    <img src="https://github.com/harshangrjn/LaplacianOpt.jl/blob/master/docs/src/assets/logo_header_dark.png#gh-dark-mode-only" width=75%>
   </a>
   <br>
   A Julia Package for Maximizing Algebraic Connectivity of Graphs
