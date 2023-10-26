@@ -3,6 +3,7 @@ LaplacianOpt.jl Change Log
 
 ### Staged
 - Readme update for dark/light theme logo display
+- Fixed Docs compile issue
 
 ### v0.6.0
 - Added mutiple heuristics to handle both spanning trees and graphs with loops 
