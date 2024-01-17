@@ -5,6 +5,7 @@ LaplacianOpt.jl Change Log
 - Readme update for dark/light theme logo display
 - Fixed Docs compile issue
 - Updated 100 and 60 nodes instances with solutions
+- Minor updates in graphviz logging in `log.jl`
 
 ### v0.6.0
 - Added mutiple heuristics to handle both spanning trees and graphs with loops 

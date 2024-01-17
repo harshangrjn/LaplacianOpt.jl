@@ -86,7 +86,11 @@ function plot_tikzgraph(
     end
 end
 
-function plot_graphviz(adjacency_matrix::Matrix{<:Number}; display_edge_weights = true)
+function plot_graphviz(
+    adjacency_matrix::Matrix{<:Number};
+    display_edge_weights = true,
+    edge_length = 0.5,
+)
     num_nodes = size(adjacency_matrix)[1]
     file_path = joinpath(
         dirname(pathof(LaplacianOpt)),
@@ -101,7 +105,7 @@ function plot_graphviz(adjacency_matrix::Matrix{<:Number}; display_edge_weights 
         # write(file, "rankdir=LR; \n")
         write(
             file,
-            "node [fontname=\"Helvetica\", fontsize=20, shape = circle, width=0.4, fixedsize=true, style=\"filled\", fillcolor=\"0.650 0.200 1.000\"]; \n",
+            "node [fontname=\"Helvetica\", fontsize=7, shape = circle, width=0.15, fixedsize=true, style=\"filled\", fillcolor=\"cyan\"]; \n",
         )
 
         for i in 1:(num_nodes-1)
@@ -111,10 +115,13 @@ function plot_graphviz(adjacency_matrix::Matrix{<:Number}; display_edge_weights 
                         w_ij = string(ceil(adjacency_matrix[i, j], digits = 3))
                         write(
                             file,
-                            "$i -- $j [label = \"$w_ij\", fontsize=9, fontname=\"Helvetica\"]; \n",
+                            "$i -- $j [label = \"$w_ij\", fontsize=9, fontname=\"Helvetica\", len=$edge_length]; \n",
                         )
                     else
-                        write(file, "$i -- $j [fontsize=9, fontname=\"Helvetica\"]; \n")
+                        write(
+                            file,
+                            "$i -- $j [fontsize=9, fontname=\"Helvetica\", len=$edge_length]; \n",
+                        )
                     end
                 end
             end
