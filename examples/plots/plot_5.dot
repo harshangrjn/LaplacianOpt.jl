@@ -1,9 +1,0 @@
-graph G { 
-layout=neato; 
-size="10,5"; 
-node [fontname="Helvetica", fontsize=7, shape = circle, width=0.15, fixedsize=true, style="filled", fillcolor="cyan"]; 
-1 -- 4 [fontsize=9, fontname="Helvetica", len=0.5]; 
-2 -- 4 [fontsize=9, fontname="Helvetica", len=0.5]; 
-3 -- 4 [fontsize=9, fontname="Helvetica", len=0.5]; 
-3 -- 5 [fontsize=9, fontname="Helvetica", len=0.5]; 
-}
