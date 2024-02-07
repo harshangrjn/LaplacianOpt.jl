@@ -163,11 +163,13 @@ function _add_eigen_cut_lazy(
 
     violated_eigen_vec =
         LOpt._violated_eigen_vector(W_val[idx, idx], tol = lom.options.tol_psd)
+
     if violated_eigen_vec !== nothing
         # Projected eigen-cuts in (x, gamma) space
         if lom.options.projected_eigen_cuts
             # NxN matrix
-            if length(idx) == num_nodes
+            if (length(idx) == num_nodes) &&
+               (isapprox(abs(sum(violated_eigen_vec)), 0, atol = 1E-6))
                 con = JuMP.@build_constraint(
                     sum(
                         adjacency[i, j] *

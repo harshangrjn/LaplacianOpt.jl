@@ -1,6 +1,9 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.6.2 
+- Minor fix for testing eigen cut orthogonality if `projected_eigen_cuts` is active
+
 ### v0.6.1
 - Readme update for dark/light theme logo display
 - Fixed Docs compile issue
