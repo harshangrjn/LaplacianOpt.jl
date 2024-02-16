@@ -9,7 +9,7 @@ include("optimizer.jl")
 #            MIP solver             #
 # (> Cplex 22.1 performs the best)  #
 #-----------------------------------#
-lopt_optimizer = get_cplex()
+lopt_optimizer = get_cplex(solver_log = true)
 
 #-------------------------------------#
 #      User-defined input graphs      #
@@ -43,7 +43,7 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-num_nodes = 8
+num_nodes = 100
 instance = 1
 data_dict, augment_budget = data_I(num_nodes, instance)
 # data_dict, augment_budget = data_II()

@@ -292,35 +292,29 @@ function get_unique_cycles(
 end
 
 """
-    get_minor_idx(num_nodes::Int64, size::Int64)
+    get_minor_idx(vector::Vector{Int64}, size::Int64)
 
-Given the number of nodes (size of the square matrix) and the 
-preferred size of principal sub-matrices (`<= num_nodes`), this function 
-outputs all the indices of correspondingly sized sub-matrices.  
+Given a vector and the desired size of tuples, this 
+recursive function outputs all possible tuples of the 
+specified size from the elements of the vector.  
 """
-function get_minor_idx(num_nodes::Int64, size::Int64)
-    minor_idx = Vector{Tuple{Int64,Vararg{Int64}}}()
-
-    for i in 1:num_nodes
-        push!(minor_idx, (i,))
-    end
-
-    if size >= 2
-        for _ in 1:(size-1)
-            global minor_idx_tmp = Vector{Tuple{Int64,Vararg{Int64}}}()
-            for k in 1:length(minor_idx)
-                idx_k = minor_idx[k]
-                if idx_k[end] <= (num_nodes - 1)
-                    for ii in collect((idx_k[end]+1):num_nodes)
-                        push!(minor_idx_tmp, Tuple(push!(collect(idx_k), ii)))
-                    end
-                end
+function get_minor_idx(vector::Vector{Int64}, size::Int64)
+    if size == 1
+        return [(x,) for x in vector]
+    elseif size == length(vector)
+        return [tuple(vector...)]
+    else
+        tuples = []
+        for i in 1:length(vector)
+            element = vector[i]
+            sub_tuples = LOpt.get_minor_idx(vector[(i+1):end], size - 1)
+            for sub_tuple in sub_tuples
+                push!(tuples, (element, sub_tuple...))
             end
-            minor_idx = deepcopy(minor_idx_tmp)
         end
-    end
 
-    return minor_idx_tmp
+        return tuples
+    end
 end
 
 function _PMinorIdx(N::Int64, sizes::Vector{Int64})
@@ -335,7 +329,7 @@ function _PMinorIdx(N::Int64, sizes::Vector{Int64})
         end
         for k in unique(sizes)
             if (k >= 2) && (k <= N)
-                minor_idx_dict[k] = LOpt.get_minor_idx(N, k)
+                minor_idx_dict[k] = LOpt.get_minor_idx(collect(1:N), k)
             end
         end
     end

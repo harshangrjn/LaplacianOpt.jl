@@ -1,6 +1,9 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### Staged
+- Solver logging option added in `optimizer.jl`
+
 ### v0.6.2 
 - Minor fix for testing eigen cut orthogonality if `projected_eigen_cuts` is active
 
