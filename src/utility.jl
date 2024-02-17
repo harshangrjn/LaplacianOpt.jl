@@ -317,11 +317,12 @@ function get_minor_idx(vector::Vector{Int64}, size::Int64)
     end
 end
 
-function _PMinorIdx(N::Int64, 
-                    sizes::Vector{Int64}, 
-                    minors_on_augment_edges::Bool, 
-                    data::Dict{String, Any}
-                    )
+function _PMinorIdx(
+    N::Int64,
+    sizes::Vector{Int64},
+    minors_on_augment_edges::Bool,
+    data::Dict{String,Any},
+)
     minor_idx_dict = Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}()
 
     if length(sizes) > 0
@@ -334,10 +335,11 @@ function _PMinorIdx(N::Int64,
 
         vertices_all = collect(1:N)
         for k in unique(sizes)
-            if k == N 
+            if k == N
                 minor_idx_dict[k] = LOpt.get_minor_idx(vertices_all, k)
-            elseif (k >= 2) && (k <= (N-1))
-                minors_on_augment_edges && (vertices_all = LOpt._vertices_with_augment_edges(data))
+            elseif (k >= 2) && (k <= (N - 1))
+                minors_on_augment_edges &&
+                    (vertices_all = LOpt._vertices_with_augment_edges(data))
                 minor_idx_dict[k] = LOpt.get_minor_idx(vertices_all, k)
             end
         end
@@ -346,15 +348,15 @@ function _PMinorIdx(N::Int64,
     return minor_idx_dict
 end
 
-function _vertices_with_augment_edges(data::Dict{String, Any})
+function _vertices_with_augment_edges(data::Dict{String,Any})
     v = Vector{Int64}()
-    for i=1:(data["num_nodes"]-1), j=(i+1):data["num_nodes"]
-        if !isapprox(data["adjacency_augment_graph"][i,j], 0, atol = 1E-6)
+    for i in 1:(data["num_nodes"]-1), j in (i+1):data["num_nodes"]
+        if !isapprox(data["adjacency_augment_graph"][i, j], 0, atol = 1E-6)
             push!(v, i)
             push!(v, j)
         end
     end
-    
+
     return unique(v)
 end
 
