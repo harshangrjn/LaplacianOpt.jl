@@ -3,6 +3,9 @@ LaplacianOpt.jl Change Log
 
 ### Staged
 - Solver logging option added in `optimizer.jl`
+- Added option `minors_on_augment_edges` to include principal minor cuts only corresponding to vertices with augmentable edges - helps in reducing run times
+- Cleaned up `get_minor_idx` function to make it more efficient 
+- Function `_PMinorIdx` gets updated accordingly
 
 ### v0.6.2 
 - Minor fix for testing eigen cut orthogonality if `projected_eigen_cuts` is active

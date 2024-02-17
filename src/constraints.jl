@@ -140,6 +140,7 @@ function constraint_eigen_cuts(W_val::Matrix{<:Number}, cb_cuts, lom::LaplacianO
             end
         end
     end
+
     return
 end
 

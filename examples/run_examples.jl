@@ -23,7 +23,8 @@ function data_I(num_nodes::Int, instance::Int)
     file_path =
         joinpath(@__DIR__, "instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json")
     data_dict = LOpt.parse_file(file_path)
-    augment_budget = (num_nodes - 1) # spanning tree constraint
+    # augment_budget = (num_nodes - 1) # spanning tree constraint
+    augment_budget = 5
     return data_dict, augment_budget
 end
 
