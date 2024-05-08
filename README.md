@@ -39,6 +39,15 @@ This work was supported by Los Alamos National Laboratory (LANL)'s LDRD Early Ca
 ## Citing LaplacianOpt
 If you find LaplacianOpt.jl useful in your work, we request you to cite the following papers [\[link-1\]](https://doi.org/10.1109/ECC.2015.7330770) [\[link-2\]](https://arxiv.org/abs/2304.08571): 
 ```bibtex
+@article{LOpt_TCNS2024,
+  title={Optimal Robust Network Design: Formulations and Algorithms for Maximizing Algebraic Connectivity},
+  author={Somisetty, Neelkamal and Nagarajan, Harsha and Darbha, Swaroop},
+  journal={IEEE Transactions on Control of Network Systems (accepted)},
+  url = {https://arxiv.org/abs/2304.08571},
+  year={2024},
+  publisher={IEEE}
+}
+
 @inproceedings{LOpt_ECC2015,
   title={On maximizing algebraic connectivity of networks for various engineering applications},
   author={Nagarajan, Harsha and Rathinam, Sivakumar and Darbha, Swaroop},
@@ -46,13 +55,5 @@ If you find LaplacianOpt.jl useful in your work, we request you to cite the foll
   pages={1626--1632},
   year={2015},
   organization={IEEE}
-}
-
-@article{LOpt_arXiv2023,
-  title={Optimal Robust Network Design: Formulations and Algorithms for Maximizing Algebraic Connectivity},
-  author={Somisetty, Neelkamal and Nagarajan, Harsha and Darbha, Swaroop},
-  journal={arXiv preprint:2304.08571},
-  url = {https://arxiv.org/abs/2304.08571},
-  year={2023}
 }
 ```

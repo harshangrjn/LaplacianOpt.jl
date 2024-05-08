@@ -98,7 +98,7 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel; optimizer = not
             if !(lom.options.formulation_type == "max_span_tree")
                 if (
                     size(lom.options.eigen_cuts_sizes)[1] > 0 &&
-                    minimum(lom.options.eigen_cuts_sizes) >= 2
+                    minimum(lom.options.eigen_cuts_sizes) >= 1
                 ) || lom.options.sdp_relaxation
                     W_val = JuMP.callback_value.(Ref(cb_cuts), lom.variables[:W_var])
                     LOpt.constraint_eigen_cuts(W_val, cb_cuts, lom)
@@ -140,6 +140,7 @@ function constraint_eigen_cuts(W_val::Matrix{<:Number}, cb_cuts, lom::LaplacianO
             end
         end
     end
+
     return
 end
 

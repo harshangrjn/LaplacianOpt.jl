@@ -13,6 +13,7 @@ mutable struct LaplacianOptModelOptions
     eigen_cuts_sizes::Vector{Int64}
     projected_eigen_cuts::Bool
     soc_linearized_cuts::Bool
+    minors_on_augment_edges::Bool
     topology_multi_commodity::Bool
     topology_flow_cuts::Bool
     max_cycle_length::Int64
@@ -45,6 +46,7 @@ function get_default_options()
     eigen_cuts_sizes = [] #vector of integer values from 1 up to num_nodes
     projected_eigen_cuts = true  # true, false
     soc_linearized_cuts = false  # true, false
+    minors_on_augment_edges = true # true, false (applies to only principal minors of sizes < num_nodes)
     topology_multi_commodity = false  # true, false
     topology_flow_cuts = true   # true, false
     max_cycle_length = 3 # >= 0 and <= (num_nodes-1) integer value 
@@ -71,6 +73,7 @@ function get_default_options()
         eigen_cuts_sizes,
         projected_eigen_cuts,
         soc_linearized_cuts,
+        minors_on_augment_edges,
         topology_multi_commodity,
         topology_flow_cuts,
         max_cycle_length,

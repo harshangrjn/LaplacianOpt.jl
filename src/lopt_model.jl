@@ -18,8 +18,12 @@ function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = no
 
         elseif lom.options.solution_type == "optimal"
             # Populate PMinor indices
-            lom.minor_idx_dict =
-                LOpt._PMinorIdx(lom.data["num_nodes"], lom.options.eigen_cuts_sizes)
+            lom.minor_idx_dict = LOpt._PMinorIdx(
+                lom.data["num_nodes"],
+                lom.options.eigen_cuts_sizes,
+                lom.options.minors_on_augment_edges,
+                lom.data,
+            )
             LOpt._logging_info(lom)
 
             LOpt.variable_LOModel(lom)
@@ -178,7 +182,7 @@ end
 function lazycallback_status(lom::LaplacianOptModel)
     if (
            size(lom.options.eigen_cuts_sizes)[1] > 0 &&
-           minimum(lom.options.eigen_cuts_sizes) >= 2
+           minimum(lom.options.eigen_cuts_sizes) >= 1
        ) ||
        lom.options.topology_flow_cuts ||
        lom.options.soc_linearized_cuts ||

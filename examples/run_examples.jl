@@ -3,13 +3,13 @@ using JuMP
 using CPLEX
 # using GLPK
 
-include("optimizer.jl")
+include("optimizers.jl")
 
 #-----------------------------------#
 #            MIP solver             #
 # (> Cplex 22.1 performs the best)  #
 #-----------------------------------#
-lopt_optimizer = get_cplex()
+lopt_optimizer = get_cplex(solver_log = true)
 
 #-------------------------------------#
 #      User-defined input graphs      #
@@ -18,12 +18,23 @@ lopt_optimizer = get_cplex()
  Option I: Let the package parse a JSON file and obtain the data dictionary (data_dict)
  Sample JSON format: Check examples/instances
 =#
+
+# Spanning tree dataset
 function data_I(num_nodes::Int, instance::Int)
     # Data format has to be as given in this JSON file
     file_path =
         joinpath(@__DIR__, "instances/$(num_nodes)_nodes/$(num_nodes)_$(instance).json")
     data_dict = LOpt.parse_file(file_path)
     augment_budget = (num_nodes - 1) # spanning tree constraint
+    return data_dict, augment_budget
+end
+
+# Loading SLAM dataset
+function data_SLAM(instance::String)
+    # Data format has to be as given in this JSON file
+    file_path = joinpath(@__DIR__, "instances/SLAM_dataset/$(instance).json")
+    data_dict = LOpt.parse_file(file_path)
+    augment_budget = 10
     return data_dict, augment_budget
 end
 
@@ -46,6 +57,7 @@ end
 num_nodes = 8
 instance = 1
 data_dict, augment_budget = data_I(num_nodes, instance)
+# data_dict, augment_budget = data_SLAM("CSAIL") # "CSAIL", "intel", "ais2klinik"
 # data_dict, augment_budget = data_II()
 
 params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
