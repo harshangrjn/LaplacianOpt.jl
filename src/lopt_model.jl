@@ -182,7 +182,7 @@ end
 function lazycallback_status(lom::LaplacianOptModel)
     if (
            size(lom.options.eigen_cuts_sizes)[1] > 0 &&
-           minimum(lom.options.eigen_cuts_sizes) >= 2
+           minimum(lom.options.eigen_cuts_sizes) >= 1
        ) ||
        lom.options.topology_flow_cuts ||
        lom.options.soc_linearized_cuts ||

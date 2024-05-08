@@ -535,7 +535,10 @@ function refinement_tree(
                 )
             end
         else
-            Memento.eror(_LOGGER, "Augment budget should be greater than one.")
+            Memento.error(
+                _LOGGER,
+                "For kopt_parameter = 2, augment budget should be >= 2",
+            )
         end
     elseif kopt_parameter == 3
         if augment_budget >= 3
@@ -560,7 +563,7 @@ function refinement_tree(
             Memento.error(_LOGGER, "Augment budget should be greater than two.")
         end
     else
-        Memento.eror(_LOGGER, "kopt_parameter > 3 is currently not supported.")
+        Memento.error(_LOGGER, "kopt_parameter > 3 is currently not supported.")
     end
     return Matrix(Graphs.adjacency_matrix(G)),
     LOpt.algebraic_connectivity(

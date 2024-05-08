@@ -1,11 +1,14 @@
 LaplacianOpt.jl Change Log
 =========================
 
-### Staged
-- Solver logging option added in `optimizer.jl`
+### v0.7.0
+- Solver logging option added in `optimizers.jl`
 - Added option `minors_on_augment_edges` to include principal minor cuts only corresponding to vertices with augmentable edges - helps in reducing run times
 - Cleaned up `get_minor_idx` function to make it more efficient 
 - Function `_PMinorIdx` gets updated accordingly
+- Minor bug fix in `heuristics.jl`
+- Minor bug fix in handling 1x1 principal minors
+- Added SLAM dataset instances
 
 ### v0.6.2 
 - Minor fix for testing eigen cut orthogonality if `projected_eigen_cuts` is active
@@ -92,13 +95,13 @@ LaplacianOpt.jl Change Log
 ### v0.1.6
 - Fixed Tikzgraph issue in tests 
 - Transitioned from LightGraphs to Graphs
-- Updated and cleaned up `examples/optimizer.jl`
+- Updated and cleaned up `examples/optimizers.jl`
 - `src/data.jl` cleanup for handling `"optimizer"`
 - Minor docs update 
 
 ### v0.1.5
 - Added CITATION.bib
-- Added support for Gurobi MIP solver in `examples/optimizer.jl` 
+- Added support for Gurobi MIP solver in `examples/optimizers.jl` 
 - Updated `LO` to `LOpt`
 - `lopt_model.jl` function calls updated with `LOpt`
 - Minor docs cleanups
