@@ -1,13 +1,15 @@
 #=====================================#
 # MIP solvers (commercial, but fast)  #
 #=====================================#
-function get_gurobi(; solver_log = true)
+function get_gurobi(; solver_log = true, time_limit = 1E5)
     GRB_ENV = Gurobi.Env()
     return optimizer_with_attributes(
         () -> Gurobi.Optimizer(GRB_ENV),
         MOI.Silent() => !solver_log,
         # "MIPFocus" => 3, # Focus on optimality over feasibility 
         "Presolve" => 1,
+        "TimeLimit" => time_limit,
+        # "NonConvex" => 2
     )
 end
 
