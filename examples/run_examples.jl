@@ -6,11 +6,11 @@ using Gurobi
 
 include("optimizers.jl")
 
-#-----------------------------------#
-#            MIP solver             #
-# (> Cplex 22.1 performs the best)  #
-#-----------------------------------#
-lopt_optimizer = get_cplex(solver_log = true)
+#------------------------------------#
+#            MIP solver              #
+# (Gurobi 11.0.1+ performs the best) #
+#------------------------------------#
+lopt_optimizer = get_gurobi(solver_log = true)
 
 #-------------------------------------#
 #      User-defined input graphs      #
@@ -55,13 +55,14 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-num_nodes = 10
-instance = 4
+num_nodes = 12
+instance = 1
 data_dict, augment_budget = data_I(num_nodes, instance)
 # data_dict, augment_budget = data_SLAM("CSAIL") # "CSAIL", "intel", "ais2klinik"
 # data_dict, augment_budget = data_II()
 
-params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
+params = Dict{String,Any}("data_dict" => data_dict, 
+                          "augment_budget" => augment_budget)
 
 #----------------------------------------------------------------#
 #      Optimization model and visualize solution (optional)      #

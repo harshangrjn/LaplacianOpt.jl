@@ -3,16 +3,12 @@
 
 Given a vector of numbers, this function updates the input vector by rounding the values closest to 0, 1 and -1. 
 """
-function round_zeros_ones!(v::Array{<:Number}; tol = 1E-6)
-    for i in findall(abs.(v) .<= tol)
-        v[i] = 0
-    end
-
-    for i in findall(((1 - tol) .<= abs.(v) .<= (1 + tol)))
-        if v[i] > 0
-            v[i] = 1
-        elseif v[i] < 0
-            v[i] = -1
+function round_zeros_ones!(v::Array{<:Number}; tol = 1e-6)
+    for i in eachindex(v)
+        if abs(v[i]) <= tol
+            v[i] = 0
+        elseif 1 - tol <= abs(v[i]) <= 1 + tol
+            v[i] = sign(v[i])
         end
     end
 end
@@ -24,29 +20,20 @@ Returns a vector of tuples of edges corresponding
 to an input adjacency matrix of the graph. 
 """
 function optimal_graph_edges(adjacency_matrix::Array{<:Number})
-    edges = Vector{Tuple{Int64,Int64}}()
-
     num_nodes = size(adjacency_matrix)[1]
 
     if !LA.issymmetric(adjacency_matrix)
         Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
     end
 
-    for i in 1:num_nodes
-        if !isapprox(adjacency_matrix[i, i], 0)
-            Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
-        end
+    if any(!isapprox(adjacency_matrix[i, i], 0) for i in 1:num_nodes)
+        Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
     end
 
-    for i in 1:(num_nodes-1)
-        for j in (i+1):num_nodes
-            if !isapprox(adjacency_matrix[i, j], 0)
-                push!(edges, (i, j))
-            end
-        end
-    end
-
-    return edges
+    return [
+        (i, j) for i in 1:(num_nodes-1) for
+        j in (i+1):num_nodes if !isapprox(adjacency_matrix[i, j], 0)
+    ]
 end
 
 """
@@ -58,38 +45,21 @@ weighted Laplacian matrix of the graph.
 function laplacian_matrix(adjacency_matrix::Array{<:Number})
     if !LA.issymmetric(adjacency_matrix)
         Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
+        return
     end
 
-    num_nodes = size(adjacency_matrix)[1]
-
-    laplacian_matrix = zeros(Float64, num_nodes, num_nodes)
-
-    for i in 1:num_nodes
-        for j in i:num_nodes
-            if i == j
-                if !isapprox(adjacency_matrix[i, j], 0)
-                    Memento.error(
-                        _LOGGER,
-                        "Input adjacency matrix cannot have self loops",
-                    )
-                end
-
-                laplacian_matrix[i, j] = sum(adjacency_matrix[i, :])
-            else
-                if adjacency_matrix[i, j] <= -1E-6
-                    Memento.error(
-                        _LOGGER,
-                        "Input adjacency matrix cannot have negative weights",
-                    )
-                end
-
-                if !isapprox(adjacency_matrix[i, j], 0)
-                    laplacian_matrix[i, j] = -adjacency_matrix[i, j]
-                    laplacian_matrix[j, i] = -adjacency_matrix[i, j]
-                end
-            end
-        end
+    if any(adjacency_matrix[i, i] != 0 for i in 1:size(adjacency_matrix, 1))
+        Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
+        return
     end
+
+    if any(adjacency_matrix .< -1E-6)
+        Memento.error(_LOGGER, "Input adjacency matrix cannot have negative weights")
+        return
+    end
+
+    degrees = sum(adjacency_matrix, dims = 2)
+    laplacian_matrix = LA.Diagonal(vec(degrees)) - adjacency_matrix
 
     return laplacian_matrix
 end
@@ -160,41 +130,36 @@ Given a square symmetric matrix, this function returns an eigen vector correspon
 violated eigen value w.r.t positive semi-definiteness of the input matrix.  
 """
 function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
-    W_eigvals = LA.eigvals(W)
+    W_eigvals, W_eigvecs = LA.eigen(W).values, LA.eigen(W).vectors
 
-    if typeof(W_eigvals) != Vector{Float64}
-        if !(isapprox(imag(W_eigvals), zeros(size(W_eigvals)[1]), atol = 1E-6))
-            Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
-        end
+    if !isreal(W_eigvals)
+        Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
+        return
     end
 
-    if LA.eigmin(W) <= -tol
-        if W_eigvals[1] == LA.eigmin(W)
-            violated_eigen_vec = LA.eigvecs(W)[:, 1]
-            LOpt.round_zeros_ones!(violated_eigen_vec)
-            return violated_eigen_vec
-        else
-            Memento.warn(
-                _LOGGER,
-                "Eigen cut corresponding to the negative eigenvalue could not be evaluated",
-            )
-        end
+    if minimum(W_eigvals) <= -tol
+        violated_eigen_vec = W_eigvecs[:, argmin(W_eigvals)]
+        LOpt.round_zeros_ones!(violated_eigen_vec)
+        return violated_eigen_vec
     else
-        return
+        return nothing
     end
 end
 
 """
     cheeger_constant(G::Matrix{<:Number}, 
                      optimizer::MOI.OptimizerWithAttributes; 
-                     cheeger_ub = 1E6,
+                     cheeger_ub = 1E4,
+                     formulation_type = "set_cardinality", #set_cardinality, set_volume
                      optimizer_log = false)
     
 Given a symmetric, weighted adjacency matrix `G` of a connected graph, and a mixed-integer linear optimizer, 
-this function returns the Cheeger's constant (or isoperimetric number of the graph) and the associated two partitions (`S` and `S_complement`) of the graph.
+this function returns the Cheeger's constant (or isoperimetric number of the graph) and the associated two partitions 
+(`S` and `S_complement`) of the graph.
+
 References: 
-(I) Chung, F.R., "Laplacians of graphs and Cheeger's inequalities",
-Combinatorics, Paul Erdos is Eighty, 2(157-172), pp.13-2, 1996.
+(I) Somisetty, N., Nagarajan, H. and Darbha, S., 2024, December. Spectral Graph Theoretic Methods for Enhancing 
+Network Robustness in Robot Localization. In 63nd IEEE conference on decision and control (CDC). IEEE.
 (II) Mohar, B., 1989. Isoperimetric numbers of graphs. Journal of combinatorial theory, 
 Series B, 47(3), pp.274-291. Link: https://doi.org/10.1016/0095-8956(89)90029-4
 """
@@ -202,66 +167,76 @@ function cheeger_constant(
     G::Matrix{<:Number},
     optimizer::MOI.OptimizerWithAttributes;
     cheeger_ub = 1E4,
+    formulation_type = "set_cardinality", #set_cardinality, set_volume
     optimizer_log = false,
 )
-    if size(G)[1] !== size(G)[2]
+    num_nodes = size(G)[1]
+    if num_nodes != size(G)[2]
         Memento.error(_LOGGER, "Input adjacency has to be a square matrix")
     end
-    num_nodes = size(G)[1]
 
     result_cheeger = Dict{String,Any}("cheeger_constant" => 0)
 
-    if !isapprox(LOpt.algebraic_connectivity(G), 0, atol = 1E-5)
-        m_cheeger = JuMP.Model(optimizer)
-        if !optimizer_log
-            JuMP.set_silent(m_cheeger)
-        end
+    (isapprox(LOpt.algebraic_connectivity(G), 0, atol = 1E-5)) && result_cheeger
 
-        # Variables
-        JuMP.@variable(m_cheeger, 0 <= z[1:num_nodes] <= 1, Bin)
-        JuMP.@variable(m_cheeger, -1 <= Z[1:num_nodes, 1:num_nodes] <= 1)
-        JuMP.@variable(m_cheeger, 0 <= cheeger <= cheeger_ub)
-        JuMP.@variable(m_cheeger, cheeger_z[1:num_nodes] >= 0)
+    m_cheeger = JuMP.Model(optimizer)
+    (!optimizer_log) && (JuMP.set_silent(m_cheeger))
 
-        # Constraints
+    JuMP.@variable(m_cheeger, 0 <= z[1:num_nodes] <= 1, Bin)
+    JuMP.@variable(m_cheeger, 0 <= Z[1:num_nodes, 1:num_nodes] <= 1)
+    JuMP.@variable(m_cheeger, 0 <= cheeger <= cheeger_ub)
+    JuMP.@variable(m_cheeger, cheeger_z[1:num_nodes] >= 0)
+
+    if formulation_type == "set_cardinality" 
         JuMP.@constraint(m_cheeger, sum(z) >= 1)
         JuMP.@constraint(m_cheeger, sum(z) <= floor(num_nodes / 2))
+
         JuMP.@constraint(
             m_cheeger,
             sum(cheeger_z) >= sum(
-                G[i, j] * Z[i, j] for i in 1:(num_nodes-1), j in (i+1):num_nodes if
+                G[i, j] * (z[i] + z[j] - 2*Z[i, j]) for i in 1:(num_nodes-1), j in (i+1):num_nodes if
                 !(isapprox(G[i, j], 0, atol = 1E-5))
             )
         )
 
+    elseif formulation_type == "set_volume"
+        laplacian = LOpt.laplacian_matrix(float(G .> 0))
+        k_vol_ub = sum(G .> 0) / 2  #|E|
+        JuMP.@constraint(m_cheeger, sum(z[i] * laplacian[i, i] for i in 1:num_nodes) >= 1)
+        JuMP.@constraint(m_cheeger, sum(z[i] * laplacian[i, i] for i in 1:num_nodes) <= k_vol_ub) 
+
         JuMP.@constraint(
             m_cheeger,
-            [i = 1:(num_nodes-1), j = (i+1):num_nodes],
-            Z[i, j] >= z[i] - z[j]
+            sum(cheeger_z[i] * laplacian[i, i] for i in 1:num_nodes) >= sum(
+                G[i, j] * (z[i] + z[j] - 2*Z[i, j]) for i in 1:(num_nodes-1), j in (i+1):num_nodes if
+                !(isapprox(G[i, j], 0, atol = 1E-5))
+            )
         )
-        JuMP.@constraint(
-            m_cheeger,
-            [i = 1:(num_nodes-1), j = (i+1):num_nodes],
-            Z[i, j] >= z[j] - z[i]
-        )
-
-        for i in 1:num_nodes
-            LOpt.relaxation_bilinear(m_cheeger, cheeger_z[i], cheeger, z[i])
-        end
-
-        # Objective
-        JuMP.@objective(m_cheeger, Min, cheeger)
-
-        JuMP.optimize!(m_cheeger)
-
-        result_cheeger["cheeger_constant"] = JuMP.objective_value(m_cheeger)
-        result_cheeger["S"] =
-            Set(findall(isapprox.(abs.(JuMP.value.(z)), 1, atol = 1E-5)))
-        result_cheeger["S_complement"] =
-            Set(findall(isapprox.(abs.(JuMP.value.(z)), 0, atol = 1E-5)))
-        result_cheeger["solve_time"] = JuMP.solve_time(m_cheeger)
     end
 
+    for i = 1:(num_nodes-1), j = (i+1):num_nodes
+        if !(isapprox(G[i, j], 0, atol = 1E-5))
+            LOpt.relaxation_bilinear(m_cheeger, Z[i,j], z[i], z[j])
+        end
+    end
+
+    for i in 1:num_nodes
+        LOpt.relaxation_bilinear(m_cheeger, cheeger_z[i], cheeger, z[i])
+    end
+
+    # Objective
+    JuMP.@objective(m_cheeger, Min, cheeger)
+    JuMP.optimize!(m_cheeger)
+
+    result_cheeger["cheeger_constant"] = JuMP.objective_value(m_cheeger)
+    result_cheeger["S"] = Set(findall(isapprox.(abs.(JuMP.value.(z)), 1, atol = 1E-5)))
+    result_cheeger["S_complement"] =
+        Set(findall(isapprox.(abs.(JuMP.value.(z)), 0, atol = 1E-5)))
+    result_cheeger["solve_time"] = JuMP.solve_time(m_cheeger)
+    result_cheeger["termination_status"] = JuMP.termination_status(m_cheeger)
+    result_cheeger["optimality_gap_percent"] = 100 * JuMP.relative_gap(m_cheeger)
+
+    (length(result_cheeger["S"]) == 0) && (Memento.error(_LOGGER, "Cheeger set cardinality cannot be zero."))
     return result_cheeger
 end
 
@@ -337,7 +312,7 @@ function _PMinorIdx(
         for k in unique(sizes)
             if k == N
                 minor_idx_dict[k] = LOpt.get_minor_idx(vertices_all, k)
-            elseif (k >= 2) && (k <= (N - 1))
+            elseif (2 <= k <= (N - 1))
                 minors_on_augment_edges &&
                     (vertices_all = LOpt._vertices_with_augment_edges(data))
                 minor_idx_dict[k] = LOpt.get_minor_idx(vertices_all, k)
@@ -384,32 +359,29 @@ end
     weighted_adjacency_matrix(G::Graphs.SimpleGraphs.SimpleGraph{<:Number}, adjacency_augment_graph::Array{<:Number}, size::Int64)
 
 Returns a weighted adjacency matrix for 
-the connected part of  graph.  
+the connected part of graph.  
 """
 function weighted_adjacency_matrix(
     G::Graphs.SimpleGraphs.SimpleGraph{<:Number},
     adjacency_augment_graph::Array{<:Number},
     size::Int64,
 )
+
+    # collecting vertices connected in graph
+    vertices_from_edges = unique(
+        union(
+            [Graphs.src(e) for e in Graphs.edges(G)],
+            [Graphs.dst(e) for e in Graphs.edges(G)],
+        ),
+    )
+
+    adjacency_matrix = adjacency_augment_graph .* Graphs.adjacency_matrix(G)
     weighted_adj_matrix_size = Matrix{Float64}(undef, size, size)
 
-    #collecting vertices connected in graph
-    vertices_from_edges = Int[]
-    for edge in Graphs.edges(G)
-        push!(vertices_from_edges, Graphs.src(edge))
-        push!(vertices_from_edges, Graphs.dst(edge))
-    end
-    vertices_from_edges = unique(vertices_from_edges)
-
-    for i in 1:size
-        for j in i:size
-            weighted_adj_matrix_size[i, j] =
-                (adjacency_augment_graph.*Graphs.adjacency_matrix(G))[
-                    vertices_from_edges[i],
-                    vertices_from_edges[j],
-                ]
-            weighted_adj_matrix_size[j, i] = weighted_adj_matrix_size[i, j]
-        end
+    for i in 1:size, j in i:size
+        weighted_adj_matrix_size[i, j] =
+            adjacency_matrix[vertices_from_edges[i], vertices_from_edges[j]]
+        weighted_adj_matrix_size[j, i] = weighted_adj_matrix_size[i, j]
     end
 
     return weighted_adj_matrix_size
@@ -446,30 +418,16 @@ Returns all combinations possible for given `n` and `k`.
 """
 
 function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
-    if kopt_parameter < 2 || kopt_parameter > 3
+    if !(kopt_parameter in [2, 3])
         Memento.error(_LOGGER, "kopt_parameter must be either 2 or 3")
     elseif num_edges < kopt_parameter
         Momento.error(_LOGGER, "num_edges must be greater than or equal to k")
     end
 
-    combinations = []
-
-    if kopt_parameter == 2
-        for i in 1:num_edges-1
-            for j in i+1:num_edges
-                push!(combinations, (i, j))
-            end
-        end
-    elseif kopt_parameter == 3
-        for i in 1:num_edges-2
-            for j in i+1:num_edges-1
-                for l in j+1:num_edges
-                    push!(combinations, (i, j, l))
-                end
-            end
-        end
-    end
-    return combinations
+    return kopt_parameter == 2 ? [(i, j) for i in 1:num_edges-1 for j in i+1:num_edges] :
+           [
+        (i, j, l) for i in 1:num_edges-2 for j in i+1:num_edges-1 for l in j+1:num_edges
+    ]
 end
 
 """
