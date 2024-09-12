@@ -158,10 +158,11 @@ this function returns the Cheeger's constant (or isoperimetric number of the gra
 (`S` and `S_complement`) of the graph.
 
 References: 
-(I) Somisetty, N., Nagarajan, H. and Darbha, S., 2024, December. Spectral Graph Theoretic Methods for Enhancing 
-Network Robustness in Robot Localization. In 63nd IEEE conference on decision and control (CDC). IEEE.
-(II) Mohar, B., 1989. Isoperimetric numbers of graphs. Journal of combinatorial theory, 
-Series B, 47(3), pp.274-291. Link: https://doi.org/10.1016/0095-8956(89)90029-4
+(I) Somisetty, N., Nagarajan, H. and Darbha, S., "Spectral Graph Theoretic Methods for Enhancing 
+Network Robustness in Robot Localization". In 63nd IEEE conference on decision and control (CDC). IEEE, 2024.
+
+(II) Mohar, B., Isoperimetric numbers of graphs. Journal of combinatorial theory, 
+Series B, 47(3), pp.274-291, 1989. Link: https://doi.org/10.1016/0095-8956(89)90029-4
 """
 function cheeger_constant(
     G::Matrix{<:Number},

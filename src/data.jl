@@ -129,63 +129,52 @@ function parse_file(file_path::String)
 end
 
 function _pre_process_data(data_dict::Dict{String,Any})
-    num_edges_existing = 0
-    num_edges_to_augment = 0
-
     num_nodes = data_dict["num_nodes"]
     adjacency_base_graph = data_dict["adjacency_base_graph"]
     adjacency_augment_graph = data_dict["adjacency_augment_graph"]
 
-    for i in 1:(num_nodes-1)
-        for j in (i+1):num_nodes
-            if isapprox(abs(adjacency_base_graph[i, j]), 0, atol = 1E-6)
-                adjacency_base_graph[i, j] = 0
-            end
-            if isapprox(abs(adjacency_augment_graph[i, j]), 0, atol = 1E-6)
-                adjacency_augment_graph[i, j] = 0
-            end
-            if !(isapprox(
-                adjacency_base_graph[i, j],
-                adjacency_base_graph[j, i],
-                atol = 1E-5,
-            ))
-                Memento.error("Adjacency matrix of the base graph has to be symmetric")
-            end
-            if !(isapprox(
-                adjacency_augment_graph[i, j],
-                adjacency_augment_graph[j, i],
-                atol = 1E-5,
-            ))
-                Memento.error("Adjacency matrix of the augment graph has to be symmetric")
-            end
-            if !(isapprox(adjacency_base_graph[i, j], 0, atol = 1E-6))
-                num_edges_existing += 1
-            end
-            if !(isapprox(adjacency_augment_graph[i, j], 0, atol = 1E-6))
-                num_edges_to_augment += 1
-            end
+    num_edges_existing, num_edges_to_augment = 0, 0
+
+    for i in 1:num_nodes-1, j in i+1:num_nodes
+        adjacency_base_graph[i, j] =
+            isapprox(abs(adjacency_base_graph[i, j]), 0, atol = 1E-6) ? 0 :
+            adjacency_base_graph[i, j]
+        adjacency_augment_graph[i, j] =
+            isapprox(abs(adjacency_augment_graph[i, j]), 0, atol = 1E-6) ? 0 :
+            adjacency_augment_graph[i, j]
+
+        if !isapprox(adjacency_base_graph[i, j], adjacency_base_graph[j, i], atol = 1E-5)
+            Memento.error(_LOGGER, "Adjacency matrix of the base graph must be symmetric")
         end
+        if !isapprox(
+            adjacency_augment_graph[i, j],
+            adjacency_augment_graph[j, i],
+            atol = 1E-5,
+        )
+            Memento.error(
+                _LOGGER,
+                "Adjacency matrix of the augment graph must be symmetric",
+            )
+        end
+
+        num_edges_existing +=
+            !isapprox(adjacency_base_graph[i, j], 0, atol = 1E-6) ? 1 : 0
+        num_edges_to_augment +=
+            !isapprox(adjacency_augment_graph[i, j], 0, atol = 1E-6) ? 1 : 0
     end
 
-    # Base graph connectivity
-    is_base_graph_connected = false
-    if num_edges_existing > 0
-        !(isapprox(
-            abs(LOpt.algebraic_connectivity(adjacency_base_graph)),
-            0,
-            atol = 1E-6,
-        )) && (is_base_graph_connected = true)
-    end
+    is_base_graph_connected =
+        (num_edges_existing > 0) &&
+        !isapprox(abs(LOpt.algebraic_connectivity(adjacency_base_graph)), 0, atol = 1E-6)
 
-    data_dict_new = Dict{String,Any}()
-    data_dict_new["num_nodes"] = num_nodes
-    data_dict_new["adjacency_base_graph"] = adjacency_base_graph
-    data_dict_new["adjacency_augment_graph"] = adjacency_augment_graph
-    data_dict_new["num_edges_existing"] = num_edges_existing
-    data_dict_new["num_edges_to_augment"] = num_edges_to_augment
-    data_dict_new["is_base_graph_connected"] = is_base_graph_connected
-
-    return data_dict_new
+    return Dict{String,Any}(
+        "num_nodes" => num_nodes,
+        "adjacency_base_graph" => adjacency_base_graph,
+        "adjacency_augment_graph" => adjacency_augment_graph,
+        "num_edges_existing" => num_edges_existing,
+        "num_edges_to_augment" => num_edges_to_augment,
+        "is_base_graph_connected" => is_base_graph_connected,
+    )
 end
 
 """
@@ -213,57 +202,56 @@ end
 Given the pre-processed data dictionary, this function detects any infeasibility before 
 building the optimization model. 
 """
+
 function _detect_infeasbility_in_data(data::Dict{String,Any})
     num_nodes = data["num_nodes"]
+    num_edges_existing = data["num_edges_existing"]
+    num_edges_to_augment = data["num_edges_to_augment"]
+    augment_budget = data["augment_budget"]
 
-    if data["num_edges_to_augment"] == 0
+    if num_edges_to_augment == 0
+        Memento.error(_LOGGER, "At least one edge is required for augmentation.")
+    elseif num_edges_existing == num_nodes * (num_nodes - 1) / 2
         Memento.error(
             _LOGGER,
-            "At least one edge has to be specified to be able to augment to the base graph",
+            "The graph is already complete; augmentation is unnecessary.",
         )
-        # Assuming undirected graph
-    elseif data["num_edges_existing"] == num_nodes * (num_nodes - 1) / 2
+    elseif num_edges_existing == 0 && augment_budget < (num_nodes - 1)
         Memento.error(
             _LOGGER,
-            "Input graph is already a complete graph; augmentation is unnecessary",
+            "Graph is disconnected; `augment_budget` may be insufficient.",
         )
-    elseif (data["num_edges_existing"] == 0) && (data["augment_budget"] < (num_nodes - 1))
-        Memento.error(
-            _LOGGER,
-            "Detected trivial solutions with disconnected graphs. `augment_budget` may be insufficient.",
-        )
-    elseif !isinteger(data["augment_budget"]) || (data["augment_budget"] < -1E-6)
-        Memento.error(_LOGGER, "Edge augmentation budget has to be a positive integer")
+    elseif !isinteger(augment_budget) || augment_budget < 0
+        Memento.error(_LOGGER, "Augmentation budget must be a positive integer.")
     end
 
-    # Detect mutually exclusive sets of edges between base and augment graph
+    # Check mutually exclusive edge sets
     if maximum(
         (data["adjacency_augment_graph"] .> 0) + (data["adjacency_base_graph"] .> 0),
     ) > 1
         Memento.error(
             _LOGGER,
-            "Edge sets of base and augment graphs have to be mutually exclusive",
+            "Edge sets of base and augment graphs must be mutually exclusive.",
         )
     end
 
-    # Detect free vertices 
+    # Check for free vertices
     A = data["adjacency_augment_graph"] + data["adjacency_base_graph"]
     for i in 1:num_nodes
         if isapprox(sum(A[i, :]), 0, atol = 1E-6)
             Memento.error(
                 _LOGGER,
-                "Detected trivial solutions with disconnected graphs due to free vertices.",
+                "Free vertices detected, leading to disconnected graphs.",
             )
         end
     end
 
-    # Detect tour infeasibility
-    if (data["graph_type"] == "hamiltonian_cycle") && (data["num_edges_existing"] == 0)
-        if !(data["num_edges_to_augment"] >= data["num_nodes"]) ||
-           !(data["augment_budget"] == data["num_nodes"])
+    # Check Hamiltonian cycle feasibility
+    if data["graph_type"] == "hamiltonian_cycle" && num_edges_existing == 0
+        if !(num_edges_to_augment >= num_nodes && augment_budget == num_nodes)
             Memento.error(
                 _LOGGER,
-                "Detected infeasibility due to the number of augmentation edges incompatible for a hamiltonian cycle",
+                "Infeasibility due to incompatible augmentation for Hamiltonian cycle.",
             )
         end
     end
