@@ -187,14 +187,15 @@ function cheeger_constant(
     JuMP.@variable(m_cheeger, 0 <= cheeger <= cheeger_ub)
     JuMP.@variable(m_cheeger, cheeger_z[1:num_nodes] >= 0)
 
-    if formulation_type == "set_cardinality" 
+    if formulation_type == "set_cardinality"
         JuMP.@constraint(m_cheeger, sum(z) >= 1)
         JuMP.@constraint(m_cheeger, sum(z) <= floor(num_nodes / 2))
 
         JuMP.@constraint(
             m_cheeger,
             sum(cheeger_z) >= sum(
-                G[i, j] * (z[i] + z[j] - 2*Z[i, j]) for i in 1:(num_nodes-1), j in (i+1):num_nodes if
+                G[i, j] * (z[i] + z[j] - 2 * Z[i, j]) for
+                i in 1:(num_nodes-1), j in (i+1):num_nodes if
                 !(isapprox(G[i, j], 0, atol = 1E-5))
             )
         )
@@ -203,20 +204,24 @@ function cheeger_constant(
         laplacian = LOpt.laplacian_matrix(float(G .> 0))
         k_vol_ub = sum(G .> 0) / 2  #|E|
         JuMP.@constraint(m_cheeger, sum(z[i] * laplacian[i, i] for i in 1:num_nodes) >= 1)
-        JuMP.@constraint(m_cheeger, sum(z[i] * laplacian[i, i] for i in 1:num_nodes) <= k_vol_ub) 
+        JuMP.@constraint(
+            m_cheeger,
+            sum(z[i] * laplacian[i, i] for i in 1:num_nodes) <= k_vol_ub
+        )
 
         JuMP.@constraint(
             m_cheeger,
             sum(cheeger_z[i] * laplacian[i, i] for i in 1:num_nodes) >= sum(
-                G[i, j] * (z[i] + z[j] - 2*Z[i, j]) for i in 1:(num_nodes-1), j in (i+1):num_nodes if
+                G[i, j] * (z[i] + z[j] - 2 * Z[i, j]) for
+                i in 1:(num_nodes-1), j in (i+1):num_nodes if
                 !(isapprox(G[i, j], 0, atol = 1E-5))
             )
         )
     end
 
-    for i = 1:(num_nodes-1), j = (i+1):num_nodes
+    for i in 1:(num_nodes-1), j in (i+1):num_nodes
         if !(isapprox(G[i, j], 0, atol = 1E-5))
-            LOpt.relaxation_bilinear(m_cheeger, Z[i,j], z[i], z[j])
+            LOpt.relaxation_bilinear(m_cheeger, Z[i, j], z[i], z[j])
         end
     end
 
@@ -236,7 +241,8 @@ function cheeger_constant(
     result_cheeger["termination_status"] = JuMP.termination_status(m_cheeger)
     result_cheeger["optimality_gap_percent"] = 100 * JuMP.relative_gap(m_cheeger)
 
-    (length(result_cheeger["S"]) == 0) && (Memento.error(_LOGGER, "Cheeger set cardinality cannot be zero."))
+    (length(result_cheeger["S"]) == 0) &&
+        (Memento.error(_LOGGER, "Cheeger set cardinality cannot be zero."))
     return result_cheeger
 end
 

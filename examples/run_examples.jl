@@ -61,8 +61,7 @@ data_dict, augment_budget = data_I(num_nodes, instance)
 # data_dict, augment_budget = data_SLAM("CSAIL") # "CSAIL", "intel", "ais2klinik"
 # data_dict, augment_budget = data_II()
 
-params = Dict{String,Any}("data_dict" => data_dict, 
-                          "augment_budget" => augment_budget)
+params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)
 
 #----------------------------------------------------------------#
 #      Optimization model and visualize solution (optional)      #
