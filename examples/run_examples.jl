@@ -1,15 +1,15 @@
 import LaplacianOpt as LOpt
 using JuMP
-using CPLEX
+using Gurobi
 # using GLPK
 
 include("optimizers.jl")
 
-#-----------------------------------#
-#            MIP solver             #
-# (> Cplex 22.1 performs the best)  #
-#-----------------------------------#
-lopt_optimizer = get_cplex(solver_log = true)
+#-------------------------------------#
+#            MIP solver               #
+# (> Gurobi 12.0.2 performs the best) #
+#-------------------------------------#
+lopt_optimizer = get_gurobi(solver_log = false)
 
 #-------------------------------------#
 #      User-defined input graphs      #
@@ -54,8 +54,8 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-num_nodes = 8
-instance = 1
+num_nodes = 10
+instance = 4
 data_dict, augment_budget = data_I(num_nodes, instance)
 # data_dict, augment_budget = data_SLAM("CSAIL") # "CSAIL", "intel", "ais2klinik"
 # data_dict, augment_budget = data_II()

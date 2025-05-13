@@ -1,6 +1,9 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.7.1
+- Update codecov/codecov-action
+
 ### v0.7.0
 - Solver logging option added in `optimizers.jl`
 - Added option `minors_on_augment_edges` to include principal minor cuts only corresponding to vertices with augmentable edges - helps in reducing run times
