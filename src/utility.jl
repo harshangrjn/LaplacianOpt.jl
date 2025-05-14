@@ -162,7 +162,7 @@ function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
     end
     return nothing
 end
-  
+
 """
     cheeger_constant(G::Matrix{<:Number}, 
                      optimizer::MOI.OptimizerWithAttributes; 
@@ -357,7 +357,7 @@ function _PMinorIdx(
 
     return minor_idx_dict
 end
-                    
+
 function _vertices_with_augment_edges(data::Dict{String,Any})
     v = Set{Int64}()
     adj = data["adjacency_augment_graph"]
@@ -459,7 +459,7 @@ function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
         ]
     end
 end
-                                          
+
 """
     add_multiple_edges!(G::Graphs.SimpleGraphs.SimpleGraph{<:Number},edge_set::Vector{Tuple{Int64,Int64}},)
 

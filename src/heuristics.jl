@@ -711,14 +711,16 @@ function refinement_tree_1opt!(
         Graphs.add_edge!(G, src, dst)
         ac_tracker = 0.0
         best_edge = nothing
-        
+
         combined_adjacency = adjacency_augment_graph + adjacency_base_graph
-        
+
         for edge in Graphs.edges(G)
             s, d = Graphs.src(edge), Graphs.dst(edge)
             if adjacency_base_graph[s, d] == 0
                 Graphs.rem_edge!(G, s, d)
-                ac = LOpt.algebraic_connectivity(combined_adjacency .* Matrix(Graphs.adjacency_matrix(G)))
+                ac = LOpt.algebraic_connectivity(
+                    combined_adjacency .* Matrix(Graphs.adjacency_matrix(G)),
+                )
                 if ac > ac_tracker
                     ac_tracker = ac
                     best_edge = edge
@@ -726,7 +728,7 @@ function refinement_tree_1opt!(
                 Graphs.add_edge!(G, s, d)
             end
         end
-        
+
         if best_edge !== nothing
             Graphs.rem_edge!(G, best_edge)
         end
@@ -742,27 +744,39 @@ function refinement_tree_2opt!(
     edge_to_check_2::Graphs.SimpleGraphs.SimpleEdge{<:Number},
 )
     # Check which edges need to be added
-    edge1_exists = Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1))
-    edge2_exists = Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2))
-    
+    edge1_exists =
+        Graphs.has_edge(G, Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1))
+    edge2_exists =
+        Graphs.has_edge(G, Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2))
+
     if edge1_exists && edge2_exists
         return G
-    # One edge is missing, use 1-opt refinement
+        # One edge is missing, use 1-opt refinement
     elseif edge1_exists
-        return LOpt.refinement_tree_1opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_2)
+        return LOpt.refinement_tree_1opt!(
+            G,
+            adjacency_base_graph,
+            adjacency_augment_graph,
+            edge_to_check_2,
+        )
     elseif edge2_exists
-        return LOpt.refinement_tree_1opt!(G, adjacency_base_graph, adjacency_augment_graph, edge_to_check_1)
-    # Both edges are missing, add them and find optimal edges to remove
+        return LOpt.refinement_tree_1opt!(
+            G,
+            adjacency_base_graph,
+            adjacency_augment_graph,
+            edge_to_check_1,
+        )
+        # Both edges are missing, add them and find optimal edges to remove
     else
         edges_to_add = [
             (Graphs.src(edge_to_check_1), Graphs.dst(edge_to_check_1)),
-            (Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2))
+            (Graphs.src(edge_to_check_2), Graphs.dst(edge_to_check_2)),
         ]
         G = LOpt.add_multiple_edges!(G, edges_to_add)
-        
+
         ac_tracker = 0.0
         vertices_tracker = [(undef, undef), (undef, undef)]
-        
+
         ac_tracker, vertices_tracker = LOpt._vertices_tracker_update_two_edges!(
             G,
             adjacency_base_graph,
@@ -771,7 +785,7 @@ function refinement_tree_2opt!(
             ac_tracker,
             vertices_tracker,
         )
-        
+
         return LOpt.remove_multiple_edges!(G, vertices_tracker)
     end
 end
@@ -791,9 +805,9 @@ function refinement_tree_3opt!(
             push!(edges_to_add, (edge, i))
         end
     end
-    
+
     num_edges = length(edges_to_add)
-    
+
     if num_edges == 0
         return G
     elseif num_edges == 1
@@ -818,11 +832,11 @@ function refinement_tree_3opt!(
         # Add all three edges
         edge_pairs = [(Graphs.src(e[1]), Graphs.dst(e[1])) for e in edges_to_add]
         G = LOpt.add_multiple_edges!(G, edge_pairs)
-        
+
         # Track best configuration
         ac_tracker = 0.0
         vertices_tracker = [(undef, undef), (undef, undef), (undef, undef)]
-        
+
         # Check edges that can be removed
         for j in 1:(length(collect(Graphs.edges(G)))-2)
             edge = collect(Graphs.edges(G))[j]
@@ -837,7 +851,7 @@ function refinement_tree_3opt!(
                 )
             end
         end
-        
+
         return LOpt.remove_multiple_edges!(G, vertices_tracker)
     end
 end

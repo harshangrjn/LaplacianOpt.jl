@@ -15,8 +15,8 @@
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 22.8042, atol = 1E-4)
-    
-    for (i, j) in [(1,7), (2,7), (3,7), (4,6), (4,7), (5,7), (7,8)]
+
+    for (i, j) in [(1, 7), (2, 7), (3, 7), (4, 6), (4, 7), (5, 7), (7, 8)]
         @test isapprox(result["heuristic_solution"][i, j], 1.0)
         @test isapprox(result["heuristic_solution"][j, i], 1.0)
     end
@@ -39,8 +39,8 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 22.5051, atol = 1E-4)
-    
-    for (i, j) in [(1,5), (2,5), (3,5), (4,5), (5,6), (5,7), (7,8)]
+
+    for (i, j) in [(1, 5), (2, 5), (3, 5), (4, 5), (5, 6), (5, 7), (7, 8)]
         @test isapprox(result["heuristic_solution"][i, j], 1.0)
         @test isapprox(result["heuristic_solution"][j, i], 1.0)
     end
@@ -63,8 +63,8 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 11.1592, atol = 1E-4)
-    
-    for (i, j) in [(1,4), (2,4), (3,4), (3,5)]
+
+    for (i, j) in [(1, 4), (2, 4), (3, 4), (3, 5)]
         @test isapprox(result["heuristic_solution"][i, j], 1.0)
         @test isapprox(result["heuristic_solution"][j, i], 1.0)
     end
@@ -87,8 +87,8 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 46.028980895, atol = 1E-4)
-    
-    for (i, j) in [(1,2), (1,3), (1,4), (2,4), (2,5), (3,4), (3,5), (4,5)]
+
+    for (i, j) in [(1, 2), (1, 3), (1, 4), (2, 4), (2, 5), (3, 4), (3, 5), (4, 5)]
         @test isapprox(result["heuristic_solution"][i, j], 1.0)
         @test isapprox(result["heuristic_solution"][j, i], 1.0)
     end
@@ -111,8 +111,8 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 46.028980895, atol = 1E-4)
-    
-    for (i, j) in [(1,2), (1,3), (1,4), (2,4), (2,5), (3,4), (3,5), (4,5)]
+
+    for (i, j) in [(1, 2), (1, 3), (1, 4), (2, 4), (2, 5), (3, 4), (3, 5), (4, 5)]
         @test isapprox(result["heuristic_solution"][i, j], 1.0)
         @test isapprox(result["heuristic_solution"][j, i], 1.0)
     end
@@ -135,8 +135,8 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 46.028980895, atol = 1E-4)
-    
-    for (i, j) in [(1,2), (1,3), (1,4), (2,4), (2,5), (3,4), (3,5), (4,5)]
+
+    for (i, j) in [(1, 2), (1, 3), (1, 4), (2, 4), (2, 5), (3, 4), (3, 5), (4, 5)]
         @test isapprox(result["heuristic_solution"][i, j], 1.0)
         @test isapprox(result["heuristic_solution"][j, i], 1.0)
     end
@@ -162,7 +162,7 @@ end
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 1.610684749, atol = 1E-4)
     # Check for expected edges in the solution
-    for (i, j) in [(1,2), (2,3), (3,4)]
+    for (i, j) in [(1, 2), (2, 3), (3, 4)]
         @test isapprox(result["heuristic_solution"][i, j], 1.0)
         @test isapprox(result["heuristic_solution"][j, i], 1.0)
     end
@@ -187,8 +187,8 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 7.8551986404, atol = 1E-4)
-    
-    for (i, j) in [(1,2), (2,3), (3,4), (1,4), (2,4)]
+
+    for (i, j) in [(1, 2), (2, 3), (3, 4), (1, 4), (2, 4)]
         @test isapprox(result["heuristic_solution"][i, j], 1.0)
         @test isapprox(result["heuristic_solution"][j, i], 1.0)
     end
@@ -215,8 +215,8 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 9.276487957, atol = 1E-4)
-    
-    for (i, j) in [(1,2), (2,3), (3,4), (4,5), (1,3), (1,5), (2,5)]
+
+    for (i, j) in [(1, 2), (2, 3), (3, 4), (4, 5), (1, 3), (1, 5), (2, 5)]
         @test isapprox(result["heuristic_solution"][i, j], 1.0)
         @test isapprox(result["heuristic_solution"][j, i], 1.0)
     end

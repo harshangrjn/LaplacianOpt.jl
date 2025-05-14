@@ -19,8 +19,8 @@
     @test result_lo["termination_status"] == MOI.OPTIMAL
     @test result_lo["primal_status"] == MOI.FEASIBLE_POINT
     @test isapprox(result_lo["objective"], 11.1592, atol = 1E-4)
-    
-    for (i, j) in [(1,4), (4,1), (2,4), (4,2), (3,4), (4,3), (3,5), (5,3)]
+
+    for (i, j) in [(1, 4), (4, 1), (2, 4), (4, 2), (3, 4), (4, 3), (3, 5), (5, 3)]
         @test isapprox(result_lo["solution"]["z_var"][i, j], 1.0)
     end
 
@@ -64,7 +64,7 @@ end
     @test result_mst["termination_status"] == MOI.OPTIMAL
     @test result_mst["primal_status"] == MOI.FEASIBLE_POINT
     @test isapprox(result_mst["objective"], 113.7588, atol = 1E-4)
-    for (i, j) in [(1,2), (2,5), (3,4), (3,5)]
+    for (i, j) in [(1, 2), (2, 5), (3, 4), (3, 5)]
         @test isapprox(result_mst["solution"]["z_var"][i, j], 1.0)
         @test isapprox(result_mst["solution"]["z_var"][j, i], 1.0)
     end
@@ -91,9 +91,23 @@ end
     @test result_mst["termination_status"] == MOI.OPTIMAL
     @test result_mst["primal_status"] == MOI.FEASIBLE_POINT
     @test isapprox(result_mst["objective"], 3625.89701005, atol = 1E-6)
-    
-    for (i, j) in [(1,7), (2,4), (3,4), (4,14), (4,15), (5,14), (6,15), 
-                   (7,12), (7,15), (8,13), (8,14), (9,10), (9,13), (11,12)]
+
+    for (i, j) in [
+        (1, 7),
+        (2, 4),
+        (3, 4),
+        (4, 14),
+        (4, 15),
+        (5, 14),
+        (6, 15),
+        (7, 12),
+        (7, 15),
+        (8, 13),
+        (8, 14),
+        (9, 10),
+        (9, 13),
+        (11, 12),
+    ]
         @test isapprox(result_mst["solution"]["z_var"][i, j], 1.0)
     end
 
@@ -164,7 +178,7 @@ end
     @test result_1["termination_status"] == MOI.OPTIMAL
     @test result_1["primal_status"] == MOI.FEASIBLE_POINT
     @test isapprox(result_1["objective"], 19.529478817, atol = 1E-6)
-    for (i, j) in [(1,2), (2,5), (3,4), (3,5)]
+    for (i, j) in [(1, 2), (2, 5), (3, 4), (3, 5)]
         @test isapprox(result_1["solution"]["z_var"][i, j], 1.0, atol = 1E-6)
     end
 
@@ -210,7 +224,7 @@ end
     @test result_1["termination_status"] == MOI.OPTIMAL
     @test result_1["primal_status"] == MOI.FEASIBLE_POINT
     @test isapprox(result_1["objective"], 8.356739455, atol = 1E-6)
-    for (i, j) in [(1,4), (2,4), (2,5), (3,4)]
+    for (i, j) in [(1, 4), (2, 4), (2, 5), (3, 4)]
         @test isapprox(result_1["solution"]["z_var"][i, j], 1.0)
     end
 end
@@ -314,7 +328,7 @@ end
     @test result["termination_status"] == MOI.OPTIMAL
     @test result["primal_status"] == MOI.FEASIBLE_POINT
     @test isapprox(result["objective"], 11.53910488161, atol = 1E-6)
-    for (i, j) in [(1,3), (1,5), (2,4), (2,5), (3,4)]
+    for (i, j) in [(1, 3), (1, 5), (2, 4), (2, 5), (3, 4)]
         @test isapprox(result["solution"]["z_var"][i, j], 1.0)
     end
 end
