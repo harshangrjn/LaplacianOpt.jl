@@ -1,16 +1,13 @@
 """
     round_zeros_ones!(v::Array{<:Number}; tol = 1E-6)
 
-Given a vector of numbers, this function updates the input vector by rounding the values closest to 0, 1 and -1. 
+Given a vector of numbers, this function updates the input vector by 
+rounding the values closest to 0, 1 and -1. 
 """
-function round_zeros_ones!(v::Array{<:Number}; tol = 1e-6)
-    for i in eachindex(v)
-        if abs(v[i]) <= tol
-            v[i] = 0
-        elseif 1 - tol <= abs(v[i]) <= 1 + tol
-            v[i] = sign(v[i])
-        end
-    end
+function round_zeros_ones!(v::Array{<:Number}; tol = 1E-6)
+    v[abs.(v) .<= tol] .= 0
+    near_ones = findall(((1 - tol) .<= abs.(v) .<= (1 + tol)))
+    return v[near_ones] .= sign.(v[near_ones])
 end
 
 """
@@ -20,20 +17,20 @@ Returns a vector of tuples of edges corresponding
 to an input adjacency matrix of the graph. 
 """
 function optimal_graph_edges(adjacency_matrix::Array{<:Number})
-    num_nodes = size(adjacency_matrix)[1]
+    num_nodes = size(adjacency_matrix, 1)
 
-    if !LA.issymmetric(adjacency_matrix)
+    !LA.issymmetric(adjacency_matrix) &&
         Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
-    end
 
-    if any(!isapprox(adjacency_matrix[i, i], 0) for i in 1:num_nodes)
+    any(i -> !isapprox(adjacency_matrix[i, i], 0), 1:num_nodes) &&
         Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
+
+    edges = Tuple{Int64,Int64}[]
+    for i in 1:(num_nodes-1), j in (i+1):num_nodes
+        !isapprox(adjacency_matrix[i, j], 0) && push!(edges, (i, j))
     end
 
-    return [
-        (i, j) for i in 1:(num_nodes-1) for
-        j in (i+1):num_nodes if !isapprox(adjacency_matrix[i, j], 0)
-    ]
+    return edges
 end
 
 """
@@ -43,23 +40,34 @@ Given a weighted adjacency matrix as an input, this function returns the
 weighted Laplacian matrix of the graph. 
 """
 function laplacian_matrix(adjacency_matrix::Array{<:Number})
-    if !LA.issymmetric(adjacency_matrix)
+    !LA.issymmetric(adjacency_matrix) &&
         Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
-        return
+
+    num_nodes = size(adjacency_matrix, 1)
+    laplacian_matrix = zeros(Float64, num_nodes, num_nodes)
+
+    # Check for self loops
+    for i in 1:num_nodes
+        !isapprox(adjacency_matrix[i, i], 0) &&
+            Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
     end
 
-    if any(adjacency_matrix[i, i] != 0 for i in 1:size(adjacency_matrix, 1))
-        Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
-        return
-    end
-
-    if any(adjacency_matrix .< -1E-6)
+    # Negative weights
+    any(x -> x < -1E-6, adjacency_matrix) &&
         Memento.error(_LOGGER, "Input adjacency matrix cannot have negative weights")
-        return
+
+    # Degree matrix
+    for i in 1:num_nodes
+        laplacian_matrix[i, i] = sum(adjacency_matrix[i, :])
     end
 
-    degrees = sum(adjacency_matrix, dims = 2)
-    laplacian_matrix = LA.Diagonal(vec(degrees)) - adjacency_matrix
+    # Off-diagonal elements
+    for i in 1:num_nodes, j in (i+1):num_nodes
+        if !isapprox(adjacency_matrix[i, j], 0)
+            laplacian_matrix[i, j] = -adjacency_matrix[i, j]
+            laplacian_matrix[j, i] = -adjacency_matrix[i, j]
+        end
+    end
 
     return laplacian_matrix
 end
@@ -68,7 +76,8 @@ end
     fiedler_vector(adjacency_matrix::Array{<:Number})
 
 Returns the Fiedler vector or the eigenvector corresponding to the 
-second smallest eigenvalue of the Laplacian matrix for an input weighted adjacency matrix of the graph. 
+second smallest eigenvalue of the Laplacian matrix for an input 
+weighted adjacency matrix of the graph. 
 """
 function fiedler_vector(adjacency_matrix::Array{<:Number})
     L_mat = LOpt.laplacian_matrix(adjacency_matrix)
@@ -87,7 +96,8 @@ end
     algebraic_connectivity(adjacency_matrix::Array{<:Number}) 
     
 Returns the algebraic connectivity or the  
-second smallest eigenvalue of the Laplacian matrix, for an input weighted adjacency matrix of the graph. 
+second smallest eigenvalue of the Laplacian matrix, 
+for an input weighted adjacency matrix of the graph. 
 """
 function algebraic_connectivity(adjacency_matrix::Array{<:Number})
     L_mat = LOpt.laplacian_matrix(adjacency_matrix)
@@ -99,8 +109,10 @@ end
 """
     _is_flow_cut_valid(cutset_f::Vector{Int64}, cutset_t::Vector{Int64}, adjacency::Array{<:Number})
 
-Given from and to sets of vertices of connected components of a graph, this function returns a 
-boolean if the input `num_edges` number of candidate edge exist to augment or not, between these two sets of vertices. 
+Given from and to sets of vertices of connected components 
+of a graph, this function returns a boolean if the input 
+`num_edges` number of candidate edge exist to augment or not, 
+between these two sets of vertices. 
 """
 function _is_flow_cut_valid(
     cutset_f::Vector{Int64},
@@ -108,18 +120,13 @@ function _is_flow_cut_valid(
     num_edges::Int64,
     adjacency::Array{<:Number},
 )
-    k = 0
-    for i in cutset_f
-        for j in cutset_t
-            if !(isapprox(adjacency[i, j], 0, atol = 1E-6))
-                k += 1
-                if k == num_edges
-                    return true
-                end
-            end
+    count = 0
+    for i in cutset_f, j in cutset_t
+        if !isapprox(adjacency[i, j], 0, atol = 1E-6)
+            count += 1
+            count >= num_edges && return true
         end
     end
-
     return false
 end
 
@@ -130,39 +137,52 @@ Given a square symmetric matrix, this function returns an eigen vector correspon
 violated eigen value w.r.t positive semi-definiteness of the input matrix.  
 """
 function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
-    W_eigvals, W_eigvecs = LA.eigen(W).values, LA.eigen(W).vectors
+    W_eigvals = LA.eigvals(W)
 
-    if !isreal(W_eigvals)
+    # Check for complex eigenvalues
+    if eltype(W_eigvals) <: Complex &&
+       !isapprox(imag.(W_eigvals), zeros(length(W_eigvals)), atol = 1E-6)
         Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
-        return
     end
 
-    if minimum(W_eigvals) <= -tol
-        violated_eigen_vec = W_eigvecs[:, argmin(W_eigvals)]
-        LOpt.round_zeros_ones!(violated_eigen_vec)
-        return violated_eigen_vec
-    else
-        return nothing
+    # If minimum eigenvalue is negative (beyond tolerance)
+    min_eigval = LA.eigmin(W)
+    if min_eigval <= -tol
+        # Check if the first eigenvalue is the minimum
+        if isapprox(W_eigvals[1], min_eigval, atol = 1E-6)
+            violated_eigen_vec = LA.eigvecs(W)[:, 1]
+            LOpt.round_zeros_ones!(violated_eigen_vec)
+            return violated_eigen_vec
+        else
+            Memento.warn(
+                _LOGGER,
+                "Eigen cut corresponding to the negative eigenvalue could not be evaluated",
+            )
+        end
     end
+    return nothing
 end
 
 """
     cheeger_constant(G::Matrix{<:Number}, 
                      optimizer::MOI.OptimizerWithAttributes; 
-                     cheeger_ub = 1E4,
-                     formulation_type = "set_cardinality", #set_cardinality, set_volume
+                     cheeger_ub = 1E6,
                      optimizer_log = false)
     
 Given a symmetric, weighted adjacency matrix `G` of a connected graph, and a mixed-integer linear optimizer, 
 this function returns the Cheeger's constant (or isoperimetric number of the graph) and the associated two partitions 
-(`S` and `S_complement`) of the graph.
+(`S` and `S_complement`) of the graph. 
+
+The exact version of the formulation implemented here is published in:
+Somisetty, N., Nagarajan, H. and Darbha, S., 2024. "Spectral Graph Theoretic Methods for Enhancing Network Robustness 
+in Robot Localization," IEEE 63rd Conference on Decision and Control (CDC), 2024. 
+Link: https://doi.org/10.1109/CDC56724.2024.10886863
 
 References: 
-(I) Somisetty, N., Nagarajan, H. and Darbha, S., "Spectral Graph Theoretic Methods for Enhancing 
-Network Robustness in Robot Localization". In 63nd IEEE conference on decision and control (CDC). IEEE, 2024.
-
-(II) Mohar, B., Isoperimetric numbers of graphs. Journal of combinatorial theory, 
-Series B, 47(3), pp.274-291, 1989. Link: https://doi.org/10.1016/0095-8956(89)90029-4
+(I) Chung, F.R., "Laplacians of graphs and Cheeger's inequalities",
+Combinatorics, Paul Erdos is Eighty, 2(157-172), pp.13-2, 1996.
+(II) Mohar, B., 1989. Isoperimetric numbers of graphs. Journal of combinatorial theory, 
+Series B, 47(3), pp.274-291. Link: https://doi.org/10.1016/0095-8956(89)90029-4
 """
 function cheeger_constant(
     G::Matrix{<:Number},
@@ -299,6 +319,17 @@ function get_minor_idx(vector::Vector{Int64}, size::Int64)
     end
 end
 
+"""
+    _PMinorIdx(
+        N::Int64,
+        sizes::Vector{Int64},
+        minors_on_augment_edges::Bool,
+        data::Dict{String,Any},
+    )
+
+Generates a dictionary mapping minor sizes to their corresponding vertex tuples.
+For each size k in the input sizes vector, creates tuples of k vertices.
+"""
 function _PMinorIdx(
     N::Int64,
     sizes::Vector{Int64},
@@ -307,59 +338,49 @@ function _PMinorIdx(
 )
     minor_idx_dict = Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}()
 
-    if length(sizes) > 0
-        if maximum(sizes) > N
-            Memento.warn(
-                _LOGGER,
-                "Detected maximum eigen-cut size ($(maximum(sizes))) > num_nodes",
-            )
+    isempty(sizes) && return minor_idx_dict
+
+    max_size = maximum(sizes)
+    max_size > N &&
+        Memento.warn(_LOGGER, "Detected maximum eigen-cut size ($(max_size)) > num_nodes")
+
+    for k in unique(sizes)
+        (k < 2 || k > N) && continue
+
+        vertices = collect(1:N)
+        if minors_on_augment_edges && k < N
+            vertices = LOpt._vertices_with_augment_edges(data)
         end
 
-        vertices_all = collect(1:N)
-        for k in unique(sizes)
-            if k == N
-                minor_idx_dict[k] = LOpt.get_minor_idx(vertices_all, k)
-            elseif (2 <= k <= (N - 1))
-                minors_on_augment_edges &&
-                    (vertices_all = LOpt._vertices_with_augment_edges(data))
-                minor_idx_dict[k] = LOpt.get_minor_idx(vertices_all, k)
-            end
-        end
+        minor_idx_dict[k] = LOpt.get_minor_idx(vertices, k)
     end
 
     return minor_idx_dict
 end
 
 function _vertices_with_augment_edges(data::Dict{String,Any})
-    v = Vector{Int64}()
+    v = Set{Int64}()
+    adj = data["adjacency_augment_graph"]
     for i in 1:(data["num_nodes"]-1), j in (i+1):data["num_nodes"]
-        if !isapprox(data["adjacency_augment_graph"][i, j], 0, atol = 1E-6)
-            push!(v, i)
-            push!(v, j)
+        if !isapprox(adj[i, j], 0, atol = 1E-6)
+            push!(v, i, j)
         end
     end
-
-    return unique(v)
+    return collect(v)
 end
 
 """
     priority_central_nodes(adjacency_augment_graph::Array{<:Number}, num_nodes::Int64) 
 
-Returns a vector of order of central nodes as 
-an input to construct the graph. 
+Returns nodes sorted by their centrality, measured as the sum of edge weights 
+connected to each node, in descending order.
 """
 function priority_central_nodes(
     adjacency_augment_graph::Array{<:Number},
     num_nodes::Int64,
 )
-    edge_weights_sum_list = Vector{Float64}(undef, num_nodes)
-    central_nodes_list = Vector{Int64}(undef, num_nodes)
-
-    for i in 1:num_nodes
-        edge_weights_sum_list[i] = sum(adjacency_augment_graph[i, :])
-    end
-    central_nodes_list = sortperm(edge_weights_sum_list, rev = true)
-    return central_nodes_list
+    edge_weights = [sum(adjacency_augment_graph[i, :]) for i in 1:num_nodes]
+    return sortperm(edge_weights, rev = true)
 end
 
 """
@@ -373,22 +394,21 @@ function weighted_adjacency_matrix(
     adjacency_augment_graph::Array{<:Number},
     size::Int64,
 )
+    # Get unique vertices from edges
+    vertices_from_edges =
+        unique(vcat([[Graphs.src(e), Graphs.dst(e)] for e in Graphs.edges(G)]...))
 
-    # collecting vertices connected in graph
-    vertices_from_edges = unique(
-        union(
-            [Graphs.src(e) for e in Graphs.edges(G)],
-            [Graphs.dst(e) for e in Graphs.edges(G)],
-        ),
-    )
+    # Pre-compute the product matrix
+    product_matrix = adjacency_augment_graph .* Graphs.adjacency_matrix(G)
 
-    adjacency_matrix = adjacency_augment_graph .* Graphs.adjacency_matrix(G)
-    weighted_adj_matrix_size = Matrix{Float64}(undef, size, size)
+    # Initialize result matrix
+    weighted_adj_matrix_size = zeros(Float64, size, size)
 
+    # Fill upper triangular part and mirror to lower triangular
     for i in 1:size, j in i:size
-        weighted_adj_matrix_size[i, j] =
-            adjacency_matrix[vertices_from_edges[i], vertices_from_edges[j]]
-        weighted_adj_matrix_size[j, i] = weighted_adj_matrix_size[i, j]
+        val = product_matrix[vertices_from_edges[i], vertices_from_edges[j]]
+        weighted_adj_matrix_size[i, j] = val
+        weighted_adj_matrix_size[j, i] = val
     end
 
     return weighted_adj_matrix_size
@@ -423,18 +443,21 @@ end
 
 Returns all combinations possible for given `n` and `k`.
 """
-
 function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
-    if !(kopt_parameter in [2, 3])
+    if kopt_parameter < 2 || kopt_parameter > 3
         Memento.error(_LOGGER, "kopt_parameter must be either 2 or 3")
     elseif num_edges < kopt_parameter
-        Momento.error(_LOGGER, "num_edges must be greater than or equal to k")
+        Memento.error(_LOGGER, "num_edges must be greater than or equal to k")
     end
 
-    return kopt_parameter == 2 ? [(i, j) for i in 1:num_edges-1 for j in i+1:num_edges] :
-           [
-        (i, j, l) for i in 1:num_edges-2 for j in i+1:num_edges-1 for l in j+1:num_edges
-    ]
+    if kopt_parameter == 2
+        return [(i, j) for i in 1:(num_edges-1) for j in (i+1):num_edges]
+    else # kopt_parameter == 3
+        return [
+            (i, j, l) for i in 1:(num_edges-2) for j in (i+1):(num_edges-1) for
+            l in (j+1):num_edges
+        ]
+    end
 end
 
 """

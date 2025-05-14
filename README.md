@@ -44,6 +44,9 @@ If you find LaplacianOpt.jl useful in your work, we request you to cite the foll
   author={Somisetty, Neelkamal and Nagarajan, Harsha and Darbha, Swaroop},
   journal={IEEE Transactions on Control of Network Systems},
   url = {https://doi.org/10.1109/TCNS.2024.3431408},
+  pages={918--929},
+  volume={12},
+  number={1},
   year={2024},
   publisher={IEEE}
 }

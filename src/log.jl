@@ -51,39 +51,42 @@ function plot_tikzgraph(
     solution_graph = Graphs.SimpleGraph(num_nodes)
     edge_labels = Dict{Tuple{Int64,Int64},String}()
 
-    for i in 1:(num_nodes-1)
-        for j in (i+1):num_nodes
-            if !isapprox(abs(adjacency_matrix[i, j]), 0, atol = 1E-6)
-                Graphs.add_edge!(solution_graph, i, j)
-                edge_labels[(i, j)] = string(ceil(adjacency_matrix[i, j], digits = 2))
-            end
+    # Build graph and edge labels
+    for i in 1:(num_nodes-1), j in (i+1):num_nodes
+        if !isapprox(abs(adjacency_matrix[i, j]), 0, atol = 1E-6)
+            Graphs.add_edge!(solution_graph, i, j)
+            display_edge_weights &&
+                (edge_labels[(i, j)] = string(ceil(adjacency_matrix[i, j], digits = 2)))
         end
     end
 
+    node_style = "draw, rounded corners, fill=blue!10"
+
+    # Plot with or without edge labels
     if display_edge_weights
-        # Plot with edge weights - graphs do not look great
         t = TikzGraphs.plot(
             solution_graph,
             edge_labels = edge_labels,
-            node_style = "draw, rounded corners, fill=blue!10",
-            TikzGraphs.Layouts.SpringElectrical(),
+            node_style = node_style,
+            layout = TikzGraphs.Layouts.SpringElectrical(),
         )
     else
         t = TikzGraphs.plot(
             solution_graph,
-            node_style = "draw, rounded corners, fill=blue!10",
+            node_style = node_style,
             TikzGraphs.Layouts.SpringElectrical(),
         )
     end
 
     file_path =
         joinpath(dirname(pathof(LaplacianOpt)), "..", "examples/plots/plot_$(num_nodes)")
+    TikzPictures.save(
+        plot_file_format == "pdf" ? TikzPictures.PDF(file_path) :
+        TikzPictures.TEX(file_path),
+        t,
+    )
 
-    if plot_file_format == "pdf"
-        TikzPictures.save(TikzPictures.PDF(file_path), t)
-    elseif plot_file_format == "tex"
-        TikzPictures.save(TikzPictures.TEX(file_path), t)
-    end
+    return
 end
 
 function plot_graphviz(

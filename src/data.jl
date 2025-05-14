@@ -5,6 +5,7 @@ Given the input params, this function preprocesses the data, catches any error a
 and outputs a detailed dictionary which forms the basis for building an optimization model. 
 """
 function get_data(params::Dict{String,Any})
+    # version info
     _header_color = :cyan
     printstyled(
         "LaplacianOpt version: ",
@@ -14,34 +15,26 @@ function get_data(params::Dict{String,Any})
         bold = true,
     )
 
-    if "data_dict" in keys(params)
-        data_dict = params["data_dict"]
-    else
+    # data dictionary
+    if !haskey(params, "data_dict")
         Memento.error(_LOGGER, "Data dictionary has to be specified in input params")
     end
-
-    data_dict = LOpt._pre_process_data(data_dict)
+    data_dict = LOpt._pre_process_data(params["data_dict"])
 
     Memento.info(_LOGGER, "Number of nodes in the graph: $(data_dict["num_nodes"])")
 
-    if "augment_budget" in keys(params)
-        if params["augment_budget"] <= data_dict["num_edges_to_augment"]
-            augment_budget = params["augment_budget"]
+    # augment budget
+    augment_budget =
+        if haskey(params, "augment_budget") &&
+           params["augment_budget"] <= data_dict["num_edges_to_augment"]
+            params["augment_budget"]
         else
-            augment_budget = data_dict["num_edges_to_augment"]
-            Memento.info(
-                _LOGGER,
-                "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])",
-            )
+            budget = data_dict["num_edges_to_augment"]
+            Memento.info(_LOGGER, "Setting edge augmentation budget to $budget")
+            budget
         end
-    else
-        augment_budget = data_dict["num_edges_to_augment"]
-        Memento.info(
-            _LOGGER,
-            "Setting edge augmentation budget to $(data_dict["num_edges_to_augment"])",
-        )
-    end
 
+    # Log graph information
     Memento.info(
         _LOGGER,
         "Number of edges in the base graph: $(data_dict["num_edges_existing"])",
@@ -52,17 +45,20 @@ function get_data(params::Dict{String,Any})
     )
     Memento.info(_LOGGER, "Augment budget: $(augment_budget)")
 
-    # Graph type
-    if "graph_type" in keys(params)
-        graph_type = params["graph_type"]
-        if !(graph_type in ["any", "hamiltonian_cycle"])
-            Memento.error(_LOGGER, "Invalid graph type, $graph_type, in input params")
+    # graph type
+    graph_type = "any"  # default
+    if haskey(params, "graph_type")
+        if params["graph_type"] in ["any", "hamiltonian_cycle"]
+            graph_type = params["graph_type"]
+        else
+            Memento.error(
+                _LOGGER,
+                "Invalid graph type, $(params["graph_type"]), in input params",
+            )
         end
-    else
-        # default value
-        graph_type = "any"
     end
 
+    # data dictionary
     data = Dict{String,Any}(
         "num_nodes" => data_dict["num_nodes"],
         "num_edges_existing" => data_dict["num_edges_existing"],
@@ -75,57 +71,42 @@ function get_data(params::Dict{String,Any})
     )
 
     LOpt._detect_infeasbility_in_data(data)
-
     return data
 end
 
 function parse_file(file_path::String)
     data_dict = JSON.parsefile(file_path)
 
-    if "num_nodes" in keys(data_dict)
-        num_nodes = data_dict["num_nodes"]
-    else
+    haskey(data_dict, "num_nodes") ||
         Memento.error(_LOGGER, "Number of nodes is missing in the input data file")
-    end
+    num_nodes = data_dict["num_nodes"]
 
-    adjacency_base_graph = Matrix{Float64}(zeros(num_nodes, num_nodes))
-    adjacency_augment_graph = Matrix{Float64}(zeros(num_nodes, num_nodes))
+    adjacency_base_graph = zeros(Float64, num_nodes, num_nodes)
+    adjacency_augment_graph = zeros(Float64, num_nodes, num_nodes)
 
-    for k in 1:length(data_dict["edges_existing"])
-        i, j = data_dict["edges_existing"][k][1]
-        w_ij = data_dict["edges_existing"][k][2]
-
-        if isapprox(abs(w_ij), 0, atol = 1E-6)
-            w_ij = 0
-        end
+    # Process existing edges
+    for edge in data_dict["edges_existing"]
+        (i, j), w_ij = edge
+        w_ij = isapprox(abs(w_ij), 0, atol = 1E-6) ? 0 : w_ij
 
         LOpt._catch_data_input_error(num_nodes, i, j, w_ij)
-
-        adjacency_base_graph[i, j] = w_ij
-        adjacency_base_graph[j, i] = w_ij
+        adjacency_base_graph[i, j] = adjacency_base_graph[j, i] = w_ij
     end
 
-    for k in 1:length(data_dict["edges_to_augment"])
-        i, j = data_dict["edges_to_augment"][k][1]
-        w_ij = data_dict["edges_to_augment"][k][2]
-
-        if isapprox(abs(w_ij), 0, atol = 1E-6)
-            w_ij = 0
-        end
+    # Process augment edges
+    for edge in data_dict["edges_to_augment"]
+        (i, j), w_ij = edge
+        w_ij = isapprox(abs(w_ij), 0, atol = 1E-6) ? 0 : w_ij
 
         LOpt._catch_data_input_error(num_nodes, i, j, w_ij)
-
-        adjacency_augment_graph[i, j] = w_ij
-        adjacency_augment_graph[j, i] = w_ij
+        adjacency_augment_graph[i, j] = adjacency_augment_graph[j, i] = w_ij
     end
 
-    data_dict_new = Dict{String,Any}(
+    return Dict{String,Any}(
         "num_nodes" => num_nodes,
         "adjacency_base_graph" => adjacency_base_graph,
         "adjacency_augment_graph" => adjacency_augment_graph,
     )
-
-    return data_dict_new
 end
 
 function _pre_process_data(data_dict::Dict{String,Any})
@@ -133,38 +114,39 @@ function _pre_process_data(data_dict::Dict{String,Any})
     adjacency_base_graph = data_dict["adjacency_base_graph"]
     adjacency_augment_graph = data_dict["adjacency_augment_graph"]
 
-    num_edges_existing, num_edges_to_augment = 0, 0
+    num_edges_existing = 0
+    num_edges_to_augment = 0
 
-    for i in 1:num_nodes-1, j in i+1:num_nodes
-        adjacency_base_graph[i, j] =
-            isapprox(abs(adjacency_base_graph[i, j]), 0, atol = 1E-6) ? 0 :
-            adjacency_base_graph[i, j]
-        adjacency_augment_graph[i, j] =
-            isapprox(abs(adjacency_augment_graph[i, j]), 0, atol = 1E-6) ? 0 :
-            adjacency_augment_graph[i, j]
-
-        if !isapprox(adjacency_base_graph[i, j], adjacency_base_graph[j, i], atol = 1E-5)
-            Memento.error(_LOGGER, "Adjacency matrix of the base graph must be symmetric")
+    # Process matrices in one pass
+    for i in 1:(num_nodes-1), j in (i+1):num_nodes
+        if isapprox(abs(adjacency_base_graph[i, j]), 0, atol = 1E-6)
+            adjacency_base_graph[i, j] = adjacency_base_graph[j, i] = 0
+        elseif !isapprox(
+            adjacency_base_graph[i, j],
+            adjacency_base_graph[j, i],
+            atol = 1E-5,
+        )
+            Memento.error("Adjacency matrix of the base graph has to be symmetric")
+        else
+            num_edges_existing += 1
         end
-        if !isapprox(
+
+        if isapprox(abs(adjacency_augment_graph[i, j]), 0, atol = 1E-6)
+            adjacency_augment_graph[i, j] = adjacency_augment_graph[j, i] = 0
+        elseif !isapprox(
             adjacency_augment_graph[i, j],
             adjacency_augment_graph[j, i],
             atol = 1E-5,
         )
-            Memento.error(
-                _LOGGER,
-                "Adjacency matrix of the augment graph must be symmetric",
-            )
+            Memento.error("Adjacency matrix of the augment graph has to be symmetric")
+        else
+            num_edges_to_augment += 1
         end
-
-        num_edges_existing +=
-            !isapprox(adjacency_base_graph[i, j], 0, atol = 1E-6) ? 1 : 0
-        num_edges_to_augment +=
-            !isapprox(adjacency_augment_graph[i, j], 0, atol = 1E-6) ? 1 : 0
     end
 
+    # Check base graph connectivity
     is_base_graph_connected =
-        (num_edges_existing > 0) &&
+        num_edges_existing > 0 &&
         !isapprox(abs(LOpt.algebraic_connectivity(adjacency_base_graph)), 0, atol = 1E-6)
 
     return Dict{String,Any}(
@@ -202,57 +184,41 @@ end
 Given the pre-processed data dictionary, this function detects any infeasibility before 
 building the optimization model. 
 """
-
 function _detect_infeasbility_in_data(data::Dict{String,Any})
     num_nodes = data["num_nodes"]
     num_edges_existing = data["num_edges_existing"]
     num_edges_to_augment = data["num_edges_to_augment"]
     augment_budget = data["augment_budget"]
+    graph_type = get(data, "graph_type", "")
 
-    if num_edges_to_augment == 0
-        Memento.error(_LOGGER, "At least one edge is required for augmentation.")
-    elseif num_edges_existing == num_nodes * (num_nodes - 1) / 2
-        Memento.error(
-            _LOGGER,
-            "The graph is already complete; augmentation is unnecessary.",
-        )
-    elseif num_edges_existing == 0 && augment_budget < (num_nodes - 1)
-        Memento.error(
-            _LOGGER,
-            "Graph is disconnected; `augment_budget` may be insufficient.",
-        )
-    elseif !isinteger(augment_budget) || augment_budget < 0
-        Memento.error(_LOGGER, "Augmentation budget must be a positive integer.")
-    end
+    # Check for basic infeasibility conditions
+    num_edges_to_augment == 0 &&
+        Memento.error(_LOGGER, "At least one edge must be available for augmentation")
+    num_edges_existing == num_nodes * (num_nodes - 1) / 2 && Memento.error(
+        _LOGGER,
+        "Input graph is already complete; augmentation unnecessary",
+    )
+    (num_edges_existing == 0 && augment_budget < (num_nodes - 1)) &&
+        Memento.error(_LOGGER, "Insufficient augment_budget for connectivity")
+    (!isinteger(augment_budget) || augment_budget < -1E-6) &&
+        Memento.error(_LOGGER, "Edge augmentation budget must be positive integer")
 
-    # Check mutually exclusive edge sets
-    if maximum(
+    # Check for mutually exclusive edge sets
+    maximum(
         (data["adjacency_augment_graph"] .> 0) + (data["adjacency_base_graph"] .> 0),
-    ) > 1
-        Memento.error(
-            _LOGGER,
-            "Edge sets of base and augment graphs must be mutually exclusive.",
-        )
-    end
+    ) > 1 && Memento.error(
+        _LOGGER,
+        "Edge sets of base and augment graphs must be mutually exclusive",
+    )
 
     # Check for free vertices
     A = data["adjacency_augment_graph"] + data["adjacency_base_graph"]
-    for i in 1:num_nodes
-        if isapprox(sum(A[i, :]), 0, atol = 1E-6)
-            Memento.error(
-                _LOGGER,
-                "Free vertices detected, leading to disconnected graphs.",
-            )
-        end
-    end
+    any(isapprox.(sum(A, dims = 2), 0, atol = 1E-6)) &&
+        Memento.error(_LOGGER, "Detected free vertices resulting in disconnected graphs")
 
     # Check Hamiltonian cycle feasibility
-    if data["graph_type"] == "hamiltonian_cycle" && num_edges_existing == 0
-        if !(num_edges_to_augment >= num_nodes && augment_budget == num_nodes)
-            Memento.error(
-                _LOGGER,
-                "Infeasibility due to incompatible augmentation for Hamiltonian cycle.",
-            )
-        end
+    if graph_type == "hamiltonian_cycle" && num_edges_existing == 0
+        (num_edges_to_augment < num_nodes || augment_budget != num_nodes) &&
+            Memento.error(_LOGGER, "Insufficient edges for Hamiltonian cycle")
     end
 end

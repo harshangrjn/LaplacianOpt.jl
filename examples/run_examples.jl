@@ -1,16 +1,15 @@
 import LaplacianOpt as LOpt
 using JuMP
-using CPLEX
 using Gurobi
 # using GLPK
 
 include("optimizers.jl")
 
-#------------------------------------#
-#            MIP solver              #
-# (Gurobi 11.0.1+ performs the best) #
-#------------------------------------#
-lopt_optimizer = get_gurobi(solver_log = true)
+#-------------------------------------#
+#            MIP solver               #
+# (> Gurobi 12.0.2 performs the best) #
+#-------------------------------------#
+lopt_optimizer = get_gurobi(solver_log = false)
 
 #-------------------------------------#
 #      User-defined input graphs      #
