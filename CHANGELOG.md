@@ -3,7 +3,7 @@ LaplacianOpt.jl Change Log
 
 ### v0.7.2
 - Update codecov/codecov-action
-- Clean up of `src/utility.jl`
+- Clean up of `src/utility.jl`, `src/data.jl`
 
 ### v0.7.1
 - Clean up of `round_zeros_ones!`, `laplacian_matrix`, `_violated_eigen_vector`, `weighted_adjacency_matrix`, `edge_combinations`, `optimal_graph_edges` functions

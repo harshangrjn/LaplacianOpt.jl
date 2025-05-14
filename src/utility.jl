@@ -1,7 +1,8 @@
 """
     round_zeros_ones!(v::Array{<:Number}; tol = 1E-6)
 
-Given a vector of numbers, this function updates the input vector by rounding the values closest to 0, 1 and -1. 
+Given a vector of numbers, this function updates the input vector by 
+rounding the values closest to 0, 1 and -1. 
 """
 function round_zeros_ones!(v::Array{<:Number}; tol = 1E-6)
     v[abs.(v) .<= tol] .= 0
@@ -75,7 +76,8 @@ end
     fiedler_vector(adjacency_matrix::Array{<:Number})
 
 Returns the Fiedler vector or the eigenvector corresponding to the 
-second smallest eigenvalue of the Laplacian matrix for an input weighted adjacency matrix of the graph. 
+second smallest eigenvalue of the Laplacian matrix for an input 
+weighted adjacency matrix of the graph. 
 """
 function fiedler_vector(adjacency_matrix::Array{<:Number})
     L_mat = LOpt.laplacian_matrix(adjacency_matrix)
@@ -94,7 +96,8 @@ end
     algebraic_connectivity(adjacency_matrix::Array{<:Number}) 
     
 Returns the algebraic connectivity or the  
-second smallest eigenvalue of the Laplacian matrix, for an input weighted adjacency matrix of the graph. 
+second smallest eigenvalue of the Laplacian matrix, 
+for an input weighted adjacency matrix of the graph. 
 """
 function algebraic_connectivity(adjacency_matrix::Array{<:Number})
     L_mat = LOpt.laplacian_matrix(adjacency_matrix)
@@ -106,8 +109,10 @@ end
 """
     _is_flow_cut_valid(cutset_f::Vector{Int64}, cutset_t::Vector{Int64}, adjacency::Array{<:Number})
 
-Given from and to sets of vertices of connected components of a graph, this function returns a 
-boolean if the input `num_edges` number of candidate edge exist to augment or not, between these two sets of vertices. 
+Given from and to sets of vertices of connected components 
+of a graph, this function returns a boolean if the input 
+`num_edges` number of candidate edge exist to augment or not, 
+between these two sets of vertices. 
 """
 function _is_flow_cut_valid(
     cutset_f::Vector{Int64},
@@ -314,6 +319,17 @@ function get_minor_idx(vector::Vector{Int64}, size::Int64)
     end
 end
 
+"""
+    _PMinorIdx(
+        N::Int64,
+        sizes::Vector{Int64},
+        minors_on_augment_edges::Bool,
+        data::Dict{String,Any},
+    )
+
+Generates a dictionary mapping minor sizes to their corresponding vertex tuples.
+For each size k in the input sizes vector, creates tuples of k vertices.
+"""
 function _PMinorIdx(
     N::Int64,
     sizes::Vector{Int64},
@@ -356,8 +372,8 @@ end
 """
     priority_central_nodes(adjacency_augment_graph::Array{<:Number}, num_nodes::Int64) 
 
-Returns a vector of order of central nodes as 
-an input to construct the graph. 
+Returns nodes sorted by their centrality, measured as the sum of edge weights 
+connected to each node, in descending order.
 """
 function priority_central_nodes(
     adjacency_augment_graph::Array{<:Number},

@@ -15,20 +15,11 @@
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 22.8042, atol = 1E-4)
-    @test isapprox(result["heuristic_solution"][1, 7], 1.0)
-    @test isapprox(result["heuristic_solution"][7, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 7], 1.0)
-    @test isapprox(result["heuristic_solution"][7, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 7], 1.0)
-    @test isapprox(result["heuristic_solution"][7, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 6], 1.0)
-    @test isapprox(result["heuristic_solution"][6, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 7], 1.0)
-    @test isapprox(result["heuristic_solution"][7, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 7], 1.0)
-    @test isapprox(result["heuristic_solution"][7, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][7, 8], 1.0)
-    @test isapprox(result["heuristic_solution"][8, 7], 1.0)
+    
+    for (i, j) in [(1,7), (2,7), (3,7), (4,6), (4,7), (5,7), (7,8)]
+        @test isapprox(result["heuristic_solution"][i, j], 1.0)
+        @test isapprox(result["heuristic_solution"][j, i], 1.0)
+    end
 end
 
 @testset "Heuristic test: 2-opt_spanning_tree" begin
@@ -48,20 +39,11 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 22.5051, atol = 1E-4)
-    @test isapprox(result["heuristic_solution"][1, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 6], 1.0)
-    @test isapprox(result["heuristic_solution"][6, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 7], 1.0)
-    @test isapprox(result["heuristic_solution"][7, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][7, 8], 1.0)
-    @test isapprox(result["heuristic_solution"][8, 7], 1.0)
+    
+    for (i, j) in [(1,5), (2,5), (3,5), (4,5), (5,6), (5,7), (7,8)]
+        @test isapprox(result["heuristic_solution"][i, j], 1.0)
+        @test isapprox(result["heuristic_solution"][j, i], 1.0)
+    end
 end
 
 @testset "Heuristic test: 3-opt_spanning_tree" begin
@@ -81,14 +63,11 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 11.1592, atol = 1E-4)
-    @test isapprox(result["heuristic_solution"][1, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 3], 1.0)
+    
+    for (i, j) in [(1,4), (2,4), (3,4), (3,5)]
+        @test isapprox(result["heuristic_solution"][i, j], 1.0)
+        @test isapprox(result["heuristic_solution"][j, i], 1.0)
+    end
 end
 
 @testset "Heuristic test: 1-opt_tree" begin
@@ -108,22 +87,11 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 46.028980895, atol = 1E-4)
-    @test isapprox(result["heuristic_solution"][1, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][1, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][1, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 4], 1.0)
+    
+    for (i, j) in [(1,2), (1,3), (1,4), (2,4), (2,5), (3,4), (3,5), (4,5)]
+        @test isapprox(result["heuristic_solution"][i, j], 1.0)
+        @test isapprox(result["heuristic_solution"][j, i], 1.0)
+    end
 end
 
 @testset "Heuristic test: 2-opt_tree" begin
@@ -143,22 +111,11 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 46.028980895, atol = 1E-4)
-    @test isapprox(result["heuristic_solution"][1, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][1, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][1, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 4], 1.0)
+    
+    for (i, j) in [(1,2), (1,3), (1,4), (2,4), (2,5), (3,4), (3,5), (4,5)]
+        @test isapprox(result["heuristic_solution"][i, j], 1.0)
+        @test isapprox(result["heuristic_solution"][j, i], 1.0)
+    end
 end
 
 @testset "Heuristic test: 3-opt_tree" begin
@@ -178,22 +135,11 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 46.028980895, atol = 1E-4)
-    @test isapprox(result["heuristic_solution"][1, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][1, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][1, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 4], 1.0)
+    
+    for (i, j) in [(1,2), (1,3), (1,4), (2,4), (2,5), (3,4), (3,5), (4,5)]
+        @test isapprox(result["heuristic_solution"][i, j], 1.0)
+        @test isapprox(result["heuristic_solution"][j, i], 1.0)
+    end
 end
 
 @testset "Heuristic test: zero augment budget" begin
@@ -215,12 +161,11 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 1.610684749, atol = 1E-4)
-    @test isapprox(result["heuristic_solution"][1, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 3], 1.0)
+    # Check for expected edges in the solution
+    for (i, j) in [(1,2), (2,3), (3,4)]
+        @test isapprox(result["heuristic_solution"][i, j], 1.0)
+        @test isapprox(result["heuristic_solution"][j, i], 1.0)
+    end
 end
 
 @testset "Heuristic test: refinement_tree_1opt_2opt!" begin
@@ -242,16 +187,11 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 7.8551986404, atol = 1E-4)
-    @test isapprox(result["heuristic_solution"][1, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][1, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 2], 1.0)
+    
+    for (i, j) in [(1,2), (2,3), (3,4), (1,4), (2,4)]
+        @test isapprox(result["heuristic_solution"][i, j], 1.0)
+        @test isapprox(result["heuristic_solution"][j, i], 1.0)
+    end
 end
 
 @testset "Heuristic test: refinement_tree_2opt_3opt!" begin
@@ -275,18 +215,9 @@ end
 
     @test result["solution_type"] == "heuristic"
     @test isapprox(result["heuristic_objective"], 9.276487957, atol = 1E-4)
-    @test isapprox(result["heuristic_solution"][1, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 2], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][4, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 4], 1.0)
-    @test isapprox(result["heuristic_solution"][1, 3], 1.0)
-    @test isapprox(result["heuristic_solution"][3, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][1, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 1], 1.0)
-    @test isapprox(result["heuristic_solution"][2, 5], 1.0)
-    @test isapprox(result["heuristic_solution"][5, 2], 1.0)
+    
+    for (i, j) in [(1,2), (2,3), (3,4), (4,5), (1,3), (1,5), (2,5)]
+        @test isapprox(result["heuristic_solution"][i, j], 1.0)
+        @test isapprox(result["heuristic_solution"][j, i], 1.0)
+    end
 end
