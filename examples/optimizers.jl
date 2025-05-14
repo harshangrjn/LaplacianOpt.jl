@@ -1,9 +1,6 @@
 
 # MIP solvers (commercial, but fast)  #
 #=====================================##=====================================#
-# MIP solvers (commercial, but fast)  #
-
-# MIP solvers (commercial, but fast)  #
 
 # MIP solvers (commercial, but fast)  #
 
@@ -28,9 +25,7 @@ function get_cplex(; solver_log = true)
         # "CPX_PARAM_MIPEMPHASIS" => 1, # Focus on optimality over feasibility 
         "CPX_PARAM_PREIND" => 1,
     )
-end#======================================##======================================#
-
-# MIP solvers (open-source, but slow)  #
+end
 
 function get_glpk(; solver_log = true)
     return JuMP.optimizer_with_attributes(GLPK.Optimizer, MOI.Silent() => !solver_log)
@@ -43,7 +38,7 @@ function get_highs()
         "presolve" => "on",
         "log_to_console" => true,
     )
-end#========================================================##========================================================#
+end
 
 # Continuous nonlinear programming solver (open-source)  #
 
@@ -54,7 +49,7 @@ function get_ipopt(; solver_log = true)
         "sb" => "yes",
         "max_iter" => Int(1E4),
     )
-end#=================================================================##=================================================================#
+end
 
 # Local mixed-integer nonlinear programming solver (open-source)  #
 
