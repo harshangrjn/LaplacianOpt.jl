@@ -34,10 +34,10 @@ Pkg.test("LaplacianOpt")
 ```
 
 ## Citing LaplacianOpt
-If you find LaplacianOpt.jl useful in your work, we request you to cite the following papers [\[link-1\]](https://doi.org/10.1109/ECC.2015.7330770) [\[link-2\]](https://arxiv.org/abs/2304.08571): 
+If you find LaplacianOpt.jl useful in your work, we request you to cite the following papers [\[link-1\]](https://doi.org/10.1109/ECC.2015.7330770) [\[link-2\]](https://doi.org/10.1109/TCNS.2024.3431408): 
 ```bibtex
 @article{LOpt_TCNS2024,
-  title={Optimal Robust Network Design: Formulations and Algorithms for Maximizing Algebraic Connectivity},
+  title={Optimal robust network design: Formulations and algorithms for maximizing algebraic connectivity},
   author={Somisetty, Neelkamal and Nagarajan, Harsha and Darbha, Swaroop},
   journal={IEEE Transactions on Control of Network Systems},
   url = {https://doi.org/10.1109/TCNS.2024.3431408},

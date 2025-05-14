@@ -1,9 +1,13 @@
 LaplacianOpt.jl Change Log
 =========================
 
-### v0.7.1
+### v0.7.2
 - Update codecov/codecov-action
 - Clean up of `src/utility.jl`
+
+### v0.7.1
+- Clean up of `round_zeros_ones!`, `laplacian_matrix`, `_violated_eigen_vector`, `weighted_adjacency_matrix`, `edge_combinations`, `optimal_graph_edges` functions
+- Added support for cheeger constant of graph based on set cardinality (updated MILP formulation) and set volume definitions
 
 ### v0.7.0
 - Solver logging option added in `optimizers.jl`

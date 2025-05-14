@@ -272,10 +272,18 @@ function constraint_cheeger_cuts(
     lom::LaplacianOptModel,
     optimizer::MOI.OptimizerWithAttributes,
 )
+    ac_lower_bound = floor(lom.options.best_lower_bound, digits = 3)
+
+    if isapprox(ac_lower_bound, 0, atol = 1E-4)
+        Memento.info(
+            _LOGGER,
+            "Cheeger cuts may be ineffective: best λ₂ lower bound is approximately 0.",
+        )
+        return
+    end
+
     result_dict =
         LOpt.cheeger_constant(z_val .* lom.data["adjacency_augment_graph"], optimizer)
-
-    ac_lower_bound = floor(lom.options.best_lower_bound, digits = 3)
 
     if !(isapprox(result_dict["cheeger_constant"], 0, atol = 1E-5)) && (
         result_dict["cheeger_constant"] <

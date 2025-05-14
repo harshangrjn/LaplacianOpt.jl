@@ -53,6 +53,11 @@ end
         G[i, j] = 1.0
         G[j, i] = G[i, j]
     end
-    cheeger = LOpt.cheeger_constant(G, glpk_optimizer)
+
+    cheeger =
+        LOpt.cheeger_constant(G, glpk_optimizer, formulation_type = "set_cardinality")
     @test isapprox(cheeger["cheeger_constant"], 5 / 3, atol = 1E-6)
+
+    cheeger = LOpt.cheeger_constant(G, glpk_optimizer, formulation_type = "set_volume")
+    @test isapprox(cheeger["cheeger_constant"], 5 / 9, atol = 1E-6)
 end

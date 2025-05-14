@@ -54,8 +54,8 @@ end
 #-------------------------------#
 #      User-defined params      #
 #-------------------------------#
-num_nodes = 10
-instance = 4
+num_nodes = 8
+instance = 1
 data_dict, augment_budget = data_I(num_nodes, instance)
 # data_dict, augment_budget = data_SLAM("CSAIL") # "CSAIL", "intel", "ais2klinik"
 # data_dict, augment_budget = data_II()
