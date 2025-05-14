@@ -5,7 +5,7 @@
 
     LB = [-1, -2.5, 0, -3, 0]
     UB = [2.5, 0, 1, 3.2, 1]
-    JuMP.@variable(m, LB[i] <= x[i = 1:5] <= UB[i])
+    JuMP.@variable(m, LB[i] <= x[i=1:5] <= UB[i])
     JuMP.@variable(m, z[1:6])
 
     LOpt.relaxation_bilinear(m, z[1], x[1], x[2])

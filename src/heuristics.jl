@@ -581,8 +581,8 @@ function _vertices_tracker_update_two_edges!(
     vertices_tracker,
 )
     edge_list = collect(Graphs.edges(G))
-    for k in j_idx+1:(length(edge_list)-1)
-        for l in k+1:length(edge_list)
+    for k in (j_idx+1):(length(edge_list)-1)
+        for l in (k+1):length(edge_list)
             edges_to_check = []
             if j_idx == 0
                 edges_to_check = [

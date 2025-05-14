@@ -190,8 +190,8 @@ function _add_eigen_cut_lazy(
                         2 * sum(
                             adjacency[idx[i], idx[j]] *
                             violated_eigen_vec[i] *
-                            violated_eigen_vec[j] for i in 1:(length(idx)-1),
-                            j in (i+1):length(idx)
+                            violated_eigen_vec[j] for
+                            i in 1:(length(idx)-1), j in (i+1):length(idx)
                         )
                     ) >=
                     (γ_var / num_nodes) * (

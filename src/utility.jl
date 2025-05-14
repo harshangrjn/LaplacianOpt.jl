@@ -4,17 +4,9 @@
 Given a vector of numbers, this function updates the input vector by rounding the values closest to 0, 1 and -1. 
 """
 function round_zeros_ones!(v::Array{<:Number}; tol = 1E-6)
-    for i in findall(abs.(v) .<= tol)
-        v[i] = 0
-    end
-
-    for i in findall(((1 - tol) .<= abs.(v) .<= (1 + tol)))
-        if v[i] > 0
-            v[i] = 1
-        elseif v[i] < 0
-            v[i] = -1
-        end
-    end
+    v[abs.(v) .<= tol] .= 0
+    near_ones = findall(((1 - tol) .<= abs.(v) .<= (1 + tol)))
+    return v[near_ones] .= sign.(v[near_ones])
 end
 
 """
@@ -24,26 +16,17 @@ Returns a vector of tuples of edges corresponding
 to an input adjacency matrix of the graph. 
 """
 function optimal_graph_edges(adjacency_matrix::Array{<:Number})
-    edges = Vector{Tuple{Int64,Int64}}()
+    num_nodes = size(adjacency_matrix, 1)
 
-    num_nodes = size(adjacency_matrix)[1]
-
-    if !LA.issymmetric(adjacency_matrix)
+    !LA.issymmetric(adjacency_matrix) &&
         Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
-    end
 
-    for i in 1:num_nodes
-        if !isapprox(adjacency_matrix[i, i], 0)
-            Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
-        end
-    end
+    any(i -> !isapprox(adjacency_matrix[i, i], 0), 1:num_nodes) &&
+        Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
 
-    for i in 1:(num_nodes-1)
-        for j in (i+1):num_nodes
-            if !isapprox(adjacency_matrix[i, j], 0)
-                push!(edges, (i, j))
-            end
-        end
+    edges = Tuple{Int64,Int64}[]
+    for i in 1:(num_nodes-1), j in (i+1):num_nodes
+        !isapprox(adjacency_matrix[i, j], 0) && push!(edges, (i, j))
     end
 
     return edges
@@ -56,38 +39,32 @@ Given a weighted adjacency matrix as an input, this function returns the
 weighted Laplacian matrix of the graph. 
 """
 function laplacian_matrix(adjacency_matrix::Array{<:Number})
-    if !LA.issymmetric(adjacency_matrix)
+    !LA.issymmetric(adjacency_matrix) &&
         Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
-    end
 
-    num_nodes = size(adjacency_matrix)[1]
-
+    num_nodes = size(adjacency_matrix, 1)
     laplacian_matrix = zeros(Float64, num_nodes, num_nodes)
 
+    # Check for self loops
     for i in 1:num_nodes
-        for j in i:num_nodes
-            if i == j
-                if !isapprox(adjacency_matrix[i, j], 0)
-                    Memento.error(
-                        _LOGGER,
-                        "Input adjacency matrix cannot have self loops",
-                    )
-                end
+        !isapprox(adjacency_matrix[i, i], 0) &&
+            Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
+    end
 
-                laplacian_matrix[i, j] = sum(adjacency_matrix[i, :])
-            else
-                if adjacency_matrix[i, j] <= -1E-6
-                    Memento.error(
-                        _LOGGER,
-                        "Input adjacency matrix cannot have negative weights",
-                    )
-                end
+    # Negative weights
+    any(x -> x < -1E-6, adjacency_matrix) &&
+        Memento.error(_LOGGER, "Input adjacency matrix cannot have negative weights")
 
-                if !isapprox(adjacency_matrix[i, j], 0)
-                    laplacian_matrix[i, j] = -adjacency_matrix[i, j]
-                    laplacian_matrix[j, i] = -adjacency_matrix[i, j]
-                end
-            end
+    # Degree matrix
+    for i in 1:num_nodes
+        laplacian_matrix[i, i] = sum(adjacency_matrix[i, :])
+    end
+
+    # Off-diagonal elements
+    for i in 1:num_nodes, j in (i+1):num_nodes
+        if !isapprox(adjacency_matrix[i, j], 0)
+            laplacian_matrix[i, j] = -adjacency_matrix[i, j]
+            laplacian_matrix[j, i] = -adjacency_matrix[i, j]
         end
     end
 
@@ -138,18 +115,13 @@ function _is_flow_cut_valid(
     num_edges::Int64,
     adjacency::Array{<:Number},
 )
-    k = 0
-    for i in cutset_f
-        for j in cutset_t
-            if !(isapprox(adjacency[i, j], 0, atol = 1E-6))
-                k += 1
-                if k == num_edges
-                    return true
-                end
-            end
+    count = 0
+    for i in cutset_f, j in cutset_t
+        if !isapprox(adjacency[i, j], 0, atol = 1E-6)
+            count += 1
+            count >= num_edges && return true
         end
     end
-
     return false
 end
 
@@ -162,14 +134,17 @@ violated eigen value w.r.t positive semi-definiteness of the input matrix.
 function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
     W_eigvals = LA.eigvals(W)
 
-    if typeof(W_eigvals) != Vector{Float64}
-        if !(isapprox(imag(W_eigvals), zeros(size(W_eigvals)[1]), atol = 1E-6))
-            Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
-        end
+    # Check for complex eigenvalues
+    if eltype(W_eigvals) <: Complex &&
+       !isapprox(imag.(W_eigvals), zeros(length(W_eigvals)), atol = 1E-6)
+        Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
     end
 
-    if LA.eigmin(W) <= -tol
-        if W_eigvals[1] == LA.eigmin(W)
+    # If minimum eigenvalue is negative (beyond tolerance)
+    min_eigval = LA.eigmin(W)
+    if min_eigval <= -tol
+        # Check if the first eigenvalue is the minimum
+        if isapprox(W_eigvals[1], min_eigval, atol = 1E-6)
             violated_eigen_vec = LA.eigvecs(W)[:, 1]
             LOpt.round_zeros_ones!(violated_eigen_vec)
             return violated_eigen_vec
@@ -179,9 +154,8 @@ function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
                 "Eigen cut corresponding to the negative eigenvalue could not be evaluated",
             )
         end
-    else
-        return
     end
+    return nothing
 end
 
 """
@@ -191,7 +165,14 @@ end
                      optimizer_log = false)
     
 Given a symmetric, weighted adjacency matrix `G` of a connected graph, and a mixed-integer linear optimizer, 
-this function returns the Cheeger's constant (or isoperimetric number of the graph) and the associated two partitions (`S` and `S_complement`) of the graph.
+this function returns the Cheeger's constant (or isoperimetric number of the graph) and the associated two partitions 
+(`S` and `S_complement`) of the graph. 
+
+The exact version of the formulation implemented here is published in:
+Somisetty, N., Nagarajan, H. and Darbha, S., 2024. "Spectral Graph Theoretic Methods for Enhancing Network Robustness 
+in Robot Localization," IEEE 63rd Conference on Decision and Control (CDC), 2024. 
+Link: https://doi.org/10.1109/CDC56724.2024.10886863
+
 References: 
 (I) Chung, F.R., "Laplacians of graphs and Cheeger's inequalities",
 Combinatorics, Paul Erdos is Eighty, 2(157-172), pp.13-2, 1996.
@@ -325,39 +306,35 @@ function _PMinorIdx(
 )
     minor_idx_dict = Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}()
 
-    if length(sizes) > 0
-        if maximum(sizes) > N
-            Memento.warn(
-                _LOGGER,
-                "Detected maximum eigen-cut size ($(maximum(sizes))) > num_nodes",
-            )
+    isempty(sizes) && return minor_idx_dict
+
+    max_size = maximum(sizes)
+    max_size > N &&
+        Memento.warn(_LOGGER, "Detected maximum eigen-cut size ($(max_size)) > num_nodes")
+
+    for k in unique(sizes)
+        (k < 2 || k > N) && continue
+
+        vertices = collect(1:N)
+        if minors_on_augment_edges && k < N
+            vertices = LOpt._vertices_with_augment_edges(data)
         end
 
-        vertices_all = collect(1:N)
-        for k in unique(sizes)
-            if k == N
-                minor_idx_dict[k] = LOpt.get_minor_idx(vertices_all, k)
-            elseif (k >= 2) && (k <= (N - 1))
-                minors_on_augment_edges &&
-                    (vertices_all = LOpt._vertices_with_augment_edges(data))
-                minor_idx_dict[k] = LOpt.get_minor_idx(vertices_all, k)
-            end
-        end
+        minor_idx_dict[k] = LOpt.get_minor_idx(vertices, k)
     end
 
     return minor_idx_dict
 end
 
 function _vertices_with_augment_edges(data::Dict{String,Any})
-    v = Vector{Int64}()
+    v = Set{Int64}()
+    adj = data["adjacency_augment_graph"]
     for i in 1:(data["num_nodes"]-1), j in (i+1):data["num_nodes"]
-        if !isapprox(data["adjacency_augment_graph"][i, j], 0, atol = 1E-6)
-            push!(v, i)
-            push!(v, j)
+        if !isapprox(adj[i, j], 0, atol = 1E-6)
+            push!(v, i, j)
         end
     end
-
-    return unique(v)
+    return collect(v)
 end
 
 """
@@ -370,14 +347,8 @@ function priority_central_nodes(
     adjacency_augment_graph::Array{<:Number},
     num_nodes::Int64,
 )
-    edge_weights_sum_list = Vector{Float64}(undef, num_nodes)
-    central_nodes_list = Vector{Int64}(undef, num_nodes)
-
-    for i in 1:num_nodes
-        edge_weights_sum_list[i] = sum(adjacency_augment_graph[i, :])
-    end
-    central_nodes_list = sortperm(edge_weights_sum_list, rev = true)
-    return central_nodes_list
+    edge_weights = [sum(adjacency_augment_graph[i, :]) for i in 1:num_nodes]
+    return sortperm(edge_weights, rev = true)
 end
 
 """
@@ -391,25 +362,21 @@ function weighted_adjacency_matrix(
     adjacency_augment_graph::Array{<:Number},
     size::Int64,
 )
-    weighted_adj_matrix_size = Matrix{Float64}(undef, size, size)
+    # Get unique vertices from edges
+    vertices_from_edges =
+        unique(vcat([[Graphs.src(e), Graphs.dst(e)] for e in Graphs.edges(G)]...))
 
-    #collecting vertices connected in graph
-    vertices_from_edges = Int[]
-    for edge in Graphs.edges(G)
-        push!(vertices_from_edges, Graphs.src(edge))
-        push!(vertices_from_edges, Graphs.dst(edge))
-    end
-    vertices_from_edges = unique(vertices_from_edges)
+    # Pre-compute the product matrix
+    product_matrix = adjacency_augment_graph .* Graphs.adjacency_matrix(G)
 
-    for i in 1:size
-        for j in i:size
-            weighted_adj_matrix_size[i, j] =
-                (adjacency_augment_graph.*Graphs.adjacency_matrix(G))[
-                    vertices_from_edges[i],
-                    vertices_from_edges[j],
-                ]
-            weighted_adj_matrix_size[j, i] = weighted_adj_matrix_size[i, j]
-        end
+    # Initialize result matrix
+    weighted_adj_matrix_size = zeros(Float64, size, size)
+
+    # Fill upper triangular part and mirror to lower triangular
+    for i in 1:size, j in i:size
+        val = product_matrix[vertices_from_edges[i], vertices_from_edges[j]]
+        weighted_adj_matrix_size[i, j] = val
+        weighted_adj_matrix_size[j, i] = val
     end
 
     return weighted_adj_matrix_size
@@ -449,27 +416,17 @@ function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
     if kopt_parameter < 2 || kopt_parameter > 3
         Memento.error(_LOGGER, "kopt_parameter must be either 2 or 3")
     elseif num_edges < kopt_parameter
-        Momento.error(_LOGGER, "num_edges must be greater than or equal to k")
+        Memento.error(_LOGGER, "num_edges must be greater than or equal to k")
     end
-
-    combinations = []
 
     if kopt_parameter == 2
-        for i in 1:num_edges-1
-            for j in i+1:num_edges
-                push!(combinations, (i, j))
-            end
-        end
-    elseif kopt_parameter == 3
-        for i in 1:num_edges-2
-            for j in i+1:num_edges-1
-                for l in j+1:num_edges
-                    push!(combinations, (i, j, l))
-                end
-            end
-        end
+        return [(i, j) for i in 1:(num_edges-1) for j in (i+1):num_edges]
+    else # kopt_parameter == 3
+        return [
+            (i, j, l) for i in 1:(num_edges-2) for j in (i+1):(num_edges-1) for
+            l in (j+1):num_edges
+        ]
     end
-    return combinations
 end
 
 """

@@ -3,6 +3,7 @@ LaplacianOpt.jl Change Log
 
 ### v0.7.1
 - Update codecov/codecov-action
+- Clean up of `src/utility.jl`
 
 ### v0.7.0
 - Solver logging option added in `optimizers.jl`
