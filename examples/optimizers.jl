@@ -1,8 +1,6 @@
 #=====================================#
 # MIP solvers (commercial, but fast)  #
-#=====================================# 
-
-# MIP solvers (commercial, but fast)  #
+#=====================================#
 
 function get_gurobi(; solver_log = true, time_limit = 1E5)
     GRB_ENV = Gurobi.Env()
