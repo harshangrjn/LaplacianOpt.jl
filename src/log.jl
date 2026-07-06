@@ -19,7 +19,7 @@ function visualize_solution(
         (isapprox.(solution_mat, 0, atol = 1E-5)) +
         (isapprox.(solution_mat, 1, atol = 1E-5)),
     ) == data["num_nodes"]^2
-        Memento.info(_LOGGER, "Plotting the graph of integral solution")
+        @_info "Plotting the graph of integral solution"
         if visualizing_tool == "tikz"
             LOpt.plot_tikzgraph(
                 solution_mat .* adjacency_full_graph,
@@ -34,10 +34,7 @@ function visualize_solution(
             )
         end
     else
-        Memento.info(
-            _LOGGER,
-            "Cannot plot as the obtained solutions are non-integral; fractional values can be found in the results dictionary",
-        )
+        @_info "Cannot plot as the obtained solutions are non-integral; fractional values can be found in the results dictionary"
         return
     end
 end

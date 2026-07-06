@@ -84,19 +84,13 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer = nothing)
         if lom.model.moi_backend.state == MOI.Utilities.NO_OPTIMIZER
             JuMP.set_optimizer(lom.model, optimizer)
         else
-            Memento.warn(
-                _LOGGER,
-                "Model already contains optimizer, cannot use optimizer specified in `optimize_LOModel!`",
-            )
+            @_warn "Model already contains optimizer, cannot use optimizer specified in `optimize_LOModel!`"
         end
     end
 
     if JuMP.mode(lom.model) != JuMP.DIRECT &&
        lom.model.moi_backend.state == MOI.Utilities.NO_OPTIMIZER
-        Memento.error(
-            _LOGGER,
-            "No optimizer specified in `optimize_LOModel!` or the given JuMP model.",
-        )
+        @_error "No optimizer specified in `optimize_LOModel!` or the given JuMP model."
     end
 
     start_time = time()
@@ -105,13 +99,10 @@ function optimize_LOModel!(lom::LaplacianOptModel; optimizer = nothing)
     try
         solve_time = JuMP.solve_time(lom.model)
     catch
-        Memento.warn(
-            _LOGGER,
-            "The given optimizer does not provide the SolveTime() attribute, falling back on @timed.  This is not a rigorous timing value.",
-        )
+        @_warn "The given optimizer does not provide the SolveTime() attribute, falling back on @timed.  This is not a rigorous timing value."
     end
 
-    Memento.debug(_LOGGER, "JuMP model optimize time: $(time() - start_time)")
+    @_debug "JuMP model optimize time: $(time() - start_time)"
     result_dict = LOpt.build_LOModel_result(lom, solve_time)
 
     return merge(lom.result, result_dict)
@@ -198,25 +189,25 @@ function _logging_info(lom::LaplacianOptModel)
     if lom.options.solution_type == "optimal"
         if length(keys(lom.minor_idx_dict)) > 0
             for k in keys(lom.minor_idx_dict)
-                Memento.info(_LOGGER, "Applying eigen cuts ($(k)x$(k) matrix)")
+                @_info "Applying eigen cuts ($(k)x$(k) matrix)"
             end
         end
 
         lom.options.soc_linearized_cuts &&
-            Memento.info(_LOGGER, "Applying linearized SOC cuts (2x2 minors)")
+            @_info "Applying linearized SOC cuts (2x2 minors)"
         lom.options.cheeger_cuts &&
-            Memento.info(_LOGGER, "Applying Cheeger inequality-based cuts")
+            @_info "Applying Cheeger inequality-based cuts"
         lom.options.sdp_relaxation &&
-            Memento.info(_LOGGER, "Applying SDP relaxation formulation")
+            @_info "Applying SDP relaxation formulation"
 
         if !lom.data["is_base_graph_connected"] && lom.options.topology_multi_commodity
-            Memento.info(_LOGGER, "Applying topology multi commodity constraints")
+            @_info "Applying topology multi commodity constraints"
         end
 
         if !lom.data["is_base_graph_connected"] && lom.options.topology_flow_cuts
-            Memento.info(_LOGGER, "Applying topology flow cuts")
+            @_info "Applying topology flow cuts"
         end
     elseif lom.options.solution_type == "heuristic"
-        Memento.info(_LOGGER, "Applying heuristics to obtain a feasible solution")
+        @_info "Applying heuristics to obtain a feasible solution"
     end
 end

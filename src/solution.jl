@@ -4,10 +4,7 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
     try
         result_count = JuMP.result_count(lom.model)
     catch
-        Memento.warn(
-            _LOGGER,
-            "the given optimizer does not provide the ResultCount() attribute, assuming the solver returned a solution which may be incorrect.",
-        )
+        @_warn "the given optimizer does not provide the ResultCount() attribute, assuming the solver returned a solution which may be incorrect."
     end
 
     solution = Dict{String,Any}()
@@ -15,17 +12,11 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
     if result_count > 0
         solution = LOpt.build_LOModel_solution(lom)
     else
-        Memento.warn(
-            _LOGGER,
-            "LaplacianOpt model has no results - solution cannot be built",
-        )
+        @_warn "LaplacianOpt model has no results - solution cannot be built"
     end
 
     if JuMP.primal_status(lom.model) != MOI.FEASIBLE_POINT
-        Memento.error(
-            _LOGGER,
-            "Non-feasible primal status. Graph solution may not be exact",
-        )
+        @_error "Non-feasible primal status. Graph solution may not be exact"
     end
 
     result = Dict{String,Any}(
@@ -46,7 +37,7 @@ function build_LOModel_result(lom::LaplacianOptModel, solve_time::Number)
         if status in [true, false]
             result["optimality_certificate_MISDP"] = status
             (status == false) &&
-                (Memento.warn(_LOGGER, "Optimality certificate for MISDP failed!"))
+                (@_warn "Optimality certificate for MISDP failed!")
         end
     end
 
@@ -60,10 +51,7 @@ function get_objective_value(model::JuMP.Model)
     try
         obj_val = JuMP.objective_value(model)
     catch
-        Memento.warn(
-            _LOGGER,
-            "Objective value is unbounded. Problem may be infeasible or not constrained properly",
-        )
+        @_warn "Objective value is unbounded. Problem may be infeasible or not constrained properly"
     end
 
     return obj_val

@@ -17,11 +17,11 @@ function get_data(params::Dict{String,Any})
 
     # data dictionary
     if !haskey(params, "data_dict")
-        Memento.error(_LOGGER, "Data dictionary has to be specified in input params")
+        @_error "Data dictionary has to be specified in input params"
     end
     data_dict = LOpt._pre_process_data(params["data_dict"])
 
-    Memento.info(_LOGGER, "Number of nodes in the graph: $(data_dict["num_nodes"])")
+    @_info "Number of nodes in the graph: $(data_dict["num_nodes"])"
 
     # augment budget
     augment_budget =
@@ -30,20 +30,14 @@ function get_data(params::Dict{String,Any})
             params["augment_budget"]
         else
             budget = data_dict["num_edges_to_augment"]
-            Memento.info(_LOGGER, "Setting edge augmentation budget to $budget")
+            @_info "Setting edge augmentation budget to $budget"
             budget
         end
 
     # Log graph information
-    Memento.info(
-        _LOGGER,
-        "Number of edges in the base graph: $(data_dict["num_edges_existing"])",
-    )
-    Memento.info(
-        _LOGGER,
-        "Number of candidate edges to augment: $(data_dict["num_edges_to_augment"])",
-    )
-    Memento.info(_LOGGER, "Augment budget: $(augment_budget)")
+    @_info "Number of edges in the base graph: $(data_dict["num_edges_existing"])"
+    @_info "Number of candidate edges to augment: $(data_dict["num_edges_to_augment"])"
+    @_info "Augment budget: $(augment_budget)"
 
     # graph type
     graph_type = "any"  # default
@@ -51,10 +45,7 @@ function get_data(params::Dict{String,Any})
         if params["graph_type"] in ["any", "hamiltonian_cycle"]
             graph_type = params["graph_type"]
         else
-            Memento.error(
-                _LOGGER,
-                "Invalid graph type, $(params["graph_type"]), in input params",
-            )
+            @_error "Invalid graph type, $(params["graph_type"]), in input params"
         end
     end
 
@@ -78,7 +69,7 @@ function parse_file(file_path::String)
     data_dict = JSON.parsefile(file_path)
 
     haskey(data_dict, "num_nodes") ||
-        Memento.error(_LOGGER, "Number of nodes is missing in the input data file")
+        @_error "Number of nodes is missing in the input data file"
     num_nodes = data_dict["num_nodes"]
 
     adjacency_base_graph = zeros(Float64, num_nodes, num_nodes)
@@ -126,7 +117,7 @@ function _pre_process_data(data_dict::Dict{String,Any})
             adjacency_base_graph[j, i],
             atol = 1E-5,
         )
-            Memento.error("Adjacency matrix of the base graph has to be symmetric")
+            @_error "Adjacency matrix of the base graph has to be symmetric"
         else
             num_edges_existing += 1
         end
@@ -138,7 +129,7 @@ function _pre_process_data(data_dict::Dict{String,Any})
             adjacency_augment_graph[j, i],
             atol = 1E-5,
         )
-            Memento.error("Adjacency matrix of the augment graph has to be symmetric")
+            @_error "Adjacency matrix of the augment graph has to be symmetric"
         else
             num_edges_to_augment += 1
         end
@@ -167,14 +158,11 @@ any input data error in the JSON file.
 """
 function _catch_data_input_error(num_nodes::Int64, i::Int64, j::Int64, w_ij::Number)
     if (i > num_nodes) || (j > num_nodes)
-        Memento.error(
-            _LOGGER,
-            "Node pair ($i,$j) does not match with total number of nodes, $num_nodes",
-        )
+        @_error "Node pair ($i,$j) does not match with total number of nodes, $num_nodes"
     end
 
     if !(isapprox(abs(w_ij), 0, atol = 1E-6)) & (w_ij < 0)
-        Memento.error(_LOGGER, "Graphs with negative weights are not supported")
+        @_error "Graphs with negative weights are not supported"
     end
 end
 
@@ -193,32 +181,27 @@ function _detect_infeasbility_in_data(data::Dict{String,Any})
 
     # Check for basic infeasibility conditions
     num_edges_to_augment == 0 &&
-        Memento.error(_LOGGER, "At least one edge must be available for augmentation")
-    num_edges_existing == num_nodes * (num_nodes - 1) / 2 && Memento.error(
-        _LOGGER,
-        "Input graph is already complete; augmentation unnecessary",
-    )
+        @_error "At least one edge must be available for augmentation"
+    num_edges_existing == num_nodes * (num_nodes - 1) / 2 &&
+        @_error "Input graph is already complete; augmentation unnecessary"
     (num_edges_existing == 0 && augment_budget < (num_nodes - 1)) &&
-        Memento.error(_LOGGER, "Insufficient augment_budget for connectivity")
+        @_error "Insufficient augment_budget for connectivity"
     (!isinteger(augment_budget) || augment_budget < -1E-6) &&
-        Memento.error(_LOGGER, "Edge augmentation budget must be positive integer")
+        @_error "Edge augmentation budget must be positive integer"
 
     # Check for mutually exclusive edge sets
     maximum(
         (data["adjacency_augment_graph"] .> 0) + (data["adjacency_base_graph"] .> 0),
-    ) > 1 && Memento.error(
-        _LOGGER,
-        "Edge sets of base and augment graphs must be mutually exclusive",
-    )
+    ) > 1 && @_error "Edge sets of base and augment graphs must be mutually exclusive"
 
     # Check for free vertices
     A = data["adjacency_augment_graph"] + data["adjacency_base_graph"]
     any(isapprox.(sum(A, dims = 2), 0, atol = 1E-6)) &&
-        Memento.error(_LOGGER, "Detected free vertices resulting in disconnected graphs")
+        @_error "Detected free vertices resulting in disconnected graphs"
 
     # Check Hamiltonian cycle feasibility
     if graph_type == "hamiltonian_cycle" && num_edges_existing == 0
         (num_edges_to_augment < num_nodes || augment_budget != num_nodes) &&
-            Memento.error(_LOGGER, "Insufficient edges for Hamiltonian cycle")
+            @_error "Insufficient edges for Hamiltonian cycle"
     end
 end
