@@ -19,8 +19,7 @@ to an input adjacency matrix of the graph.
 function optimal_graph_edges(adjacency_matrix::Array{<:Number})
     num_nodes = size(adjacency_matrix, 1)
 
-    !LA.issymmetric(adjacency_matrix) &&
-        @_error "Input adjacency matrix is asymmetric"
+    !LA.issymmetric(adjacency_matrix) && @_error "Input adjacency matrix is asymmetric"
 
     any(i -> !isapprox(adjacency_matrix[i, i], 0), 1:num_nodes) &&
         @_error "Input adjacency matrix cannot have self loops"
@@ -40,8 +39,7 @@ Given a weighted adjacency matrix as an input, this function returns the
 weighted Laplacian matrix of the graph. 
 """
 function laplacian_matrix(adjacency_matrix::Array{<:Number})
-    !LA.issymmetric(adjacency_matrix) &&
-        @_error "Input adjacency matrix is asymmetric"
+    !LA.issymmetric(adjacency_matrix) && @_error "Input adjacency matrix is asymmetric"
 
     num_nodes = size(adjacency_matrix, 1)
     laplacian_matrix = zeros(Float64, num_nodes, num_nodes)
@@ -338,8 +336,7 @@ function _PMinorIdx(
     isempty(sizes) && return minor_idx_dict
 
     max_size = maximum(sizes)
-    max_size > N &&
-        @_warn "Detected maximum eigen-cut size ($(max_size)) > num_nodes"
+    max_size > N && @_warn "Detected maximum eigen-cut size ($(max_size)) > num_nodes"
 
     for k in unique(sizes)
         (k < 2 || k > N) && continue

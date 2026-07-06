@@ -195,10 +195,8 @@ function _logging_info(lom::LaplacianOptModel)
 
         lom.options.soc_linearized_cuts &&
             @_info "Applying linearized SOC cuts (2x2 minors)"
-        lom.options.cheeger_cuts &&
-            @_info "Applying Cheeger inequality-based cuts"
-        lom.options.sdp_relaxation &&
-            @_info "Applying SDP relaxation formulation"
+        lom.options.cheeger_cuts && @_info "Applying Cheeger inequality-based cuts"
+        lom.options.sdp_relaxation && @_info "Applying SDP relaxation formulation"
 
         if !lom.data["is_base_graph_connected"] && lom.options.topology_multi_commodity
             @_info "Applying topology multi commodity constraints"

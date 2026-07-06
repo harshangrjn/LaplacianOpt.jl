@@ -26,7 +26,9 @@ end
 "Suppresses information and warning messages output by LaplacianOpt."
 function silence()
     _log_if_level(
-        () -> @info("Suppressing information and warning messages for the rest of this session."),
+        () -> @info(
+            "Suppressing information and warning messages for the rest of this session."
+        ),
         Logging.Info,
     )
     return logger_config!("error")

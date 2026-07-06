@@ -431,4 +431,6 @@ function constraint_topology_multi_commodity_flow(lom::LaplacianOptModel)
     return
 end
 
-constraint_sdp_relaxation_dummy(lom::LaplacianOptModel) = JuMP.@constraint(lom.model, sum(lom.variables[:sdp_dummy_var]) == 1.0)
+function constraint_sdp_relaxation_dummy(lom::LaplacianOptModel)
+    JuMP.@constraint(lom.model, sum(lom.variables[:sdp_dummy_var]) == 1.0)
+end
