@@ -4,6 +4,7 @@ LaplacianOpt.jl Change Log
 ### v0.7.3
 - Replaced Memento-based logging with Julia's standard `Logging` package (updated `src` and `test` folders).
 - Updated dependency compatibility bounds for these packages: JSON, Graphs, JuMP, MathOptInterface, TikzGraphs, and TikzPictures.
+- Logo and docs updated. 
 
 ### v0.7.2
 - Update codecov/codecov-action
