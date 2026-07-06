@@ -33,4 +33,4 @@ makedocs(
     ],
 )
 
-deploydocs(repo = "github.com/harshangrjn/LaplacianOpt.jl.git", push_preview = true)
+deploydocs(repo = "github.com/harshangrjn/LaplacianOpt.jl.git", push_preview = false)

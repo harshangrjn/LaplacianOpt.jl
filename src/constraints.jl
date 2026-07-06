@@ -88,10 +88,7 @@ function constraint_lazycallback_wrapper(lom::LaplacianOptModel; optimizer = not
         status = JuMP.callback_node_status(cb_cuts, lom.model)
 
         if status == MOI.CALLBACK_NODE_STATUS_UNKNOWN
-            Memento.error(
-                _LOGGER,
-                "Callback status: unknown - solution may not be integer feasible",
-            )
+            @_error "Callback status: unknown - solution may not be integer feasible"
 
         elseif status in [MOI.CALLBACK_NODE_STATUS_INTEGER]
             #    [MOI.CALLBACK_NODE_STATUS_INTEGER, MOI.CALLBACK_NODE_STATUS_FRACTIONAL]
@@ -216,10 +213,7 @@ function _add_eigen_cut_lazy(
         MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
 
         if lom.options.lazycuts_logging
-            Memento.info(
-                _LOGGER,
-                "Polyhedral relaxation cuts: $(length(idx))x$(length(idx)) minor (eigen)",
-            )
+            @_info "Polyhedral relaxation cuts: $(length(idx))x$(length(idx)) minor (eigen)"
         end
     end
 end
@@ -254,10 +248,7 @@ function constraint_soc_cuts_on_2minors(
                 end
 
                 if lom.options.lazycuts_logging
-                    Memento.info(
-                        _LOGGER,
-                        "Polyhedral relaxation cuts: 2x2 minor linearized SOC",
-                    )
+                    @_info "Polyhedral relaxation cuts: 2x2 minor linearized SOC"
                 end
             end
         end
@@ -275,10 +266,7 @@ function constraint_cheeger_cuts(
     ac_lower_bound = floor(lom.options.best_lower_bound, digits = 3)
 
     if isapprox(ac_lower_bound, 0, atol = 1E-4)
-        Memento.info(
-            _LOGGER,
-            "Cheeger cuts may be ineffective: best λ₂ lower bound is approximately 0.",
-        )
+        @_info "Cheeger cuts may be ineffective: best λ₂ lower bound is approximately 0."
         return
     end
 
@@ -319,10 +307,7 @@ function constraint_topology_flow_cuts(
 
     max_cc = 5 # increase this to any greater integer value and it works
     if length(cc_lazy) > max_cc
-        Memento.info(
-            _LOGGER,
-            "Polyhedral relaxation: flow cuts not added for integer solutions with $(length(cc_lazy)) connected components",
-        )
+        @_info "Polyhedral relaxation: flow cuts not added for integer solutions with $(length(cc_lazy)) connected components"
     elseif length(cc_lazy) == 1
         return
     end
@@ -366,10 +351,7 @@ function constraint_topology_flow_cuts(
                 MOI.submit(lom.model, MOI.LazyConstraint(cb_cuts), con)
 
                 if lom.options.lazycuts_logging
-                    Memento.info(
-                        _LOGGER,
-                        "Polyhedral relaxation cuts: cycle elimination added (size = $cyc_length)",
-                    )
+                    @_info "Polyhedral relaxation cuts: cycle elimination added (size = $cyc_length)"
                 end
             end
         end
@@ -406,7 +388,7 @@ function constraint_topology_flow_cuts(
             end
 
             if lom.options.lazycuts_logging
-                Memento.info(_LOGGER, "Polyhedral relaxation cuts: flow cuts added")
+                @_info "Polyhedral relaxation cuts: flow cuts added"
             end
         end
     end
@@ -449,4 +431,6 @@ function constraint_topology_multi_commodity_flow(lom::LaplacianOptModel)
     return
 end
 
-constraint_sdp_relaxation_dummy(lom::LaplacianOptModel) = JuMP.@constraint(lom.model, sum(lom.variables[:sdp_dummy_var]) == 1.0)
+function constraint_sdp_relaxation_dummy(lom::LaplacianOptModel)
+    JuMP.@constraint(lom.model, sum(lom.variables[:sdp_dummy_var]) == 1.0)
+end

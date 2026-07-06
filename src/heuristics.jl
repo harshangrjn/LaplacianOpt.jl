@@ -12,7 +12,7 @@ function heuristic_kopt(lom::LaplacianOptModel, optimizer = nothing)
         _, heuristic_time, solve_bytes_alloc, sec_in_gc =
             @timed adjacency_star, ac_star = LOpt.heuristic_base_graph_connected(lom)
     else
-        Memento.error(_LOGGER, "Heuristic for this option is not yet supported.")
+        @_error "Heuristic for this option is not yet supported."
     end
 
     #  Implement the bridge to results here
@@ -535,10 +535,7 @@ function refinement_tree(
                 )
             end
         else
-            Memento.error(
-                _LOGGER,
-                "For kopt_parameter = 2, augment budget should be >= 2",
-            )
+            @_error "For kopt_parameter = 2, augment budget should be >= 2"
         end
     elseif kopt_parameter == 3
         if augment_budget >= 3
@@ -560,10 +557,10 @@ function refinement_tree(
                 )
             end
         else
-            Memento.error(_LOGGER, "Augment budget should be greater than two.")
+            @_error "Augment budget should be greater than two."
         end
     else
-        Memento.error(_LOGGER, "kopt_parameter > 3 is currently not supported.")
+        @_error "kopt_parameter > 3 is currently not supported."
     end
     return Matrix(Graphs.adjacency_matrix(G)),
     LOpt.algebraic_connectivity(

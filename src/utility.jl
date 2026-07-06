@@ -19,11 +19,10 @@ to an input adjacency matrix of the graph.
 function optimal_graph_edges(adjacency_matrix::Array{<:Number})
     num_nodes = size(adjacency_matrix, 1)
 
-    !LA.issymmetric(adjacency_matrix) &&
-        Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
+    !LA.issymmetric(adjacency_matrix) && @_error "Input adjacency matrix is asymmetric"
 
     any(i -> !isapprox(adjacency_matrix[i, i], 0), 1:num_nodes) &&
-        Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
+        @_error "Input adjacency matrix cannot have self loops"
 
     edges = Tuple{Int64,Int64}[]
     for i in 1:(num_nodes-1), j in (i+1):num_nodes
@@ -40,8 +39,7 @@ Given a weighted adjacency matrix as an input, this function returns the
 weighted Laplacian matrix of the graph. 
 """
 function laplacian_matrix(adjacency_matrix::Array{<:Number})
-    !LA.issymmetric(adjacency_matrix) &&
-        Memento.error(_LOGGER, "Input adjacency matrix is asymmetric")
+    !LA.issymmetric(adjacency_matrix) && @_error "Input adjacency matrix is asymmetric"
 
     num_nodes = size(adjacency_matrix, 1)
     laplacian_matrix = zeros(Float64, num_nodes, num_nodes)
@@ -49,12 +47,12 @@ function laplacian_matrix(adjacency_matrix::Array{<:Number})
     # Check for self loops
     for i in 1:num_nodes
         !isapprox(adjacency_matrix[i, i], 0) &&
-            Memento.error(_LOGGER, "Input adjacency matrix cannot have self loops")
+            @_error "Input adjacency matrix cannot have self loops"
     end
 
     # Negative weights
     any(x -> x < -1E-6, adjacency_matrix) &&
-        Memento.error(_LOGGER, "Input adjacency matrix cannot have negative weights")
+        @_error "Input adjacency matrix cannot have negative weights"
 
     # Degree matrix
     for i in 1:num_nodes
@@ -86,7 +84,7 @@ function fiedler_vector(adjacency_matrix::Array{<:Number})
     fiedler = LA.eigvecs(L_mat)[:, 2]
 
     if !isapprox(fiedler' * L_mat * fiedler, ac, atol = 1E-6)
-        Memento.error(_LOGGER, "Evaluated eigenvector is not the Fiedler vector")
+        @_error "Evaluated eigenvector is not the Fiedler vector"
     end
 
     return fiedler
@@ -142,7 +140,7 @@ function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
     # Check for complex eigenvalues
     if eltype(W_eigvals) <: Complex &&
        !isapprox(imag.(W_eigvals), zeros(length(W_eigvals)), atol = 1E-6)
-        Memento.error(_LOGGER, "PSD matrix (W) cannot have complex eigenvalues")
+        @_error "PSD matrix (W) cannot have complex eigenvalues"
     end
 
     # If minimum eigenvalue is negative (beyond tolerance)
@@ -154,10 +152,7 @@ function _violated_eigen_vector(W::Array{<:Number}; tol = 1E-6)
             LOpt.round_zeros_ones!(violated_eigen_vec)
             return violated_eigen_vec
         else
-            Memento.warn(
-                _LOGGER,
-                "Eigen cut corresponding to the negative eigenvalue could not be evaluated",
-            )
+            @_warn "Eigen cut corresponding to the negative eigenvalue could not be evaluated"
         end
     end
     return nothing
@@ -193,7 +188,7 @@ function cheeger_constant(
 )
     num_nodes = size(G)[1]
     if num_nodes != size(G)[2]
-        Memento.error(_LOGGER, "Input adjacency has to be a square matrix")
+        @_error "Input adjacency has to be a square matrix"
     end
 
     result_cheeger = Dict{String,Any}("cheeger_constant" => 0)
@@ -263,7 +258,7 @@ function cheeger_constant(
     result_cheeger["optimality_gap_percent"] = 100 * JuMP.relative_gap(m_cheeger)
 
     (length(result_cheeger["S"]) == 0) &&
-        (Memento.error(_LOGGER, "Cheeger set cardinality cannot be zero."))
+        (@_error "Cheeger set cardinality cannot be zero.")
     return result_cheeger
 end
 
@@ -341,8 +336,7 @@ function _PMinorIdx(
     isempty(sizes) && return minor_idx_dict
 
     max_size = maximum(sizes)
-    max_size > N &&
-        Memento.warn(_LOGGER, "Detected maximum eigen-cut size ($(max_size)) > num_nodes")
+    max_size > N && @_warn "Detected maximum eigen-cut size ($(max_size)) > num_nodes"
 
     for k in unique(sizes)
         (k < 2 || k > N) && continue
@@ -445,9 +439,9 @@ Returns all combinations possible for given `n` and `k`.
 """
 function edge_combinations(num_edges::Int64, kopt_parameter::Int64)
     if kopt_parameter < 2 || kopt_parameter > 3
-        Memento.error(_LOGGER, "kopt_parameter must be either 2 or 3")
+        @_error "kopt_parameter must be either 2 or 3"
     elseif num_edges < kopt_parameter
-        Memento.error(_LOGGER, "num_edges must be greater than or equal to k")
+        @_error "num_edges must be greater than or equal to k"
     end
 
     if kopt_parameter == 2
