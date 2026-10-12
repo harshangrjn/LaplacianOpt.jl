@@ -5,10 +5,10 @@ using Gurobi
 
 include("optimizers.jl")
 
-#-------------------------------------#
-#            MIP solver               #
-# (> Gurobi 12.0.2 performs the best) #
-#-------------------------------------#
+#----------------------------#
+#        MIP solver          #
+# (Gurobi performs the best) #
+#----------------------------#
 lopt_optimizer = get_gurobi(solver_log = false)
 
 #-------------------------------------#
