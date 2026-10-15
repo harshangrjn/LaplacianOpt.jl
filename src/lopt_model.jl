@@ -1,7 +1,7 @@
 function build_LOModel(data::Dict{String,Any}; optimizer = nothing, options = nothing)
     lom = LOpt.LaplacianOptModel(data)
 
-    # Default eigen-cuts sizes (for exact soltution of MISDP, include `num_nodes` here)
+    # Default eigen-cuts sizes (for exact solution of MISDP, include `num_nodes` here)
     LOpt.set_option(lom, :eigen_cuts_sizes, [lom.data["num_nodes"], 2])
 
     # Update defaults to user-defined options

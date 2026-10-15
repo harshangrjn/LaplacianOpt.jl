@@ -1,8 +1,12 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.7.4
+- Updated GitHub Actions dependencies and CI compatibility.
+- Fixed broken docs, Julia 1.10 compatibility, and corrected usage examples, links, and docstrings.
+
 ### v0.7.3
-- Replaced Memento-based logging with Julia's standard `Logging` package (updated `src` and `test` folders).
+- Replaced the previous logging dependency with Julia's standard `Logging` package (updated `src` and `test` folders).
 - Updated dependency compatibility bounds for these packages: JSON, Graphs, JuMP, MathOptInterface, TikzGraphs, and TikzPictures.
 - Updated README content, logo display, and documentation workflow settings.
 
@@ -34,7 +38,7 @@ LaplacianOpt.jl Change Log
 - `plot_solutions.jl` script added to plot graphs
 
 ### v0.6.0
-- Added mutiple heuristics to handle both spanning trees and graphs with loops 
+- Added multiple heuristics to handle both spanning trees and graphs with loops
 - Refactored `log.jl` to handle solutions from heuristics
 - Included more user options for heuristic in `model_options`
 - Cleaned up populating and logging of eigen cuts
@@ -45,7 +49,7 @@ LaplacianOpt.jl Change Log
 - Dropped support for `constraint_eigen_cuts_on_2minors` and `constraint_eigen_cuts_on_3minors`
 - Cleaned up project eigen-cuts, and applies to all sub-matrix sizes
 - Added more dense-graph instances in `src/examples` folder (60 nodes)
-- Added `src/examples/solutions` which conntains optimal/best-known solutions for all the dense-graph instances
+- Added `src/examples/solutions` which contains optimal/best-known solutions for all the dense-graph instances
 - Updated docs and unit tests to reflect above changes
 
 ### v0.4.1
@@ -136,7 +140,7 @@ LaplacianOpt.jl Change Log
 
 ### v0.1.1
 - Added utility functions for evaluation of algebraic connectivity 
-- Added utility functions for evaluation of fieder vector
+- Added utility functions for evaluation of Fiedler vector
 - Support for SOC relaxations for upper bounds 
 - Documentation stable update
 - More unit tests for SOC and utility functions

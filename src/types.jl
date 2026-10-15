@@ -3,7 +3,7 @@ export LaplacianOptModel
 """
     LaplacianOptModelOptions
 The composite mutable struct, `LaplacianOptModelOptions`, holds various optimization 
-model options for enhancements with defualt options set to the values provided by 
+model options for enhancements with default options set to the values provided by
 `get_default_options` function.
 """
 mutable struct LaplacianOptModelOptions
@@ -107,7 +107,7 @@ mutable struct LaplacianOptModel
     minor_idx_dict::Dict{Int64,Vector{Tuple{Int64,Vararg{Int64}}}}
     result::Dict{String,Any}
 
-    "Contructor for struct `LaplacianOptModel`"
+    "Constructor for struct `LaplacianOptModel`"
     function LaplacianOptModel(data::Dict{String,Any})
         data = data
         model = JuMP.Model()

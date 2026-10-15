@@ -8,5 +8,8 @@ JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 LaplacianOpt = "bb20392f-64fb-4001-92e8-14b3aedd5a9e"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 
+[sources]
+LaplacianOpt = {path = ".."}
+
 [compat]
 julia = "1"

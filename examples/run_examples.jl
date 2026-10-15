@@ -7,7 +7,7 @@ include("optimizers.jl")
 
 #----------------------------#
 #        MIP solver          #
-# (Gurobi performs the best) #
+# (commercial solvers are recommended) #
 #----------------------------#
 lopt_optimizer = get_gurobi(solver_log = false)
 

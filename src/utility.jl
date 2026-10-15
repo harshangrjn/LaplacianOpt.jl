@@ -161,7 +161,8 @@ end
 """
     cheeger_constant(G::Matrix{<:Number}, 
                      optimizer::MOI.OptimizerWithAttributes; 
-                     cheeger_ub = 1E6,
+                     cheeger_ub = 1E4,
+                     formulation_type = "set_cardinality",
                      optimizer_log = false)
     
 Given a symmetric, weighted adjacency matrix `G` of a connected graph, and a mixed-integer linear optimizer, 

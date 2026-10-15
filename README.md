@@ -14,9 +14,9 @@
 
 Status: 
 [![CI](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl/branch/main/graph/badge.svg?token=7EKATOHLYL)](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl)
+[![codecov](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl/branch/master/graph/badge.svg?token=7EKATOHLYL)](https://codecov.io/gh/harshangrjn/LaplacianOpt.jl)
 [![Documentation](https://github.com/harshangrjn/LaplacianOpt.jl/actions/workflows/documentation.yml/badge.svg)](https://harshangrjn.github.io/LaplacianOpt.jl/dev/)
-[![version](https://juliahub.com/docs/LaplacianOpt/version.svg)](https://juliahub.com/ui/Packages/LaplacianOpt/V1JEg/)
+[![version](https://img.shields.io/github/v/release/harshangrjn/LaplacianOpt.jl?label=version)](https://juliahub.com/ui/Packages/LaplacianOpt/V1JEg/)
 ## LaplacianOpt
 **LaplacianOpt** is a Julia package for designing robust weighted graphs by maximizing the algebraic connectivity of their Laplacian matrices. Given a weighted base graph (possibly empty), a set of candidate weighted edges, and an augmentation budget `K`, LaplacianOpt selects `K` edges that make the resulting graph as well connected as possible.
 
@@ -41,7 +41,7 @@ pkg> test
 See the `examples` directory for optimization scripts, input data, plotting utilities, and sample workflows.
 
 ## Bug reports and support
-Please report any issues via the Github **[issue tracker](https://github.com/harshangrjn/LaplacianOpt.jl/issues)**. All types of issues are welcome and encouraged; this includes bug reports, documentation typos, feature requests, etc.
+Please report any issues via the GitHub **[issue tracker](https://github.com/harshangrjn/LaplacianOpt.jl/issues)**. All types of issues are welcome and encouraged; this includes bug reports, documentation typos, feature requests, etc.
 
 ## Acknowledgement
 This work was supported by Los Alamos National Laboratory (LANL)'s LDRD Early Career Research Award (20190590ECR) and [LANL-TAMU's collaborative research project](https://nationallabsoffice.tamus.edu/the-texas-am-university-system-and-los-alamos-national-laboratory-partner-to-design-robust-networks/) grant. The primary developer of this package is [Harsha Nagarajan](http://harshanagarajan.com) ([@harshangrjn](https://github.com/harshangrjn)). 

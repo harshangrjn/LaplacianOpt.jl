@@ -1,7 +1,7 @@
 name = "LaplacianOpt"
 uuid = "bb20392f-64fb-4001-92e8-14b3aedd5a9e"
 authors = ["Harsha Nagarajan"]
-version = "0.7.3"
+version = "0.7.4"
 
 [deps]
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
@@ -21,7 +21,7 @@ JuMP = "1.30"
 MathOptInterface = "1.51"
 TikzGraphs = "1.4"
 TikzPictures = "3.5"
-julia = "^1"
+julia = "1.10"
 
 [extras]
 GLPK = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
