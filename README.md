@@ -47,26 +47,8 @@ Please report any issues via the GitHub **[issue tracker](https://github.com/har
 This work was supported by Los Alamos National Laboratory (LANL)'s LDRD Early Career Research Award (20190590ECR) and [LANL-TAMU's collaborative research project](https://nationallabsoffice.tamus.edu/the-texas-am-university-system-and-los-alamos-national-laboratory-partner-to-design-robust-networks/) grant. The primary developer of this package is [Harsha Nagarajan](http://harshanagarajan.com) ([@harshangrjn](https://github.com/harshangrjn)). 
 
 ## Citing LaplacianOpt
-If you find LaplacianOpt.jl useful in your work, we request you to cite the following papers [\[link-1\]](https://doi.org/10.1109/ECC.2015.7330770) [\[link-2\]](https://doi.org/10.1109/TCNS.2024.3431408): 
-```bibtex
-@article{LOpt_TCNS2024,
-  title={Optimal robust network design: Formulations and algorithms for maximizing algebraic connectivity},
-  author={Somisetty, Neelkamal and Nagarajan, Harsha and Darbha, Swaroop},
-  journal={IEEE Transactions on Control of Network Systems},
-  url = {https://doi.org/10.1109/TCNS.2024.3431408},
-  pages={918--929},
-  volume={12},
-  number={1},
-  year={2024},
-  publisher={IEEE}
-}
-
-@inproceedings{LOpt_ECC2015,
-  title={On maximizing algebraic connectivity of networks for various engineering applications},
-  author={Nagarajan, Harsha and Rathinam, Sivakumar and Darbha, Swaroop},
-  booktitle={European Control Conference (ECC)},
-  pages={1626--1632},
-  year={2015},
-  organization={IEEE}
-}
-```
+If you find LaplacianOpt useful in your work, please cite the publication(s)
+most relevant to your use of the package. The
+[Research & Publications](https://harshangrjn.github.io/LaplacianOpt.jl/dev/research/)
+page provides a chronological overview of the research, paper links, and
+copyable BibTeX citations.

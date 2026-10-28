@@ -1,6 +1,9 @@
 LaplacianOpt.jl Change Log
 =========================
 
+### v0.7.5
+- Added a `Research & Publications` timeline with paper links and copyable BibTeX citations, and linked it from the README and documentation.
+
 ### v0.7.4
 - Updated GitHub Actions dependencies and CI compatibility.
 - Fixed broken docs, Julia 1.10 compatibility, and corrected usage examples, links, and docstrings.
