@@ -1,4 +1,5 @@
 import LaplacianOpt as LOpt
+import JSON
 using JuMP
 using Gurobi
 # using GLPK
@@ -34,7 +35,7 @@ function data_SLAM(instance::String)
     # Data format has to be as given in this JSON file
     file_path = joinpath(@__DIR__, "instances/SLAM_dataset/$(instance).json")
     data_dict = LOpt.parse_file(file_path)
-    augment_budget = 10
+    augment_budget = get(JSON.parsefile(file_path), "augment_budget", 10)
     return data_dict, augment_budget
 end
 
@@ -57,7 +58,7 @@ end
 num_nodes = 8
 instance = 1
 data_dict, augment_budget = data_I(num_nodes, instance)
-# data_dict, augment_budget = data_SLAM("CSAIL") # "CSAIL", "intel", "ais2klinik"
+# data_dict, augment_budget = data_SLAM("lambda_3D") # "lambda_3D", "CSAIL", "intel", "ais2klinik"
 # data_dict, augment_budget = data_II()
 
 params = Dict{String,Any}("data_dict" => data_dict, "augment_budget" => augment_budget)

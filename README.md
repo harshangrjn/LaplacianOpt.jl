@@ -24,6 +24,20 @@ Status:
 
 The package supports mixed-integer formulations, polyhedral relaxations, cutting-plane methods, and heuristic approaches for finding globally optimal and high-quality locally optimal solutions. A common use case is designing sparse but robust measurement networks for robot localization under a limited edge budget; starting from `N` vertices, no existing edges, a complete candidate graph, and `K = N - 1`, LaplacianOpt searches for a spanning tree with maximum algebraic connectivity.
 
+## Graph sparsification for pose-graph SLAM
+
+In pose-graph SLAM, a limited loop-closure budget turns measurement selection into a graph-design problem. LaplacianOpt selects the loop closures that maximize the algebraic connectivity of the measurement graph, reinforcing weakly constrained regions and improving the accuracy of the final pose estimate. Because a larger algebraic connectivity lowers the Cramér–Rao bound on estimation error ([Boumal et al., 2014](https://doi.org/10.1093/imaiai/iat006)), a sparse graph with high algebraic connectivity can support accurate estimation for surface reconstruction.
+
+<p align="center">
+  <a href="https://harshangrjn.github.io/LaplacianOpt.jl/dev/research/#graph-sparsification-for-pose-graph-slam">
+    <img src="docs/src/assets/posegraph_algebraic_connectivity.png" alt="Five pose-graph reconstructions showing improved recovery as algebraic connectivity increases" width="100%">
+  </a>
+</p>
+
+See the
+[research documentation](https://harshangrjn.github.io/LaplacianOpt.jl/dev/research/#graph-sparsification-for-pose-graph-slam)
+for the problem setup details.
+
 ## Usage
 Clone the repository and start Julia in the project environment:
 

@@ -2,9 +2,79 @@
 
 LaplacianOpt is developed alongside research on mathematical optimization
 methods for maximizing graph algebraic connectivity and designing robust
-networks. Select a publication to read a short overview and follow its paper
-links or copy its BibTeX citation. If you find LaplacianOpt useful, we request
-that you cite the papers most relevant to your work.
+networks.
+
+## Graph sparsification for pose-graph SLAM
+
+Pose-graph SLAM estimates a set of unknown robot poses from noisy relative-pose
+measurements and is the standard formulation in modern SLAM
+([Cadena et al., 2016](https://doi.org/10.1109/TRO.2016.2624754)). Estimation
+accuracy depends on both the precision of individual measurements and the
+structure of the measurement graph: the Fisher information matrix of pose-graph
+optimization is expressed in terms of weighted graph Laplacians
+([Chen et al., 2021](https://doi.org/10.1109/TRO.2020.3001718)). For rotation
+synchronization, the Cramér–Rao bound is governed by the pseudoinverse of the
+weighted measurement-graph Laplacian, so increasing the algebraic connectivity
+``\lambda_2`` lowers this bound
+([Boumal et al., 2014](https://doi.org/10.1093/imaiai/iat006)). Sparse graphs
+that keep ``\lambda_2`` bounded away from zero remain well suited to accurate estimation and 3D reconstruction.
+
+That turns measurement selection into a graph-design problem. When sensing,
+communication, or computation allow only ``K`` loop closures, which ``K``
+should be kept? Given a fixed spanning-tree backbone and a pool of candidate
+loop closures weighted by their measurement precision, LaplacianOpt selects the
+``K`` loop closures that maximize ``\lambda_2`` of the resulting graph, either
+to global optimality or quickly with heuristics. Because ``\lambda_2`` is small
+whenever part of the graph hangs on by only a few weak edges, maximizing it
+spends the budget on loop closures that brace weakly constrained regions, not
+on redundant measurements where the graph is already rigid.
+
+### Example: recovering a 3D surface
+
+The ground truth is a three-dimensional ``\lambda``-shaped surface. It is used
+only to generate the noisy measurements and to score the final reconstruction;
+neither the edge selection nor the estimator ever sees it. Every selection
+receives the same backbone, the same pool of candidate loop closures with their
+uncertainties, the same noisy measurements, and the same budget. Each selected
+graph is then solved with a standard nonlinear pose-graph estimator. The better
+connected the selected graph, the closer its reconstruction stays to the
+ground truth.
+
+```@raw html
+<figure class="posegraph-research-figure posegraph-ground-truth-figure">
+  <a href="assets/posegraph_ground_truth.png" aria-label="Open the full-resolution ground-truth pose graph">
+    <img src="assets/posegraph_ground_truth.png" alt="Ground-truth three-dimensional lambda surface with all backbone and candidate loop-closure edges">
+  </a>
+  <figcaption>
+    Ground-truth lattice with 616 surface poses, 615 fixed backbone edges, and
+    1,298 candidate loop closures. It is used only to generate noisy
+    measurements and evaluate the reconstructions.
+  </figcaption>
+</figure>
+```
+
+```@raw html
+<figure class="posegraph-research-figure">
+  <a href="assets/posegraph_algebraic_connectivity.png" aria-label="Open the full-resolution pose-graph comparison">
+    <img src="assets/posegraph_algebraic_connectivity.png" alt="Five pose-graph reconstructions showing progressively higher algebraic connectivity and lower error relative to the ground-truth wireframe">
+  </a>
+  <figcaption>
+    Sparse pose-graph reconstructions from a fixed backbone and a 20%
+    loop-closure budget (260 of 1,298 candidate loop closures), ordered by
+    increasing algebraic connectivity. The grey wireframe is the ground truth,
+    surface colour shows per-pose translation error, and red segments show
+    sampled displacement vectors. Poorly placed loop closures barely improve
+    on the backbone-only estimate, while the maximum-algebraic-connectivity
+    selection recovers the geometry with substantially lower error.
+  </figcaption>
+</figure>
+```
+
+## Publications
+
+Select a publication to read a short overview and follow its paper links or
+copy its BibTeX citation. If you find LaplacianOpt useful, we request that you
+cite the papers most relevant to your work.
 
 ```@raw html
 <section class="publication-timeline" aria-label="LaplacianOpt publication timeline">

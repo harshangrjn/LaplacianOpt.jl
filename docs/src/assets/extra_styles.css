@@ -1,3 +1,59 @@
+.posegraph-research-figure {
+  width: min(1400px, calc(100vw - 22rem));
+  max-width: none;
+  margin: 2rem 0 2.5rem 50%;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #d8dbe2;
+  border-radius: 0.75rem;
+  box-shadow: 0 0.35rem 1.1rem rgba(24, 28, 38, 0.08);
+  transform: translateX(-50%);
+}
+
+.posegraph-research-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.posegraph-research-figure figcaption {
+  padding: 0.9rem 1.1rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #596170;
+  border-top: 1px solid #e2e4e9;
+}
+
+.posegraph-ground-truth-figure {
+  width: min(520px, calc(100vw - 22rem));
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.posegraph-ground-truth-figure a {
+  display: block;
+  width: min(200px, 100%);
+  margin: 0 auto;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #d8dbe2;
+  border-radius: 0.75rem;
+}
+
+.posegraph-ground-truth-figure img {
+  border-radius: inherit;
+}
+
+.posegraph-ground-truth-figure figcaption {
+  margin-top: 0.8rem;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #d8dbe2;
+  border-radius: 0.75rem;
+}
+
 .publication-timeline {
   position: relative;
   margin: 2rem 0;
@@ -166,6 +222,27 @@
   box-shadow: none;
 }
 
+.theme--documenter-dark .posegraph-research-figure {
+  background: #282b30;
+  border-color: #4a4e57;
+  box-shadow: none;
+}
+
+.theme--documenter-dark .posegraph-ground-truth-figure {
+  background: transparent;
+  border: 0;
+}
+
+.theme--documenter-dark .posegraph-research-figure figcaption {
+  color: #c3c7cf;
+  border-top-color: #4a4e57;
+}
+
+.theme--documenter-dark .posegraph-ground-truth-figure figcaption {
+  background: #282b30;
+  border-color: #4a4e57;
+}
+
 .theme--documenter-dark .publication-card::before {
   border-color: #202226;
 }
@@ -197,6 +274,21 @@
 
 .theme--documenter-dark .citation-header {
   background: #202226;
+}
+
+@media screen and (max-width: 1055px) {
+  .posegraph-research-figure {
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+    transform: none;
+  }
+
+  .posegraph-ground-truth-figure {
+    width: min(520px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
 }
 
 @media screen and (max-width: 620px) {
