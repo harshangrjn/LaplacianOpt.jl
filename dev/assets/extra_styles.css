@@ -16,6 +16,10 @@
   height: auto;
 }
 
+.posegraph-research-figure > p {
+  margin: 0;
+}
+
 .posegraph-research-figure figcaption {
   padding: 0.9rem 1.1rem 1rem;
   font-size: 0.95rem;
