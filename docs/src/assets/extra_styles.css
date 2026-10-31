@@ -1,3 +1,11 @@
+:root {
+  --laplacian-docs-accent: #2e63b8;
+}
+
+html.theme--documenter-dark {
+  --laplacian-docs-accent: #1abc9c;
+}
+
 #documenter .content .posegraph-research-figure {
   box-sizing: border-box;
   width: 100%;
@@ -5,9 +13,9 @@
   margin: 2rem auto 2.5rem;
   overflow: hidden;
   background: #fff;
-  border: 1px solid #d8dbe2;
+  border: 0;
   border-radius: 0.75rem;
-  box-shadow: 0 0.35rem 1.1rem rgba(24, 28, 38, 0.08);
+  box-shadow: none;
 }
 
 .posegraph-research-figure img {
@@ -29,7 +37,7 @@
   font-size: 0.95rem;
   line-height: 1.5;
   color: #596170;
-  border-top: 1px solid #e2e4e9;
+  border-top: 0;
 }
 
 #documenter .content .posegraph-ground-truth-figure {
@@ -45,7 +53,7 @@
   margin: 0 auto;
   overflow: hidden;
   background: #fff;
-  border: 1px solid #d8dbe2;
+  border: 0;
   border-radius: 0.75rem;
 }
 
@@ -57,7 +65,7 @@
   margin-top: 0.8rem;
   text-align: center;
   background: #fff;
-  border: 1px solid #d8dbe2;
+  border: 0;
   border-radius: 0.75rem;
 }
 
@@ -74,7 +82,7 @@
   left: 0.7rem;
   width: 2px;
   content: "";
-  background: #2a5398;
+  background: var(--laplacian-docs-accent);
   opacity: 0.35;
 }
 
@@ -95,10 +103,10 @@
   width: 0.8rem;
   height: 0.8rem;
   content: "";
-  background: #2a5398;
+  background: var(--laplacian-docs-accent);
   border: 3px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 0 0 1px #2a5398;
+  box-shadow: 0 0 0 1px var(--laplacian-docs-accent);
 }
 
 .publication-card summary {
@@ -118,7 +126,7 @@
 .publication-card summary::after {
   font-size: 1.4rem;
   line-height: 1;
-  color: #2a5398;
+  color: var(--laplacian-docs-accent);
   text-align: center;
   content: "+";
 }
@@ -134,7 +142,7 @@
 .publication-year {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #2a5398;
+  color: var(--laplacian-docs-accent);
   letter-spacing: 0.05em;
 }
 
@@ -176,7 +184,7 @@
   padding: 0.35rem 0.7rem;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #21447e;
+  color: var(--laplacian-docs-accent);
   text-decoration: none;
   background: #eaf0f8;
   border: 1px solid #b9c9e2;
@@ -186,8 +194,8 @@
 .publication-links a:hover,
 .bibtex-copy:hover {
   color: #fff;
-  background: #2a5398;
-  border-color: #2a5398;
+  background: var(--laplacian-docs-accent);
+  border-color: var(--laplacian-docs-accent);
 }
 
 .citation-block {
@@ -223,64 +231,61 @@
   display: none;
 }
 
-.theme--documenter-dark .publication-card {
-  background: #282b30;
-  border-color: #4a4e57;
+html.theme--documenter-dark .publication-card {
+  background: #282f2f;
+  border-color: #5e6d6f;
   box-shadow: none;
 }
 
-.theme--documenter-dark .posegraph-research-figure {
-  background: #282b30;
-  border-color: #4a4e57;
+html.theme--documenter-dark #documenter .content .posegraph-research-figure {
+  background: #282f2f;
   box-shadow: none;
 }
 
-.theme--documenter-dark .posegraph-ground-truth-figure {
+html.theme--documenter-dark #documenter .content .posegraph-ground-truth-figure {
   background: transparent;
   border: 0;
 }
 
-.theme--documenter-dark .posegraph-research-figure figcaption {
-  color: #c3c7cf;
-  border-top-color: #4a4e57;
+html.theme--documenter-dark #documenter .content .posegraph-research-figure figcaption {
+  color: #d5dddd;
 }
 
-.theme--documenter-dark .posegraph-ground-truth-figure figcaption {
-  background: #282b30;
-  border-color: #4a4e57;
+html.theme--documenter-dark #documenter .content .posegraph-ground-truth-figure figcaption {
+  background: #282f2f;
 }
 
-.theme--documenter-dark .publication-card::before {
-  border-color: #202226;
+html.theme--documenter-dark .publication-card::before {
+  border-color: #1f2424;
 }
 
-.theme--documenter-dark .publication-card[open] summary {
-  border-bottom-color: #4a4e57;
+html.theme--documenter-dark .publication-card[open] summary {
+  border-bottom-color: #5e6d6f;
 }
 
-.theme--documenter-dark .publication-venue {
-  color: #b8bbc3;
+html.theme--documenter-dark .publication-venue {
+  color: #c3cccc;
 }
 
-.theme--documenter-dark .publication-links a,
-.theme--documenter-dark .bibtex-copy {
-  color: #c6d7ef;
-  background: #26364f;
-  border-color: #49658f;
+html.theme--documenter-dark .publication-links a,
+html.theme--documenter-dark .bibtex-copy {
+  color: #bff4e8;
+  background: #173c36;
+  border-color: #2d7566;
 }
 
-.theme--documenter-dark .publication-links a:hover,
-.theme--documenter-dark .bibtex-copy:hover {
-  color: #fff;
-  background: #2a5398;
+html.theme--documenter-dark .publication-links a:hover,
+html.theme--documenter-dark .bibtex-copy:hover {
+  color: #1f2424;
+  background: var(--laplacian-docs-accent);
 }
 
-.theme--documenter-dark .citation-block {
-  border-color: #4a4e57;
+html.theme--documenter-dark .citation-block {
+  border-color: #5e6d6f;
 }
 
-.theme--documenter-dark .citation-header {
-  background: #202226;
+html.theme--documenter-dark .citation-header {
+  background: #1f2424;
 }
 
 @media screen and (max-width: 620px) {

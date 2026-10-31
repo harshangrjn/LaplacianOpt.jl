@@ -1,21 +1,5 @@
 using Documenter
 using LaplacianOpt
-using DocumenterTools: Themes
-
-for w in ("light", "dark")
-    header = read(joinpath(@__DIR__, "src/assets/themes/style.scss"), String)
-    theme = read(joinpath(@__DIR__, "src/assets/themes/$(w)defs.scss"), String)
-    write(joinpath(@__DIR__, "src/assets/themes/$(w).scss"), header * "\n" * theme)
-end
-
-Themes.compile(
-    joinpath(@__DIR__, "src/assets/themes/documenter-light.css"),
-    joinpath(@__DIR__, "src/assets/themes/light.scss"),
-)
-Themes.compile(
-    joinpath(@__DIR__, "src/assets/themes/documenter-dark.css"),
-    joinpath(@__DIR__, "src/assets/themes/dark.scss"),
-)
 
 makedocs(
     modules = [LaplacianOpt],

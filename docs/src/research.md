@@ -1,6 +1,6 @@
 # Research & Publications
 
-LaplacianOpt is developed alongside research on mathematical optimization
+[LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl) is developed alongside research on mathematical optimization
 methods for maximizing graph algebraic connectivity and designing robust
 networks.
 
@@ -23,7 +23,7 @@ that keep ``\lambda_2`` bounded away from zero remain well suited to accurate es
 That turns measurement selection into a graph-design problem. When sensing,
 communication, or computation allow only ``K`` loop closures, which ``K``
 should be kept? Given a fixed spanning-tree backbone and a pool of candidate
-loop closures weighted by their measurement precision, LaplacianOpt selects the
+loop closures weighted by their measurement precision, [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl) selects the
 ``K`` loop closures that maximize ``\lambda_2`` of the resulting graph, either
 to global optimality or quickly with heuristics. Because ``\lambda_2`` is small
 whenever part of the graph hangs on by only a few weak edges, maximizing it

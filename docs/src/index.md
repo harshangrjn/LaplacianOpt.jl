@@ -9,9 +9,9 @@ CurrentModule = LaplacianOpt
 [Algebraic connectivity](https://dml.cz/bitstream/handle/10338.dmlcz/101168/CzechMathJ_23-1973-2_11.pdf) is the second smallest eigenvalue of the graph Laplacian. The magnitude of this value reflects how well connected the overall graph is. This connectivity measure has been used in analyzing the robustness and synchronizability of complex networks, and in graph sparsification techniques. 
 
 ## Installation 
-To use LaplacianOpt, first [download and install](https://julialang.org/downloads/) Julia. The current version of LaplacianOpt requires Julia 1.10 or later.
+To use [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl), first [download and install](https://julialang.org/downloads/) Julia. The current version of LaplacianOpt requires Julia 1.10 or later.
 
-The latest stable release of LaplacianOpt can be installed using the Julia package manager with
+The latest stable release of [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl) can be installed using the Julia package manager with
 
 ```julia
 import Pkg
@@ -26,7 +26,7 @@ Pkg.add("GLPK")
 ```
 
 ## Unit Tests
-To run the tests in the package, run the following command after installing the LaplacianOpt package.
+To run the tests in the package, run the following command after installing the [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl) package.
 
 ```julia
 import Pkg
@@ -34,7 +34,7 @@ Pkg.test("LaplacianOpt")
 ```
 
 ## Citing LaplacianOpt
-If you find LaplacianOpt useful in your work, please cite the publication(s)
+If you find [LaplacianOpt](https://github.com/harshangrjn/LaplacianOpt.jl) useful in your work, please cite the publication(s)
 most relevant to your use of the package. The
-[Research & Publications](research.md) page provides a chronological overview
+[Research & Publications](research.md#Publications) page provides a chronological overview
 of the research, paper links, and copyable BibTeX citations.

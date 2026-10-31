@@ -5,7 +5,6 @@ LaplacianOpt's documentation is generated using [Documenter.jl](https://github.c
 
 ```julia
 Pkg.add("Documenter")
-Pkg.add("DocumenterTools")
 ```
 
 ## Building the Docs

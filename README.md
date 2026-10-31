@@ -61,6 +61,6 @@ This work was supported by Los Alamos National Laboratory (LANL)'s LDRD Early Ca
 ## Citing LaplacianOpt
 If you find LaplacianOpt useful in your work, please cite the publication(s)
 most relevant to your use of the package. The
-[Research & Publications](https://harshangrjn.github.io/LaplacianOpt.jl/dev/research/)
+[Research & Publications](https://harshangrjn.github.io/LaplacianOpt.jl/dev/research/#Publications)
 page provides a chronological overview of the research, paper links, and
 copyable BibTeX citations.
