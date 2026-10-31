@@ -6,8 +6,9 @@ networks.
 
 ## Graph sparsification for pose-graph SLAM
 
-Pose-graph SLAM estimates a set of unknown robot poses from noisy relative-pose
-measurements and is the standard formulation in modern SLAM
+Pose-graph Simultaneous Localization and Mapping (SLAM) estimates a set of
+unknown robot poses from noisy relative-pose measurements and is the standard
+formulation in modern SLAM
 ([Cadena et al., 2016](https://doi.org/10.1109/TRO.2016.2624754)). Estimation
 accuracy depends on both the precision of individual measurements and the
 structure of the measurement graph: the Fisher information matrix of pose-graph
@@ -42,9 +43,9 @@ ground truth.
 
 ```@raw html
 <figure class="posegraph-research-figure posegraph-ground-truth-figure">
-  <a href="assets/posegraph_ground_truth.png" aria-label="Open the full-resolution ground-truth pose graph">
-    <img src="assets/posegraph_ground_truth.png" alt="Ground-truth three-dimensional lambda surface with all backbone and candidate loop-closure edges">
-  </a>
+```
+[![Ground-truth three-dimensional lambda surface with all backbone and candidate loop-closure edges](assets/posegraph_ground_truth.png)](assets/posegraph_ground_truth.png)
+```@raw html
   <figcaption>
     Ground-truth lattice with 616 surface poses, 615 fixed backbone edges, and
     1,298 candidate loop closures. It is used only to generate noisy
@@ -55,9 +56,9 @@ ground truth.
 
 ```@raw html
 <figure class="posegraph-research-figure">
-  <a href="assets/posegraph_algebraic_connectivity.png" aria-label="Open the full-resolution pose-graph comparison">
-    <img src="assets/posegraph_algebraic_connectivity.png" alt="Five pose-graph reconstructions showing progressively higher algebraic connectivity and lower error relative to the ground-truth wireframe">
-  </a>
+```
+[![Five pose-graph reconstructions showing progressively higher algebraic connectivity and lower error relative to the ground-truth wireframe](assets/posegraph_algebraic_connectivity.png)](assets/posegraph_algebraic_connectivity.png)
+```@raw html
   <figcaption>
     Sparse pose-graph reconstructions from a fixed backbone and a 20%
     loop-closure budget (260 of 1,298 candidate loop closures), ordered by
