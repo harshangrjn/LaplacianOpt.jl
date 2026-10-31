@@ -1,19 +1,23 @@
-.posegraph-research-figure {
-  width: min(1400px, calc(100vw - 22rem));
-  max-width: none;
-  margin: 2rem 0 2.5rem 50%;
+#documenter .content .posegraph-research-figure {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1100px;
+  margin: 2rem auto 2.5rem;
   overflow: hidden;
   background: #fff;
   border: 1px solid #d8dbe2;
   border-radius: 0.75rem;
   box-shadow: 0 0.35rem 1.1rem rgba(24, 28, 38, 0.08);
-  transform: translateX(-50%);
 }
 
 .posegraph-research-figure img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.posegraph-research-figure a {
+  display: block;
 }
 
 .posegraph-research-figure > p {
@@ -28,8 +32,8 @@
   border-top: 1px solid #e2e4e9;
 }
 
-.posegraph-ground-truth-figure {
-  width: min(520px, calc(100vw - 22rem));
+#documenter .content .posegraph-ground-truth-figure {
+  width: min(420px, 100%);
   overflow: visible;
   background: transparent;
   border: 0;
@@ -37,8 +41,7 @@
 }
 
 .posegraph-ground-truth-figure a {
-  display: block;
-  width: min(200px, 100%);
+  width: min(100px, 100%);
   margin: 0 auto;
   overflow: hidden;
   background: #fff;
@@ -278,21 +281,6 @@
 
 .theme--documenter-dark .citation-header {
   background: #202226;
-}
-
-@media screen and (max-width: 1055px) {
-  .posegraph-research-figure {
-    width: 100%;
-    margin-right: 0;
-    margin-left: 0;
-    transform: none;
-  }
-
-  .posegraph-ground-truth-figure {
-    width: min(520px, 100%);
-    margin-right: auto;
-    margin-left: auto;
-  }
 }
 
 @media screen and (max-width: 620px) {
